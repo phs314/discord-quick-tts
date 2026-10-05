@@ -34,6 +34,7 @@ public class QuickChatApp extends Application {
     private final TrayMenu trayMenu = new TrayMenu();
     private ClientConfig config;
     private QuickChatClient client;
+    private LocalBotServer localBotServer;
     private GlobalHotkey hotkey;
     private Stage stage;
     private TextField input;
@@ -44,6 +45,8 @@ public class QuickChatApp extends Application {
         Platform.setImplicitExit(false);
 
         config = ClientConfig.load();
+        // exe 로 실행했고 서버가 이 PC 면, 봇 서버도 같이 켠다.
+        localBotServer = LocalBotServer.startIfNeeded(config.serverUrl());
         client = new QuickChatClient(config.serverUrl());
         if (!config.isRegistered() && !pairDevice()) {
             Platform.exit();
@@ -68,7 +71,7 @@ public class QuickChatApp extends Application {
             return;
         }
 
-        trayMenu.install(() -> Platform.runLater(Platform::exit));
+        trayMenu.install(() -> Platform.runLater(Platform::exit), WindowsStartup.forThisApp());
         // 이미 떠 있는데 exe 를 또 실행하면 새로 뜨는 대신 입력창을 연다.
         if (singleInstance != null) {
             singleInstance.onShowRequested(() -> Platform.runLater(this::show));
@@ -77,6 +80,9 @@ public class QuickChatApp extends Application {
 
     @Override
     public void stop() {
+        if (localBotServer != null) {
+            localBotServer.close();
+        }
         if (singleInstance != null) {
             singleInstance.close();
         }
