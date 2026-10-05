@@ -91,6 +91,8 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 
 음성 채널에 들어간 상태에서 `Ctrl+Shift+Space` 를 누르고 문장을 입력한 뒤 Enter 를 치면 봇이 읽어 줍니다. 종료는 트레이 아이콘의 Exit 메뉴로 합니다.
 
+연결한 PC 를 끊으려면 디스코드에서 `/연결해제` 를 입력하고 메뉴에서 PC 를 고르세요. 목록에는 각 PC 의 컴퓨터 이름이 보입니다. 끊긴 PC 의 클라이언트는 다음에 보낼 때 연결 코드를 다시 묻습니다.
+
 ## 커밋 컨벤션
 
 [Gitmoji](https://gitmoji.dev/) 이모지와 타입을 앞에 붙입니다.

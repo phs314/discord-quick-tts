@@ -2,9 +2,8 @@ package io.github.phs314.quicktts.bot.device.adapter.in.discord;
 
 import io.github.phs314.quicktts.bot.device.application.port.in.IssuePairingCodeUseCase;
 import io.github.phs314.quicktts.bot.device.domain.Pairing;
+import io.github.phs314.quicktts.bot.shared.adapter.in.discord.DiscordSlashCommand;
 import io.github.phs314.quicktts.bot.shared.domain.DiscordUserId;
-import jakarta.annotation.PostConstruct;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.DiscordLocale;
@@ -17,25 +16,18 @@ import org.springframework.stereotype.Component;
  * 누가 쳤는지는 디스코드가 보증하므로 사용자가 자기 ID 를 직접 입력할 필요가 없다.
  */
 @Component
-public class LinkCommandListener extends ListenerAdapter {
+public class LinkCommandListener extends ListenerAdapter implements DiscordSlashCommand {
 
     private static final String COMMAND_NAME = "link";
 
-    private final JDA jda;
     private final IssuePairingCodeUseCase issuePairingCode;
 
-    public LinkCommandListener(JDA jda, IssuePairingCodeUseCase issuePairingCode) {
-        this.jda = jda;
+    public LinkCommandListener(IssuePairingCodeUseCase issuePairingCode) {
         this.issuePairingCode = issuePairingCode;
     }
 
-    @PostConstruct
-    void register() {
-        jda.addEventListener(this);
-        jda.updateCommands().addCommands(linkCommand()).queue();
-    }
-
-    private static SlashCommandData linkCommand() {
+    @Override
+    public SlashCommandData definition() {
         return Commands.slash(COMMAND_NAME, "Get a code to link the Quick TTS desktop app")
                 .setNameLocalization(DiscordLocale.KOREAN, "연결")
                 .setDescriptionLocalization(DiscordLocale.KOREAN, "Quick TTS 데스크톱 앱을 연결할 코드를 받습니다");
@@ -49,7 +41,8 @@ public class LinkCommandListener extends ListenerAdapter {
         Pairing pairing = issuePairingCode.issue(new DiscordUserId(event.getUser().getIdLong()));
         event.reply("""
                         연결 코드: **%s**
-                        Quick TTS 데스크톱 앱에 %d분 안에 입력해 주세요. 이 코드는 한 번만 쓸 수 있습니다."""
+                        Quick TTS 데스크톱 앱에 %d분 안에 입력해 주세요. 이 코드는 한 번만 쓸 수 있습니다.
+                        연결한 PC 를 끊으려면 `/연결해제` 를 쓰세요."""
                         .formatted(pairing.code().display(), Pairing.VALID_FOR.toMinutes()))
                 .setEphemeral(true)
                 .queue();
