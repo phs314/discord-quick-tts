@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: 빌드와 테스트
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      # 컴파일, 단위 테스트, ArchUnit 아키텍처 규칙까지 모두 돈다.
+      - run: ./gradlew build
+
+      - name: 테스트 리포트 올리기
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-reports
+          path: '**/build/reports/tests/'
+
+  commit-messages:
+    name: 커밋 메시지 컨벤션
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: PR 커밋 제목 검사
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          failed=0
+          while IFS= read -r subject; do
+            printf '%s\n' "$subject" > /tmp/msg
+            scripts/check-commit-msg.sh /tmp/msg || failed=1
+          done < <(git log --no-merges --format=%s "$BASE_SHA..$HEAD_SHA")
+          exit $failed
