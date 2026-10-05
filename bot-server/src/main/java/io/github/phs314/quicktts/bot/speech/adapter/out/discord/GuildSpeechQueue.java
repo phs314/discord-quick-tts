@@ -31,13 +31,26 @@ class GuildSpeechQueue extends AudioEventAdapter {
         }
     }
 
+    /** 읽고 있던 문장을 끊고 기다리던 문장도 모두 버린다. */
+    synchronized void clear() {
+        AudioTrack track;
+        while ((track = pending.poll()) != null) {
+            deleteAudioFile(track);
+        }
+        player.stopTrack();
+    }
+
     @Override
     public synchronized void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
-        if (track.getUserData() instanceof Path file) {
-            LavaPlayerSpeechPlayer.deleteQuietly(file);
-        }
+        deleteAudioFile(track);
         if (endReason.mayStartNext) {
             player.startTrack(pending.poll(), false);
+        }
+    }
+
+    private static void deleteAudioFile(AudioTrack track) {
+        if (track.getUserData() instanceof Path file) {
+            LavaPlayerSpeechPlayer.deleteQuietly(file);
         }
     }
 }
