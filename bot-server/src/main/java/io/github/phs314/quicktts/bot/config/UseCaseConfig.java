@@ -4,7 +4,6 @@ import io.github.phs314.quicktts.bot.device.application.port.out.DeviceRepositor
 import io.github.phs314.quicktts.bot.device.application.port.out.PairingRepository;
 import io.github.phs314.quicktts.bot.device.application.service.DeviceRegistrationService;
 import io.github.phs314.quicktts.bot.speech.application.port.in.ManageVoiceUseCase;
-import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayer;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizer;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocator;
@@ -32,11 +31,12 @@ public class UseCaseConfig {
         return new VoiceService(speechSynthesizer, voicePreferenceRepository);
     }
 
+    /** quick chat 읽어 주기와 "어느 채널에서 읽힐지" 조회 유스케이스를 함께 맡는다. */
     @Bean
-    public SpeakQuickChatUseCase speakQuickChatUseCase(VoiceChannelLocator voiceChannelLocator,
-                                                       SpeechSynthesizer speechSynthesizer,
-                                                       SpeechPlayer speechPlayer,
-                                                       ManageVoiceUseCase manageVoiceUseCase) {
+    public QuickChatService quickChatService(VoiceChannelLocator voiceChannelLocator,
+                                             SpeechSynthesizer speechSynthesizer,
+                                             SpeechPlayer speechPlayer,
+                                             ManageVoiceUseCase manageVoiceUseCase) {
         return new QuickChatService(voiceChannelLocator, speechSynthesizer, speechPlayer, manageVoiceUseCase);
     }
 

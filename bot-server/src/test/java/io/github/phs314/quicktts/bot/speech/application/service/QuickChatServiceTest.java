@@ -10,6 +10,7 @@ import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayer;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocator;
 import io.github.phs314.quicktts.bot.speech.domain.QuickChatMessage;
 import io.github.phs314.quicktts.bot.speech.domain.VoiceChannel;
+import io.github.phs314.quicktts.bot.speech.domain.VoiceChannelDetails;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +21,7 @@ class QuickChatServiceTest {
 
     private static final DiscordUserId SPEAKER = new DiscordUserId(42L);
     private static final VoiceChannel CHANNEL = new VoiceChannel(1L, 2L);
+    private static final VoiceChannelDetails DETAILS = new VoiceChannelDetails(CHANNEL, "우리 서버", null, "일반");
 
     private final List<String> played = new ArrayList<>();
     private final SpeechPlayer recordingPlayer =
@@ -30,7 +32,7 @@ class QuickChatServiceTest {
     @Test
     void 보낸_사람이_있는_음성_채널에서_그_사람이_고른_목소리로_읽어_준다() {
         voices.changeVoice(SPEAKER, VoiceServiceTest.INJOON.id());
-        QuickChatService service = service(user -> user.equals(SPEAKER) ? Optional.of(CHANNEL) : Optional.empty());
+        QuickChatService service = service(user -> user.equals(SPEAKER) ? Optional.of(DETAILS) : Optional.empty());
 
         service.speak(new SpeakQuickChatCommand(SPEAKER, new QuickChatMessage("안녕")));
 
@@ -44,6 +46,14 @@ class QuickChatServiceTest {
         assertThatThrownBy(() -> service.speak(new SpeakQuickChatCommand(SPEAKER, new QuickChatMessage("안녕"))))
                 .isInstanceOf(SpeakerNotInVoiceChannelException.class);
         assertThat(played).isEmpty();
+    }
+
+    @Test
+    void 보내기_전에_어느_음성_채널에서_읽힐지_알려_준다() {
+        QuickChatService service = service(user -> user.equals(SPEAKER) ? Optional.of(DETAILS) : Optional.empty());
+
+        assertThat(service.findMyVoiceChannel(SPEAKER)).contains(DETAILS);
+        assertThat(service.findMyVoiceChannel(new DiscordUserId(7L))).isEmpty();
     }
 
     private QuickChatService service(VoiceChannelLocator locator) {
