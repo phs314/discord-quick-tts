@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class LinkCommandListener extends ListenerAdapter {
 
-    static final String COMMAND_NAME = "link";
+    private static final String COMMAND_NAME = "link";
 
     private final JDA jda;
     private final IssuePairingCodeUseCase issuePairingCode;
@@ -35,7 +35,7 @@ public class LinkCommandListener extends ListenerAdapter {
         jda.updateCommands().addCommands(linkCommand()).queue();
     }
 
-    static SlashCommandData linkCommand() {
+    private static SlashCommandData linkCommand() {
         return Commands.slash(COMMAND_NAME, "Get a code to link the Quick TTS desktop app")
                 .setNameLocalization(DiscordLocale.KOREAN, "연결")
                 .setDescriptionLocalization(DiscordLocale.KOREAN, "Quick TTS 데스크톱 앱을 연결할 코드를 받습니다");
