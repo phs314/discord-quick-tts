@@ -11,3 +11,9 @@ update device set id = cast(random_uuid() as varchar) where id is null;
 
 create unique index if not exists ux_device_id on device (id);
 create index if not exists idx_device_discord_user_id on device (discord_user_id);
+
+-- 사용자가 /목소리 로 고른 목소리. 없으면 기본 목소리를 쓴다.
+create table if not exists voice_preference (
+    discord_user_id bigint       primary key,
+    voice_id        varchar(100) not null
+);

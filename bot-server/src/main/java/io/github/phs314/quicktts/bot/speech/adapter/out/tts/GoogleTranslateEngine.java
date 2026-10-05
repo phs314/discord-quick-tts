@@ -1,10 +1,9 @@
 package io.github.phs314.quicktts.bot.speech.adapter.out.tts;
 
-import io.github.phs314.quicktts.bot.config.QuickTtsProperties;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesisException;
-import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizer;
-import io.github.phs314.quicktts.bot.speech.domain.QuickChatMessage;
 import io.github.phs314.quicktts.bot.speech.domain.Speech;
+import io.github.phs314.quicktts.bot.speech.domain.Voice;
+import io.github.phs314.quicktts.bot.speech.domain.VoiceId;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URLEncoder;
@@ -13,31 +12,35 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import java.util.List;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
- * Google 번역의 공개 TTS 엔드포인트를 쓰는 무료 엔진.
- * 공식 API 가 아니므로 언제든 막힐 수 있다. 그때는 다른 {@link SpeechSynthesizer} 어댑터로 바꾼다.
+ * Google 번역의 공개 TTS 엔드포인트를 쓰는 무료 엔진. 한국어 목소리 하나뿐이다.
+ * 공식 API 가 아니라 언제든 막힐 수 있지만, 다른 엔진이 실패할 때 대신 읽어 주는 예비 목소리로도 쓴다.
  */
 @Component
-@ConditionalOnProperty(name = "quicktts.tts.engine", havingValue = "google-translate", matchIfMissing = true)
-public class GoogleTranslateSpeechSynthesizer implements SpeechSynthesizer {
+@Order(2)
+public class GoogleTranslateEngine implements TtsEngine {
+
+    static final VoiceId VOICE_ID = new VoiceId("google:ko");
 
     private static final String ENDPOINT = "https://translate.google.com/translate_tts";
+    private static final List<Voice> VOICES = List.of(new Voice(VOICE_ID, "구글 번역 (예전 목소리)"));
 
     private final HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(5))
             .build();
-    private final String language;
 
-    public GoogleTranslateSpeechSynthesizer(QuickTtsProperties properties) {
-        this.language = properties.tts().language();
+    @Override
+    public List<Voice> voices() {
+        return VOICES;
     }
 
     @Override
-    public Speech synthesize(QuickChatMessage message) {
-        HttpRequest request = HttpRequest.newBuilder(buildUri(message.text(), language))
+    public Speech synthesize(String text, VoiceId voice) {
+        HttpRequest request = HttpRequest.newBuilder(buildUri(text, "ko"))
                 .header("User-Agent", "Mozilla/5.0")
                 .timeout(Duration.ofSeconds(10))
                 .GET()
