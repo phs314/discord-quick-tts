@@ -1,6 +1,7 @@
 package io.github.phs314.quicktts.bot.device.adapter.in.web;
 
 import io.github.phs314.quicktts.bot.device.application.port.in.RegisterDeviceUseCase;
+import io.github.phs314.quicktts.bot.device.domain.DeviceName;
 import io.github.phs314.quicktts.bot.device.domain.DeviceToken;
 import io.github.phs314.quicktts.bot.device.domain.PairingCode;
 import io.github.phs314.quicktts.common.DeviceRegistrationRequest;
@@ -27,7 +28,8 @@ public class DeviceController {
     @PostMapping(QuickChatApi.DEVICES_PATH)
     @ResponseStatus(HttpStatus.CREATED)
     public DeviceRegistrationResponse register(@RequestBody DeviceRegistrationRequest request) {
-        DeviceToken token = registerDevice.register(new PairingCode(request.pairingCode()));
+        DeviceToken token = registerDevice.register(
+                new PairingCode(request.pairingCode()), new DeviceName(request.deviceName()));
         return new DeviceRegistrationResponse(token.value());
     }
 }

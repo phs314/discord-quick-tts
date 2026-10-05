@@ -5,7 +5,9 @@ import io.github.phs314.quicktts.common.DeviceRegistrationResponse;
 import io.github.phs314.quicktts.common.QuickChatApi;
 import io.github.phs314.quicktts.common.QuickChatRequest;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -29,12 +31,13 @@ class QuickChatClient {
     }
 
     /**
-     * 연결 코드로 이 PC 를 등록하고 기기 토큰을 받는다.
+     * 연결 코드로 이 PC 를 등록하고 기기 토큰을 받는다. 디스코드 {@code /연결해제} 목록에는 컴퓨터 이름으로 보인다.
      *
      * @throws QuickChatException 코드가 틀렸거나 서버에 닿지 못했을 때
      */
     String register(String pairingCode) {
-        HttpRequest request = jsonPost(QuickChatApi.DEVICES_PATH, new DeviceRegistrationRequest(pairingCode)).build();
+        HttpRequest request = jsonPost(QuickChatApi.DEVICES_PATH,
+                new DeviceRegistrationRequest(pairingCode, computerName())).build();
         try {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
             return switch (response.statusCode()) {
@@ -70,6 +73,18 @@ class QuickChatClient {
                         default -> throw new QuickChatException("봇 서버 오류가 났습니다. (HTTP " + response.statusCode() + ")");
                     }
                 });
+    }
+
+    private static String computerName() {
+        String name = System.getenv("COMPUTERNAME");
+        if (name == null || name.isBlank()) {
+            try {
+                name = InetAddress.getLocalHost().getHostName();
+            } catch (UnknownHostException e) {
+                name = "";
+            }
+        }
+        return name;
     }
 
     private HttpRequest.Builder jsonPost(String path, Object body) {
