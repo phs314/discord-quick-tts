@@ -2,6 +2,7 @@ package io.github.phs314.quicktts.client;
 
 import com.github.kwhat.jnativehook.NativeHookException;
 import io.github.phs314.quicktts.common.QuickChatApi;
+import java.util.Optional;
 import java.util.concurrent.CompletionException;
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -10,6 +11,7 @@ import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.stage.Screen;
@@ -25,6 +27,7 @@ public class QuickChatApp extends Application {
     private static final double WIDTH = 560;
 
     private final TrayMenu trayMenu = new TrayMenu();
+    private ClientConfig config;
     private QuickChatClient client;
     private GlobalHotkey hotkey;
     private Stage stage;
@@ -32,12 +35,15 @@ public class QuickChatApp extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        ClientConfig config = ClientConfig.load();
-        if (!config.isComplete()) {
-            showFatal("설정 파일을 채운 뒤 다시 실행해 주세요.\n" + ClientConfig.FILE);
+        // 위젯이나 대화 상자를 닫아도 앱은 트레이에서 계속 돈다.
+        Platform.setImplicitExit(false);
+
+        config = ClientConfig.load();
+        client = new QuickChatClient(config.serverUrl());
+        if (!config.isRegistered() && !pairDevice()) {
+            Platform.exit();
             return;
         }
-        client = new QuickChatClient(config);
 
         stage = primaryStage;
         stage.initStyle(StageStyle.UNDECORATED);
@@ -57,8 +63,6 @@ public class QuickChatApp extends Application {
             return;
         }
 
-        // 위젯을 닫아도 앱은 트레이에서 계속 돈다.
-        Platform.setImplicitExit(false);
         trayMenu.install(() -> Platform.runLater(Platform::exit));
     }
 
@@ -122,14 +126,51 @@ public class QuickChatApp extends Application {
             return;
         }
         hide();
-        client.send(text).exceptionally(failure -> {
+        client.send(config.deviceToken(), text).exceptionally(failure -> {
             Throwable cause = failure instanceof CompletionException ? failure.getCause() : failure;
             String message = cause instanceof QuickChatClient.QuickChatException
                     ? cause.getMessage()
                     : "봇 서버에 연결하지 못했습니다.";
             trayMenu.showError(message);
+            if (cause instanceof QuickChatClient.DeviceUnauthorizedException) {
+                Platform.runLater(this::forgetDeviceAndPairAgain);
+            }
             return null;
         });
+    }
+
+    /**
+     * 디스코드 {@code /연결} 로 받은 코드를 입력받아 이 PC 를 등록한다.
+     *
+     * @return 등록했으면 true, 사용자가 취소했으면 false
+     */
+    private boolean pairDevice() {
+        String error = null;
+        while (true) {
+            TextInputDialog dialog = new TextInputDialog();
+            dialog.setTitle("Discord Quick TTS");
+            dialog.setHeaderText("디스코드에서 /연결 을 입력하고 받은 코드를 붙여 넣어 주세요.");
+            dialog.setContentText(error == null ? "연결 코드" : error + "\n\n연결 코드");
+            Optional<String> code = dialog.showAndWait();
+            if (code.isEmpty()) {
+                return false;
+            }
+            try {
+                config = config.withDeviceToken(client.register(code.get().strip()));
+                config.save();
+                return true;
+            } catch (QuickChatClient.QuickChatException e) {
+                error = e.getMessage();
+            }
+        }
+    }
+
+    private void forgetDeviceAndPairAgain() {
+        config = config.withDeviceToken("");
+        config.save();
+        if (!pairDevice()) {
+            Platform.exit();
+        }
     }
 
     private static void showFatal(String message) {

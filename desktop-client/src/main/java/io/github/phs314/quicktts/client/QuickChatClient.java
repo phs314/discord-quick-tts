@@ -1,7 +1,10 @@
 package io.github.phs314.quicktts.client;
 
+import io.github.phs314.quicktts.common.DeviceRegistrationRequest;
+import io.github.phs314.quicktts.common.DeviceRegistrationResponse;
 import io.github.phs314.quicktts.common.QuickChatApi;
 import io.github.phs314.quicktts.common.QuickChatRequest;
+import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -11,7 +14,7 @@ import java.util.concurrent.CompletableFuture;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * 봇 서버로 quick chat 문장을 보낸다.
+ * 봇 서버와 이야기한다. 기기 등록과 quick chat 전송을 맡는다.
  */
 class QuickChatClient {
 
@@ -19,45 +22,74 @@ class QuickChatClient {
             .connectTimeout(Duration.ofSeconds(3))
             .build();
     private final JsonMapper jsonMapper = JsonMapper.builder().build();
-    private final ClientConfig config;
+    private final String serverUrl;
 
-    QuickChatClient(ClientConfig config) {
-        this.config = config;
+    QuickChatClient(String serverUrl) {
+        this.serverUrl = serverUrl;
+    }
+
+    /**
+     * 연결 코드로 이 PC 를 등록하고 기기 토큰을 받는다.
+     *
+     * @throws QuickChatException 코드가 틀렸거나 서버에 닿지 못했을 때
+     */
+    String register(String pairingCode) {
+        HttpRequest request = jsonPost(QuickChatApi.DEVICES_PATH, new DeviceRegistrationRequest(pairingCode)).build();
+        try {
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            return switch (response.statusCode()) {
+                case 201 -> jsonMapper.readValue(response.body(), DeviceRegistrationResponse.class).deviceToken();
+                case 400 -> throw new QuickChatException("연결 코드가 틀렸거나 만료되었습니다. 디스코드에서 /연결 을 다시 입력해 주세요.");
+                default -> throw new QuickChatException("봇 서버 오류가 났습니다. (HTTP " + response.statusCode() + ")");
+            };
+        } catch (IOException e) {
+            throw new QuickChatException("봇 서버에 연결하지 못했습니다: " + serverUrl);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new QuickChatException("등록이 중단되었습니다.");
+        }
     }
 
     /**
      * 문장을 보낸다. 실패하면 사용자에게 보여 줄 메시지를 담은 예외로 끝난다.
+     * 기기 토큰이 더 이상 유효하지 않으면 {@link DeviceUnauthorizedException} 으로 끝난다.
      */
-    CompletableFuture<Void> send(String text) {
-        String body = jsonMapper.writeValueAsString(new QuickChatRequest(config.discordUserId(), text));
-        HttpRequest request = HttpRequest.newBuilder(URI.create(config.serverUrl() + QuickChatApi.PATH))
-                .header("Content-Type", "application/json")
-                .header(QuickChatApi.API_KEY_HEADER, config.apiKey())
-                .timeout(Duration.ofSeconds(10))
-                .POST(HttpRequest.BodyPublishers.ofString(body))
+    CompletableFuture<Void> send(String deviceToken, String text) {
+        HttpRequest request = jsonPost(QuickChatApi.PATH, new QuickChatRequest(text))
+                .header("Authorization", QuickChatApi.BEARER_PREFIX + deviceToken)
                 .build();
 
         return httpClient.sendAsync(request, HttpResponse.BodyHandlers.discarding())
                 .thenAccept(response -> {
-                    if (response.statusCode() / 100 != 2) {
-                        throw new QuickChatException(describeFailure(response.statusCode()));
+                    switch (response.statusCode()) {
+                        case 202 -> {
+                        }
+                        case 400 -> throw new QuickChatException("문장이 비어 있거나 너무 깁니다. (최대 " + QuickChatApi.MAX_TEXT_LENGTH + "자)");
+                        case 401 -> throw new DeviceUnauthorizedException();
+                        case 409 -> throw new QuickChatException("봇이 있는 서버의 음성 채널에 먼저 들어가 주세요.");
+                        default -> throw new QuickChatException("봇 서버 오류가 났습니다. (HTTP " + response.statusCode() + ")");
                     }
                 });
     }
 
-    private static String describeFailure(int statusCode) {
-        return switch (statusCode) {
-            case 400 -> "문장이 비어 있거나 너무 깁니다. (최대 " + QuickChatApi.MAX_TEXT_LENGTH + "자)";
-            case 401 -> "API 키가 봇 서버와 맞지 않습니다.";
-            case 409 -> "봇이 있는 서버의 음성 채널에 먼저 들어가 주세요.";
-            default -> "봇 서버 오류가 났습니다. (HTTP " + statusCode + ")";
-        };
+    private HttpRequest.Builder jsonPost(String path, Object body) {
+        return HttpRequest.newBuilder(URI.create(serverUrl + path))
+                .header("Content-Type", "application/json")
+                .timeout(Duration.ofSeconds(10))
+                .POST(HttpRequest.BodyPublishers.ofString(jsonMapper.writeValueAsString(body)));
     }
 
     static class QuickChatException extends RuntimeException {
 
         QuickChatException(String message) {
             super(message);
+        }
+    }
+
+    static class DeviceUnauthorizedException extends QuickChatException {
+
+        DeviceUnauthorizedException() {
+            super("이 PC 의 연결이 해제되었습니다. 디스코드에서 /연결 로 다시 연결해 주세요.");
         }
     }
 }

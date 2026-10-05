@@ -1,10 +1,9 @@
 package io.github.phs314.quicktts.common;
 
 /**
- * quick chat 요청 본문.
+ * quick chat 요청 본문. 누가 보냈는지는 기기 토큰으로 서버가 판단한다.
  *
- * @param discordUserId 문장을 읽어 줄 음성 채널을 찾을 디스코드 사용자 ID
- * @param text          읽어 줄 문장
+ * @param text 읽어 줄 문장
  */
-public record QuickChatRequest(String discordUserId, String text) {
+public record QuickChatRequest(String text) {
 }

@@ -22,7 +22,9 @@ class ArchitectureTest {
             .domainModels("..bot.domain..")
             .applicationServices("..bot.application..")
             .adapter("web", "..bot.adapter.in.web..")
+            .adapter("discord-command", "..bot.adapter.in.discord..")
             .adapter("tts", "..bot.adapter.out.tts..")
+            .adapter("persistence", "..bot.adapter.out.persistence..")
             .adapter("discord", "..bot.adapter.out.discord..")
             .withOptionalLayers(true)
             // config 는 포트와 어댑터를 이어 붙이는 조립 코드라서 계층 규칙에서 뺀다.

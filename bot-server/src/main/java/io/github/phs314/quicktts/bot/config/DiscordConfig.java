@@ -1,7 +1,6 @@
-package io.github.phs314.quicktts.bot.adapter.out.discord;
+package io.github.phs314.quicktts.bot.config;
 
 import club.minnced.discord.jdave.interop.JDaveSessionFactory;
-import io.github.phs314.quicktts.bot.config.QuickTtsProperties;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.audio.AudioModuleConfig;

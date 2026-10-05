@@ -19,3 +19,6 @@ build/
 # OS
 .DS_Store
 Thumbs.db
+
+# 봇 서버 로컬 DB (등록된 기기)
+data/

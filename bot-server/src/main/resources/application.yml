@@ -4,6 +4,14 @@ spring:
   config:
     # 저장소 루트의 .env (KEY=VALUE) 를 설정으로 읽는다. 없으면 환경변수만 쓴다.
     import: optional:file:.env[.properties]
+  datasource:
+    # 등록된 기기 목록. 기본은 실행 위치의 data/ 폴더에 H2 파일로 저장한다.
+    url: ${QUICKTTS_DB_URL:jdbc:h2:file:./data/quicktts}
+    username: ${QUICKTTS_DB_USERNAME:sa}
+    password: ${QUICKTTS_DB_PASSWORD:}
+  sql:
+    init:
+      mode: always
 
 server:
   port: ${QUICKTTS_PORT:8080}
@@ -11,7 +19,6 @@ server:
 quicktts:
   discord:
     token: ${DISCORD_TOKEN:}
-  api-key: ${QUICKTTS_API_KEY:}
   tts:
     # 사용할 TTS 엔진. 지금은 google-translate 하나뿐이다.
     engine: google-translate
