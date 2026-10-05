@@ -97,6 +97,19 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 
 읽어 주는 목소리는 사람마다 디스코드에서 `/목소리` 로 바꿀 수 있습니다. 목소리를 고르지 않으면 지금 목소리와 목록을 보여 줍니다. 아무도 고르지 않았을 때의 기본 목소리는 `QUICKTTS_DEFAULT_VOICE` 로 정합니다(기본: 선희).
 
+## 클라이언트 exe 만들기 (Windows)
+
+자바를 설치하지 않은 PC 에서도 돌아가도록 자바 런타임까지 넣은 `QuickTTS.exe` 를 만듭니다. JDK 25 에 들어 있는 `jpackage` 를 쓰므로 다른 도구는 필요 없습니다.
+
+```bash
+./gradlew :desktop-client:packageZip
+```
+
+`desktop-client/build/distributions/QuickTTS-0.1.0-windows.zip` 이 생깁니다. 압축을 풀고 `QuickTTS/QuickTTS.exe` 를 실행하면 됩니다. 압축하지 않은 폴더만 필요하면 `packageExe` 를 쓰세요(`desktop-client/build/jpackage/image/QuickTTS`).
+
+- 기본 봇 서버 주소는 `http://localhost:8080` 입니다. 다른 곳에 띄운 서버를 쓰려면 `-PserverUrl=https://...` 를 붙여 만듭니다.
+- 서명하지 않은 exe 라서 처음 실행할 때 Windows 가 "알 수 없는 게시자" 경고를 띄웁니다. "추가 정보" → "실행" 으로 넘어가면 됩니다.
+
 ## 커밋 컨벤션
 
 [Gitmoji](https://gitmoji.dev/) 이모지와 타입을 앞에 붙입니다.
