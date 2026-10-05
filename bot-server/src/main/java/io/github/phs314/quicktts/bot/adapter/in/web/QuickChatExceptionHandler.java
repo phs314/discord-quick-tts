@@ -1,5 +1,6 @@
 package io.github.phs314.quicktts.bot.adapter.in.web;
 
+import io.github.phs314.quicktts.bot.application.InvalidPairingCodeException;
 import io.github.phs314.quicktts.bot.application.SpeakerNotInVoiceChannelException;
 import io.github.phs314.quicktts.bot.application.port.out.SpeechSynthesisException;
 import io.github.phs314.quicktts.bot.domain.InvalidDomainValueException;
@@ -20,6 +21,11 @@ public class QuickChatExceptionHandler {
 
     @ExceptionHandler(InvalidDomainValueException.class)
     public ProblemDetail invalidRequest(InvalidDomainValueException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidPairingCodeException.class)
+    public ProblemDetail invalidPairingCode(InvalidPairingCodeException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 

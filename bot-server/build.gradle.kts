@@ -7,6 +7,8 @@ plugins {
 dependencies {
     implementation(project(":common"))
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    runtimeOnly("com.h2database:h2")
 
     implementation(libs.jda)
     implementation(libs.lavaplayer)
