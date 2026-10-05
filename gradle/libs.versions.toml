@@ -1,0 +1,26 @@
+[versions]
+spring-boot = "4.1.1"
+spring-dependency-management = "1.1.7"
+jda = "6.7.0"
+jdave = "0.1.8"
+lavaplayer = "2.2.7"
+openjfx = "26.0.2"
+javafx-plugin = "0.1.0"
+jnativehook = "2.2.2"
+jackson = "3.2.3"
+archunit = "1.5.1"
+
+[libraries]
+jda = { module = "net.dv8tion:JDA", version.ref = "jda" }
+jdave-api = { module = "club.minnced:jdave-api", version.ref = "jdave" }
+jdave-natives-windows = { module = "club.minnced:jdave-native-win-x86-64", version.ref = "jdave" }
+jdave-natives-linux = { module = "club.minnced:jdave-native-linux-x86-64", version.ref = "jdave" }
+lavaplayer = { module = "dev.arbjerg:lavaplayer", version.ref = "lavaplayer" }
+jnativehook = { module = "com.github.kwhat:jnativehook", version.ref = "jnativehook" }
+jackson-databind = { module = "tools.jackson.core:jackson-databind", version.ref = "jackson" }
+archunit-junit5 = { module = "com.tngtech.archunit:archunit-junit5", version.ref = "archunit" }
+
+[plugins]
+spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
+spring-dependency-management = { id = "io.spring.dependency-management", version.ref = "spring-dependency-management" }
+javafx = { id = "org.openjfx.javafxplugin", version.ref = "javafx-plugin" }

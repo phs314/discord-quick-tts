@@ -1,0 +1,21 @@
+# 비밀값
+.env
+*.env.local
+
+# Gradle
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+.vscode/
+/out/
+/*/out/
+/bin/
+/*/bin/
+
+# OS
+.DS_Store
+Thumbs.db
