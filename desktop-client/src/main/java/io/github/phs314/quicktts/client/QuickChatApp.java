@@ -28,6 +28,9 @@ public class QuickChatApp extends Application {
 
     private static final double WIDTH = 560;
 
+    /** {@link Launcher} 가 먼저 잡아 둔 중복 실행 방지 자리. 클래스패스로 바로 띄우면 null 이다. */
+    static SingleInstance singleInstance;
+
     private final TrayMenu trayMenu = new TrayMenu();
     private ClientConfig config;
     private QuickChatClient client;
@@ -66,10 +69,17 @@ public class QuickChatApp extends Application {
         }
 
         trayMenu.install(() -> Platform.runLater(Platform::exit));
+        // 이미 떠 있는데 exe 를 또 실행하면 새로 뜨는 대신 입력창을 연다.
+        if (singleInstance != null) {
+            singleInstance.onShowRequested(() -> Platform.runLater(this::show));
+        }
     }
 
     @Override
     public void stop() {
+        if (singleInstance != null) {
+            singleInstance.close();
+        }
         if (hotkey != null) {
             hotkey.unregister();
         }
