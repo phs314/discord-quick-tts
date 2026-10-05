@@ -20,28 +20,51 @@
 | `desktop-client` | JavaFX 입력 위젯 + JNativeHook 전역 단축키 + 트레이 아이콘. |
 | `common` | 클라이언트와 서버가 함께 쓰는 요청 형식과 상수. |
 
-## 봇 서버 구조 (헥사고날)
+## 봇 서버 구조 (바운디드 컨텍스트 + 헥사고날)
+
+봇 서버는 두 바운디드 컨텍스트로 나뉘고, 각 컨텍스트 안은 헥사고날(도메인 / 포트 / 어댑터)로 나뉩니다.
+
+| 컨텍스트 | 다루는 것 |
+| --- | --- |
+| `speech` (핵심) | 누가 무슨 문장을 어느 음성 채널에서 읽게 하나 |
+| `device` (지원) | 이 PC 가 어느 디스코드 사용자의 것인가 (`/연결` 코드 발급, 기기 등록, 기기 인증) |
+| `shared` | 두 컨텍스트가 함께 쓰는 공유 커널 (`DiscordUserId`, 도메인 검증 예외) |
 
 ```
 bot-server/src/main/java/io/github/phs314/quicktts/bot/
-├── domain/                 순수 도메인 모델 (QuickChatMessage, DiscordUserId, VoiceChannel, Speech)
-│   └── device/             기기 연결 (PairingCode, Pairing, DeviceToken, Device)
-├── application/
-│   ├── port/in/            유스케이스 (SpeakQuickChat, IssuePairingCode, RegisterDevice, AuthenticateDevice)
-│   ├── port/out/           바깥 세상에 대한 포트 (SpeechSynthesizer, VoiceChannelLocator, SpeechPlayer,
-│   │                       PairingRepository, DeviceRepository)
-│   └── service/            유스케이스 구현 (QuickChatService, DeviceRegistrationService)
-├── adapter/
-│   ├── in/web/             REST 컨트롤러
-│   ├── in/discord/         /연결 슬래시 명령
-│   ├── out/tts/            TTS 엔진 어댑터 (GoogleTranslateSpeechSynthesizer)
-│   ├── out/discord/        JDA + LavaPlayer 어댑터
-│   └── out/persistence/    기기 저장소 (H2, JdbcClient) 와 메모리 연결 코드 저장소
-└── config/                 설정 값, JDA, 포트-어댑터 조립
+├── speech/
+│   ├── domain/                 QuickChatMessage, VoiceChannel, Speech
+│   ├── application/
+│   │   ├── port/in/            SpeakQuickChatUseCase
+│   │   ├── port/out/           SpeechSynthesizer, VoiceChannelLocator, SpeechPlayer
+│   │   └── service/            QuickChatService
+│   └── adapter/
+│       ├── in/web/             quick chat REST 컨트롤러
+│       ├── out/tts/            TTS 엔진 (GoogleTranslateSpeechSynthesizer)
+│       └── out/discord/        JDA + LavaPlayer 로 채널 찾기, 재생
+├── device/
+│   ├── domain/                 PairingCode, Pairing, DeviceToken, Device
+│   ├── application/
+│   │   ├── port/in/            IssuePairingCode, RegisterDevice, AuthenticateDevice (공개 입구)
+│   │   ├── port/out/           PairingRepository, DeviceRepository
+│   │   └── service/            DeviceRegistrationService
+│   └── adapter/
+│       ├── in/web/             기기 등록 REST 컨트롤러
+│       ├── in/discord/         /연결 슬래시 명령
+│       └── out/persistence/    기기 저장소 (H2, JdbcClient), 메모리 연결 코드 저장소
+├── shared/                     공유 커널과 공통 예외 처리
+└── config/                     설정 값, JDA, 포트-어댑터 조립
 ```
 
-- `domain` 과 `application` 은 스프링, JDA, LavaPlayer 를 모릅니다. 이 규칙과 "어댑터끼리 서로 모른다"는 규칙은 `ArchitectureTest`(ArchUnit)가 빌드 때마다 확인합니다.
-- TTS 엔진은 `SpeechSynthesizer` 포트 뒤에 있습니다. 지금은 무료인 Google 번역 TTS 를 쓰고, 다른 엔진은 `adapter/out/tts` 에 어댑터를 추가한 뒤 `quicktts.tts.engine` 설정으로 고르면 됩니다.
+`ArchitectureTest`(ArchUnit)가 빌드 때마다 다음 규칙을 확인합니다.
+
+- 각 컨텍스트의 `domain` 과 `application` 은 스프링, JDA, LavaPlayer 를 모르고, 어댑터끼리는 서로 모릅니다.
+- `speech` 는 `device` 를 공개 입구(`device.application.port.in`)로만 씁니다. quick chat 요청의 기기 토큰 주인을 물을 때가 유일한 접점입니다.
+- `device` 는 `speech` 를 모르고, `shared` 는 어느 컨텍스트도 모릅니다.
+
+그 밖에:
+
+- TTS 엔진은 `SpeechSynthesizer` 포트 뒤에 있습니다. 지금은 무료인 Google 번역 TTS 를 쓰고, 다른 엔진은 `speech/adapter/out/tts` 에 어댑터를 추가한 뒤 `quicktts.tts.engine` 설정으로 고르면 됩니다.
 - 기기 토큰은 서버에 SHA-256 해시로만 저장합니다. 연결 코드는 5분짜리 일회용이고 메모리에만 둡니다.
 
 ## 준비물

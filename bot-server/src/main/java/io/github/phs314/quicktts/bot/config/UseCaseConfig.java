@@ -1,13 +1,13 @@
 package io.github.phs314.quicktts.bot.config;
 
-import io.github.phs314.quicktts.bot.application.port.in.SpeakQuickChatUseCase;
-import io.github.phs314.quicktts.bot.application.port.out.DeviceRepository;
-import io.github.phs314.quicktts.bot.application.port.out.PairingRepository;
-import io.github.phs314.quicktts.bot.application.port.out.SpeechPlayer;
-import io.github.phs314.quicktts.bot.application.port.out.SpeechSynthesizer;
-import io.github.phs314.quicktts.bot.application.port.out.VoiceChannelLocator;
-import io.github.phs314.quicktts.bot.application.service.DeviceRegistrationService;
-import io.github.phs314.quicktts.bot.application.service.QuickChatService;
+import io.github.phs314.quicktts.bot.device.application.port.out.DeviceRepository;
+import io.github.phs314.quicktts.bot.device.application.port.out.PairingRepository;
+import io.github.phs314.quicktts.bot.device.application.service.DeviceRegistrationService;
+import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatUseCase;
+import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayer;
+import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizer;
+import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocator;
+import io.github.phs314.quicktts.bot.speech.application.service.QuickChatService;
 import java.time.Clock;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
