@@ -166,6 +166,10 @@ public class QuickChatApp extends Application {
     }
 
     private void forgetDeviceAndPairAgain() {
+        // 여러 문장이 한꺼번에 401 을 받아도 코드 입력 창은 한 번만 띄운다.
+        if (!config.isRegistered()) {
+            return;
+        }
         config = config.withDeviceToken("");
         config.save();
         if (!pairDevice()) {
