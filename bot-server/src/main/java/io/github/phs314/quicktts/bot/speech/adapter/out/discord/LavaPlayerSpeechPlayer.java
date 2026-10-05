@@ -82,6 +82,18 @@ public class LavaPlayerSpeechPlayer implements SpeechPlayer {
         });
     }
 
+    /** 읽던 문장을 모두 버리고 음성 채널에서 나간다. */
+    void leave(long guildId) {
+        GuildSpeechQueue queue = queues.get(guildId);
+        if (queue != null) {
+            queue.clear();
+        }
+        Guild guild = jda.getGuildById(guildId);
+        if (guild != null && guild.getAudioManager().isConnected()) {
+            guild.getAudioManager().closeAudioConnection();
+        }
+    }
+
     private static void connect(Guild guild, AudioChannel channel, GuildSpeechQueue queue) {
         AudioManager audioManager = guild.getAudioManager();
         if (audioManager.getSendingHandler() == null) {
