@@ -25,8 +25,10 @@ class ArchitectureTest {
             .domainModels("..bot.speech.domain..")
             .applicationServices("..bot.speech.application..")
             .adapter("web", "..bot.speech.adapter.in.web..")
+            .adapter("discord-command", "..bot.speech.adapter.in.discord..")
             .adapter("tts", "..bot.speech.adapter.out.tts..")
             .adapter("discord", "..bot.speech.adapter.out.discord..")
+            .adapter("persistence", "..bot.speech.adapter.out.persistence..")
             .withOptionalLayers(true)
             // config 는 포트와 어댑터를 이어 붙이는 조립 코드라서 계층 규칙에서 뺀다.
             .ignoreDependency(resideInAPackage("..bot.config.."), alwaysTrue());

@@ -33,15 +33,17 @@
 ```
 bot-server/src/main/java/io/github/phs314/quicktts/bot/
 ├── speech/
-│   ├── domain/                 QuickChatMessage, VoiceChannel, Speech
+│   ├── domain/                 QuickChatMessage, VoiceChannel, Speech, Voice
 │   ├── application/
-│   │   ├── port/in/            SpeakQuickChatUseCase
-│   │   ├── port/out/           SpeechSynthesizer, VoiceChannelLocator, SpeechPlayer
-│   │   └── service/            QuickChatService
+│   │   ├── port/in/            SpeakQuickChatUseCase, ManageVoiceUseCase
+│   │   ├── port/out/           SpeechSynthesizer, VoiceChannelLocator, SpeechPlayer, VoicePreferenceRepository
+│   │   └── service/            QuickChatService, VoiceService
 │   └── adapter/
 │       ├── in/web/             quick chat REST 컨트롤러
-│       ├── out/tts/            TTS 엔진 (GoogleTranslateSpeechSynthesizer)
-│       └── out/discord/        JDA + LavaPlayer 로 채널 찾기, 재생
+│       ├── in/discord/         /목소리 슬래시 명령
+│       ├── out/tts/            TTS 엔진 (Edge, Google 번역) 과 엔진 고르기
+│       ├── out/discord/        JDA + LavaPlayer 로 채널 찾기, 재생
+│       └── out/persistence/    사용자별 목소리 저장소 (H2)
 ├── device/
 │   ├── domain/                 PairingCode, Pairing, DeviceToken, Device
 │   ├── application/
@@ -64,7 +66,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 
 그 밖에:
 
-- TTS 엔진은 `SpeechSynthesizer` 포트 뒤에 있습니다. 지금은 무료인 Google 번역 TTS 를 쓰고, 다른 엔진은 `speech/adapter/out/tts` 에 어댑터를 추가한 뒤 `quicktts.tts.engine` 설정으로 고르면 됩니다.
+- TTS 엔진은 `SpeechSynthesizer` 포트 뒤에 있습니다. 지금은 무료인 Microsoft Edge "소리 내어 읽기" 목소리(선희, 인준, 현수)와 Google 번역 목소리를 쓰고, Edge 가 실패하면 Google 번역 목소리로 대신 읽습니다. 엔진을 추가하려면 `speech/adapter/out/tts` 에 `TtsEngine` 구현을 하나 더 만들면 됩니다. 둘 다 공식 API 가 아니라서 언제든 막힐 수 있습니다.
 - 기기 토큰은 서버에 SHA-256 해시로만 저장합니다. 연결 코드는 5분짜리 일회용이고 메모리에만 둡니다.
 
 ## 준비물
@@ -92,6 +94,8 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 음성 채널에 들어간 상태에서 `Ctrl+Shift+Space` 를 누르고 문장을 입력한 뒤 Enter 를 치면 봇이 읽어 줍니다. 종료는 트레이 아이콘의 Exit 메뉴로 합니다.
 
 연결한 PC 를 끊으려면 디스코드에서 `/연결해제` 를 입력하고 메뉴에서 PC 를 고르세요. 목록에는 각 PC 의 컴퓨터 이름이 보입니다. 끊긴 PC 의 클라이언트는 다음에 보낼 때 연결 코드를 다시 묻습니다.
+
+읽어 주는 목소리는 사람마다 디스코드에서 `/목소리` 로 바꿀 수 있습니다. 목소리를 고르지 않으면 지금 목소리와 목록을 보여 줍니다. 아무도 고르지 않았을 때의 기본 목소리는 `QUICKTTS_DEFAULT_VOICE` 로 정합니다(기본: 선희).
 
 ## 커밋 컨벤션
 

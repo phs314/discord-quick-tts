@@ -1,0 +1,22 @@
+package io.github.phs314.quicktts.bot.speech.application.port.in;
+
+import io.github.phs314.quicktts.bot.shared.domain.DiscordUserId;
+import io.github.phs314.quicktts.bot.speech.domain.Voice;
+import io.github.phs314.quicktts.bot.speech.domain.VoiceId;
+import java.util.List;
+
+/**
+ * 사용자가 자기 문장을 읽어 줄 목소리를 보고 바꾼다.
+ */
+public interface ManageVoiceUseCase {
+
+    List<Voice> voices();
+
+    /** 고른 목소리. 고른 적이 없거나 더 이상 없는 목소리면 기본 목소리. */
+    Voice currentVoice(DiscordUserId user);
+
+    /**
+     * @throws io.github.phs314.quicktts.bot.speech.application.UnknownVoiceException 없는 목소리일 때
+     */
+    Voice changeVoice(DiscordUserId user, VoiceId voice);
+}

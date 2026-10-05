@@ -10,13 +10,26 @@ public record QuickTtsProperties(Discord discord, Tts tts) {
             throw new IllegalStateException("DISCORD_TOKEN 이 비어 있습니다. .env 또는 환경변수로 봇 토큰을 설정하세요.");
         }
         if (tts == null) {
-            tts = new Tts("google-translate", "ko");
+            tts = new Tts(null, null);
         }
     }
 
     public record Discord(String token) {
     }
 
-    public record Tts(String engine, String language) {
+    /**
+     * @param defaultVoice         목소리를 고르지 않은 사용자에게 쓰는 목소리
+     * @param edgeChromiumVersion  Edge 목소리 서버가 확인하는 Edge 브라우저 버전
+     */
+    public record Tts(String defaultVoice, String edgeChromiumVersion) {
+
+        public Tts {
+            if (defaultVoice == null || defaultVoice.isBlank()) {
+                defaultVoice = "edge:ko-KR-SunHiNeural";
+            }
+            if (edgeChromiumVersion == null || edgeChromiumVersion.isBlank()) {
+                edgeChromiumVersion = "143.0.3650.75";
+            }
+        }
     }
 }

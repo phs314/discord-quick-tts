@@ -5,11 +5,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.net.URI;
 import org.junit.jupiter.api.Test;
 
-class GoogleTranslateSpeechSynthesizerTest {
+class GoogleTranslateEngineTest {
 
     @Test
     void 한글_문장을_URL_인코딩해서_요청_주소를_만든다() {
-        URI uri = GoogleTranslateSpeechSynthesizer.buildUri("안녕 하세요", "ko");
+        URI uri = GoogleTranslateEngine.buildUri("안녕 하세요", "ko");
 
         assertThat(uri.getRawQuery())
                 .contains("tl=ko")
