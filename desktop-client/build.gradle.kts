@@ -49,6 +49,7 @@ val packageExe by tasks.registering(Exec::class) {
 
     inputs.dir(jpackageInput)
     inputs.property("serverUrl", serverUrl)
+    inputs.file(layout.projectDirectory.file("packaging/QuickTTS.ico"))
     outputs.dir(jpackageImage)
 
     doFirst {
@@ -63,6 +64,7 @@ val packageExe by tasks.registering(Exec::class) {
             "--input", jpackageInput.get().asFile.path,
             "--main-jar", mainJar.get(),
             "--main-class", "io.github.phs314.quicktts.client.Launcher",
+            "--icon", layout.projectDirectory.file("packaging/QuickTTS.ico").asFile.path,
             "--java-options", "--enable-native-access=ALL-UNNAMED",
             "--java-options", "-Dquicktts.server-url=" + serverUrl.get(),
             "--dest", jpackageImage.get().asFile.path,
