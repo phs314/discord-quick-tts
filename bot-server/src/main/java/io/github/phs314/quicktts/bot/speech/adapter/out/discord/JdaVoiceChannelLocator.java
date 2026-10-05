@@ -3,11 +3,14 @@ package io.github.phs314.quicktts.bot.speech.adapter.out.discord;
 import io.github.phs314.quicktts.bot.shared.domain.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocator;
 import io.github.phs314.quicktts.bot.speech.domain.VoiceChannel;
+import io.github.phs314.quicktts.bot.speech.domain.VoiceChannelDetails;
 import java.util.Objects;
 import java.util.Optional;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import org.springframework.stereotype.Component;
 
 /**
@@ -23,20 +26,26 @@ public class JdaVoiceChannelLocator implements VoiceChannelLocator {
     }
 
     @Override
-    public Optional<VoiceChannel> findCurrentChannel(DiscordUserId user) {
+    public Optional<VoiceChannelDetails> findCurrentChannel(DiscordUserId user) {
         return jda.getGuilds().stream()
                 .map(guild -> guild.getMemberById(user.value()))
                 .filter(Objects::nonNull)
-                .map(JdaVoiceChannelLocator::toVoiceChannel)
+                .map(JdaVoiceChannelLocator::toDetails)
                 .flatMap(Optional::stream)
                 .findFirst();
     }
 
-    private static Optional<VoiceChannel> toVoiceChannel(Member member) {
+    private static Optional<VoiceChannelDetails> toDetails(Member member) {
         GuildVoiceState voiceState = member.getVoiceState();
-        if (voiceState == null || voiceState.getChannel() == null) {
+        AudioChannel channel = voiceState == null ? null : voiceState.getChannel();
+        if (channel == null) {
             return Optional.empty();
         }
-        return Optional.of(new VoiceChannel(member.getGuild().getIdLong(), voiceState.getChannel().getIdLong()));
+        Guild guild = member.getGuild();
+        return Optional.of(new VoiceChannelDetails(
+                new VoiceChannel(guild.getIdLong(), channel.getIdLong()),
+                guild.getName(),
+                guild.getIconUrl(),
+                channel.getName()));
     }
 }

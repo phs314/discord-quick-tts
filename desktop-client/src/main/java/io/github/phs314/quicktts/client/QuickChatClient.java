@@ -4,6 +4,7 @@ import io.github.phs314.quicktts.common.DeviceRegistrationRequest;
 import io.github.phs314.quicktts.common.DeviceRegistrationResponse;
 import io.github.phs314.quicktts.common.QuickChatApi;
 import io.github.phs314.quicktts.common.QuickChatRequest;
+import io.github.phs314.quicktts.common.VoiceChannelResponse;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.URI;
@@ -12,6 +13,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import tools.jackson.databind.json.JsonMapper;
 
@@ -85,6 +87,23 @@ class QuickChatClient {
             }
         }
         return name;
+    }
+
+    /**
+     * 지금 보내면 어느 음성 채널에서 읽힐지 묻는다. 음성 채널에 없으면 빈 값으로 끝난다.
+     */
+    CompletableFuture<Optional<VoiceChannelResponse>> myVoiceChannel(String deviceToken) {
+        HttpRequest request = HttpRequest.newBuilder(URI.create(serverUrl + QuickChatApi.MY_VOICE_CHANNEL_PATH))
+                .header("Authorization", QuickChatApi.BEARER_PREFIX + deviceToken)
+                .timeout(Duration.ofSeconds(3))
+                .GET()
+                .build();
+        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(response -> switch (response.statusCode()) {
+                    case 200 -> Optional.of(jsonMapper.readValue(response.body(), VoiceChannelResponse.class));
+                    case 204 -> Optional.<VoiceChannelResponse>empty();
+                    default -> throw new QuickChatException("음성 채널을 확인하지 못했습니다. (HTTP " + response.statusCode() + ")");
+                });
     }
 
     private HttpRequest.Builder jsonPost(String path, Object body) {

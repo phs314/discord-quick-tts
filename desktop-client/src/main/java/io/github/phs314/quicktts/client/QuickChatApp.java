@@ -16,17 +16,21 @@ import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
 import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 /**
- * 전역 단축키로 띄우는 quick chat 입력 위젯.
+ * 전역 단축키로 화면 아래쪽 가운데에 띄우는 quick chat 입력 위젯.
  * Enter 로 보내고 Esc 나 다른 창 클릭으로 닫는다.
  */
 public class QuickChatApp extends Application {
 
-    private static final double WIDTH = 560;
+    /** 막대 둘레의 그림자 여백. */
+    private static final double SHADOW_MARGIN = 24;
+    /** 화면 높이에서 막대 아래쪽 끝까지의 비율. 0.15 면 화면 맨 아래에서 15% 위에 막대가 놓인다. */
+    private static final double BOTTOM_RATIO = 0.15;
 
     /** {@link Launcher} 가 먼저 잡아 둔 중복 실행 방지 자리. 클래스패스로 바로 띄우면 null 이다. */
     static SingleInstance singleInstance;
@@ -37,6 +41,7 @@ public class QuickChatApp extends Application {
     private LocalBotServer localBotServer;
     private GlobalHotkey hotkey;
     private Stage stage;
+    private InputBar inputBar;
     private TextField input;
 
     @Override
@@ -54,7 +59,7 @@ public class QuickChatApp extends Application {
         }
 
         stage = primaryStage;
-        stage.initStyle(StageStyle.UNDECORATED);
+        stage.initStyle(StageStyle.TRANSPARENT);
         stage.setAlwaysOnTop(true);
         stage.setScene(createScene());
         stage.focusedProperty().addListener((observable, wasFocused, isFocused) -> {
@@ -93,9 +98,8 @@ public class QuickChatApp extends Application {
     }
 
     private Scene createScene() {
-        input = new TextField();
-        input.setPromptText("읽어 줄 문장을 입력하고 Enter (Esc 로 닫기)");
-        input.setStyle("-fx-font-size: 18px; -fx-background-radius: 8;");
+        inputBar = new InputBar();
+        input = inputBar.input();
         input.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.ENTER) {
                 send();
@@ -104,10 +108,13 @@ public class QuickChatApp extends Application {
             }
         });
 
-        StackPane root = new StackPane(input);
-        root.setPadding(new Insets(10));
-        root.setStyle("-fx-background-color: #2b2d31; -fx-background-radius: 12;");
-        return new Scene(root, WIDTH, -1);
+        // 그림자가 잘리지 않도록 막대 둘레에 투명한 여백을 둔다.
+        StackPane root = new StackPane(inputBar.node());
+        root.setPadding(new Insets(SHADOW_MARGIN));
+        root.setStyle("-fx-background-color: transparent;");
+        Scene scene = new Scene(root);
+        scene.setFill(Color.TRANSPARENT);
+        return scene;
     }
 
     private void toggle() {
@@ -118,14 +125,31 @@ public class QuickChatApp extends Application {
         }
     }
 
+    /** 화면 아래쪽 가운데(맨 아래에서 {@link #BOTTOM_RATIO} 위)에 띄우고 문장이 읽힐 음성 채널을 다시 확인한다. */
     private void show() {
-        Rectangle2D screen = Screen.getPrimary().getVisualBounds();
+        Rectangle2D screen = Screen.getPrimary().getBounds();
+        Rectangle2D usable = Screen.getPrimary().getVisualBounds();
         stage.show();
         stage.setX(screen.getMinX() + (screen.getWidth() - stage.getWidth()) / 2);
-        stage.setY(screen.getMinY() + screen.getHeight() * 0.3);
+        double barBottom = screen.getMaxY() - screen.getHeight() * BOTTOM_RATIO;
+        // 작업 표시줄이 아주 커도 막대가 그 뒤에 숨지 않게 한다.
+        barBottom = Math.min(barBottom, usable.getMaxY());
+        stage.setY(barBottom - stage.getHeight() + SHADOW_MARGIN);
         stage.toFront();
         stage.requestFocus();
         input.requestFocus();
+        refreshVoiceChannel();
+    }
+
+    private void refreshVoiceChannel() {
+        inputBar.showChecking();
+        client.myVoiceChannel(config.deviceToken()).whenComplete((channel, failure) -> Platform.runLater(() -> {
+            if (failure == null) {
+                inputBar.showChannel(channel);
+            } else {
+                inputBar.showServerUnreachable();
+            }
+        }));
     }
 
     private void hide() {
