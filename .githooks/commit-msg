@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+# 커밋할 때 메시지 형식을 검사한다. 켜기: git config core.hooksPath .githooks
+exec "$(git rev-parse --show-toplevel)/scripts/check-commit-msg.sh" "$1"

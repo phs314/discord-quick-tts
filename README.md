@@ -117,3 +117,9 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 | 🔧 | `chore` | 빌드 설정, 의존성, 설정 파일 |
 | 🔥 | `remove` | 코드나 파일 삭제 |
 | 🚀 | `deploy` | 배포 관련 |
+
+이 형식은 PR 마다 CI 가 검사합니다. 커밋할 때 바로 걸러지게 하려면 저장소를 클론한 뒤 한 번만 훅을 켜 두세요.
+
+```bash
+git config core.hooksPath .githooks
+```
