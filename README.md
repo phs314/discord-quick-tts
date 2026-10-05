@@ -97,17 +97,32 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 
 읽어 주는 목소리는 사람마다 디스코드에서 `/목소리` 로 바꿀 수 있습니다. 목소리를 고르지 않으면 지금 목소리와 목록을 보여 줍니다. 아무도 고르지 않았을 때의 기본 목소리는 `QUICKTTS_DEFAULT_VOICE` 로 정합니다(기본: 선희).
 
-## 클라이언트 exe 만들기 (Windows)
+## exe 만들기 (Windows)
 
-자바를 설치하지 않은 PC 에서도 돌아가도록 자바 런타임까지 넣은 `QuickTTS.exe` 를 만듭니다. JDK 25 에 들어 있는 `jpackage` 를 쓰므로 다른 도구는 필요 없습니다.
+자바를 설치하지 않은 PC 에서도 돌아가도록 자바 런타임까지 넣은 exe 를 만듭니다. JDK 25 에 들어 있는 `jpackage` 를 쓰므로 다른 도구는 필요 없습니다.
 
 ```bash
 ./gradlew :desktop-client:packageZip
 ```
 
-`desktop-client/build/distributions/QuickTTS-0.1.0-windows.zip` 이 생깁니다. 압축을 풀고 `QuickTTS/QuickTTS.exe` 를 실행하면 됩니다. 압축하지 않은 폴더만 필요하면 `packageExe` 를 쓰세요(`desktop-client/build/jpackage/image/QuickTTS`).
+`desktop-client/build/distributions/QuickTTS-0.1.0-windows.zip` 이 생깁니다. 압축 안의 `QuickTTS` 폴더에는 두 실행 파일이 같은 자바 런타임을 나눠 쓰며 들어 있습니다.
 
-- 기본 봇 서버 주소는 `http://localhost:8080` 입니다. 다른 곳에 띄운 서버를 쓰려면 `-PserverUrl=https://...` 를 붙여 만듭니다.
+- `QuickTTS.exe`: 데스크톱 클라이언트. 서버 주소가 이 PC 면 켜질 때 봇 서버도 같이 켜고, 트레이의 Exit 로 끌 때 같이 끕니다. 이미 떠 있을 때 다시 실행하면 입력창을 엽니다.
+- `QuickTTS-Server.exe`: 봇 서버. 보통은 직접 실행할 필요가 없습니다.
+
+압축을 Gradle 빌드 폴더가 아닌 곳(예: `%LOCALAPPDATA%\Programs\QuickTTS`)에 풀어서 쓰세요. 빌드 폴더에서 실행하면 다음에 다시 만들 때 파일이 잠겨 실패합니다.
+
+### exe 로 쓸 때의 설정과 데이터 위치
+
+| 무엇 | 위치 |
+| --- | --- |
+| 봇 토큰 (`DISCORD_TOKEN=...`) | `~/.discord-quick-tts/server.env` |
+| 등록된 PC, 목소리 설정 (H2) | `~/.discord-quick-tts/data/` |
+| 봇 서버 로그 | `~/.discord-quick-tts/logs/bot-server.log` |
+| 클라이언트 설정 (기기 토큰) | `~/.discord-quick-tts/client.properties` |
+
+- 트레이 아이콘 메뉴의 **Start with Windows** 를 켜면 윈도우에 로그인할 때 QuickTTS 가 자동으로 켜지고, 그때 봇 서버도 같이 켜집니다.
+- 기본 봇 서버 주소는 `http://localhost:8080` 입니다. 다른 곳에 띄운 서버를 쓰려면 `-PserverUrl=https://...` 를 붙여 만듭니다. 이때 클라이언트는 이 PC 의 봇 서버를 켜지 않습니다.
 - 서명하지 않은 exe 라서 처음 실행할 때 Windows 가 "알 수 없는 게시자" 경고를 띄웁니다. "추가 정보" → "실행" 으로 넘어가면 됩니다.
 
 ## 커밋 컨벤션

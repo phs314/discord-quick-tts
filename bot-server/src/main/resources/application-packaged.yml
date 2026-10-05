@@ -1,0 +1,8 @@
+# exe(QuickTTS-Server.exe) 로 띄울 때 쓰는 설정. 데이터와 로그를 사용자 폴더에 둔다.
+spring:
+  datasource:
+    url: jdbc:h2:file:~/.discord-quick-tts/data/quicktts
+
+logging:
+  file:
+    name: ${user.home}/.discord-quick-tts/logs/bot-server.log
