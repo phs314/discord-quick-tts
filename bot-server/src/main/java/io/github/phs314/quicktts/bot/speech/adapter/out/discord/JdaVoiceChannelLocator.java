@@ -10,11 +10,12 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
+import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import org.springframework.stereotype.Component;
 
 /**
- * 봇이 들어가 있는 서버들의 음성 상태 캐시에서 사용자를 찾는다.
+ * 봇이 들어가 있는 서버들의 음성 상태 캐시에서 사용자와 봇이 있는 음성 채널을 찾는다.
  */
 @Component
 public class JdaVoiceChannelLocator implements VoiceChannelLocatorPort {
@@ -30,22 +31,32 @@ public class JdaVoiceChannelLocator implements VoiceChannelLocatorPort {
         return jda.getGuilds().stream()
                 .map(guild -> guild.getMemberById(user.value()))
                 .filter(Objects::nonNull)
-                .map(JdaVoiceChannelLocator::toDetails)
+                .map(JdaVoiceChannelLocator::currentChannel)
                 .flatMap(Optional::stream)
                 .findFirst();
     }
 
-    private static Optional<VoiceChannelDetails> toDetails(Member member) {
-        GuildVoiceState voiceState = member.getVoiceState();
-        AudioChannel channel = voiceState == null ? null : voiceState.getChannel();
-        if (channel == null) {
+    @Override
+    public Optional<VoiceChannelDetails> findBotChannelInUse(long guildId) {
+        Guild guild = jda.getGuildById(guildId);
+        AudioChannel channel = guild == null ? null : guild.getAudioManager().getConnectedChannel();
+        if (channel == null || channel.getMembers().stream().map(Member::getUser).allMatch(User::isBot)) {
             return Optional.empty();
         }
-        Guild guild = member.getGuild();
-        return Optional.of(new VoiceChannelDetails(
+        return Optional.of(toDetails(guild, channel));
+    }
+
+    private static Optional<VoiceChannelDetails> currentChannel(Member member) {
+        GuildVoiceState voiceState = member.getVoiceState();
+        AudioChannel channel = voiceState == null ? null : voiceState.getChannel();
+        return channel == null ? Optional.empty() : Optional.of(toDetails(member.getGuild(), channel));
+    }
+
+    private static VoiceChannelDetails toDetails(Guild guild, AudioChannel channel) {
+        return new VoiceChannelDetails(
                 new VoiceChannel(guild.getIdLong(), channel.getIdLong()),
                 guild.getName(),
                 guild.getIconUrl(),
-                channel.getName()));
+                channel.getName());
     }
 }
