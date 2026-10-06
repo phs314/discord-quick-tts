@@ -2,6 +2,7 @@ package io.github.phs314.quicktts.bot.speech.application.service;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.application.SpeakerNotInVoiceChannelException;
+import io.github.phs314.quicktts.bot.speech.application.VoiceChannelInUseException;
 import io.github.phs314.quicktts.bot.speech.application.port.in.FindMyVoiceChannelUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.ManageVoiceUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatCommand;
@@ -40,7 +41,22 @@ public class QuickChatService implements SpeakQuickChatUseCase, FindMyVoiceChann
 
         VoiceId voice = voices.currentVoice(command.speaker()).id();
         Speech speech = speechSynthesizer.synthesize(command.message(), voice);
-        speechPlayer.play(channel, speech);
+
+        // 확인과 재생 사이에 다른 채널의 요청이 끼어들어 봇을 옮기지 않게 한 번에 하나씩 처리한다.
+        // play 는 재생 순서에 넣기만 하고 바로 돌아오므로 오래 막지 않는다.
+        synchronized (this) {
+            rejectIfInUseElsewhere(channel);
+            speechPlayer.play(channel, speech);
+        }
+    }
+
+    /** 먼저 온 채널 우선: 봇이 같은 디스코드 서버의 다른 채널에서 쓰이고 있으면 옮겨 가지 않는다. */
+    private void rejectIfInUseElsewhere(VoiceChannel channel) {
+        voiceChannelLocator.findBotChannelInUse(channel.guildId())
+                .filter(inUse -> !inUse.channel().equals(channel))
+                .ifPresent(inUse -> {
+                    throw new VoiceChannelInUseException(inUse);
+                });
     }
 
     @Override

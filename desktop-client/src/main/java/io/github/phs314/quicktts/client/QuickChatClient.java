@@ -72,6 +72,7 @@ class QuickChatClient {
                         case 400 -> throw new QuickChatException("문장이 비어 있거나 너무 깁니다. (최대 " + QuickChatApi.MAX_TEXT_LENGTH + "자)");
                         case 401 -> throw new DeviceUnauthorizedException();
                         case 409 -> throw new QuickChatException("봇이 있는 서버의 음성 채널에 먼저 들어가 주세요.");
+                        case 423 -> throw new QuickChatException("봇이 이 서버의 다른 음성 채널에서 쓰이고 있습니다. 그 채널이 비면 쓸 수 있습니다.");
                         default -> throw new QuickChatException("봇 서버 오류가 났습니다. (HTTP " + response.statusCode() + ")");
                     }
                 });

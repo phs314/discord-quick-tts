@@ -1,6 +1,7 @@
 package io.github.phs314.quicktts.bot.speech.adapter.in.web;
 
 import io.github.phs314.quicktts.bot.speech.application.SpeakerNotInVoiceChannelException;
+import io.github.phs314.quicktts.bot.speech.application.VoiceChannelInUseException;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesisException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,11 @@ public class SpeechExceptionHandler {
     @ExceptionHandler(SpeakerNotInVoiceChannelException.class)
     public ProblemDetail speakerNotInVoiceChannel(SpeakerNotInVoiceChannelException e) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, e.getMessage());
+    }
+
+    @ExceptionHandler(VoiceChannelInUseException.class)
+    public ProblemDetail voiceChannelInUse(VoiceChannelInUseException e) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.LOCKED, e.getMessage());
     }
 
     @ExceptionHandler(SpeechSynthesisException.class)
