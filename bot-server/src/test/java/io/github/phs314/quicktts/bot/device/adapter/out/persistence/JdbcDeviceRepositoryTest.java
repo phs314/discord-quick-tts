@@ -39,7 +39,8 @@ class JdbcDeviceRepositoryTest {
 
         repository.save(device);
 
-        assertThat(repository.findByTokenHash(device.tokenHash())).contains(device);
+        assertThat(repository.findByTokenHash(device.tokenHash())).get()
+                .usingRecursiveComparison().isEqualTo(device);
         assertThat(repository.findByTokenHash("z".repeat(64))).isEmpty();
     }
 
@@ -51,7 +52,9 @@ class JdbcDeviceRepositoryTest {
         repository.save(desktop);
         repository.save(device(OTHER, "c", "남의-PC", NOW));
 
-        assertThat(repository.findByOwner(OWNER)).containsExactly(desktop, laptop);
+        assertThat(repository.findByOwner(OWNER))
+                .usingRecursiveFieldByFieldElementComparator()
+                .containsExactly(desktop, laptop);
     }
 
     @Test
