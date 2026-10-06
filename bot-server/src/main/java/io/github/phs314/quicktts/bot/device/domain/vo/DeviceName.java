@@ -1,4 +1,4 @@
-package io.github.phs314.quicktts.bot.device.domain;
+package io.github.phs314.quicktts.bot.device.domain.vo;
 
 /**
  * 사용자에게 보여 줄 PC 이름. 클라이언트가 컴퓨터 이름을 보내 주고, 없으면 기본 이름을 쓴다.

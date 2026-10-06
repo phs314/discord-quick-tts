@@ -1,9 +1,9 @@
 package io.github.phs314.quicktts.bot.speech.adapter.out.discord;
 
-import io.github.phs314.quicktts.bot.shared.domain.DiscordUserId;
+import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocator;
-import io.github.phs314.quicktts.bot.speech.domain.VoiceChannel;
-import io.github.phs314.quicktts.bot.speech.domain.VoiceChannelDetails;
+import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
+import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import java.util.Objects;
 import java.util.Optional;
 import net.dv8tion.jda.api.JDA;

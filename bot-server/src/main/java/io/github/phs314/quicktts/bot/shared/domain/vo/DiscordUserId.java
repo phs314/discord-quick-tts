@@ -1,4 +1,6 @@
-package io.github.phs314.quicktts.bot.shared.domain;
+package io.github.phs314.quicktts.bot.shared.domain.vo;
+
+import io.github.phs314.quicktts.bot.shared.domain.InvalidDomainValueException;
 
 /**
  * 디스코드 사용자 ID (snowflake).

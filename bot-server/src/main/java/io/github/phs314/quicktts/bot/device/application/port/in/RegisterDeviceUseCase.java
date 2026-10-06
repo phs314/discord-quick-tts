@@ -1,8 +1,8 @@
 package io.github.phs314.quicktts.bot.device.application.port.in;
 
-import io.github.phs314.quicktts.bot.device.domain.DeviceName;
-import io.github.phs314.quicktts.bot.device.domain.DeviceToken;
-import io.github.phs314.quicktts.bot.device.domain.PairingCode;
+import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
+import io.github.phs314.quicktts.bot.device.domain.vo.DeviceToken;
+import io.github.phs314.quicktts.bot.device.domain.vo.PairingCode;
 
 /**
  * 연결 코드를 쓰고 그 PC 전용 기기 토큰을 발급한다. 코드는 한 번만 쓸 수 있다.

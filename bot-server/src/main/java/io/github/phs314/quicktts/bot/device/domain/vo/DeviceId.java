@@ -1,4 +1,4 @@
-package io.github.phs314.quicktts.bot.device.domain;
+package io.github.phs314.quicktts.bot.device.domain.vo;
 
 import io.github.phs314.quicktts.bot.shared.domain.InvalidDomainValueException;
 import java.util.UUID;

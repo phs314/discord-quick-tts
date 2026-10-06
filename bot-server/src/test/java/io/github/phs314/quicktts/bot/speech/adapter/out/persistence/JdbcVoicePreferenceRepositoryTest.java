@@ -2,8 +2,8 @@ package io.github.phs314.quicktts.bot.speech.adapter.out.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.github.phs314.quicktts.bot.shared.domain.DiscordUserId;
-import io.github.phs314.quicktts.bot.speech.domain.VoiceId;
+import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
+import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
 import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

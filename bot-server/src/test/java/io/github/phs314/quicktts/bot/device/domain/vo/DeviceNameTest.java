@@ -1,4 +1,4 @@
-package io.github.phs314.quicktts.bot.device.domain;
+package io.github.phs314.quicktts.bot.device.domain.vo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

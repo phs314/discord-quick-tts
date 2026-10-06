@@ -7,12 +7,12 @@ import io.github.phs314.quicktts.bot.device.application.InvalidPairingCodeExcept
 import io.github.phs314.quicktts.bot.device.application.port.out.DeviceRepository;
 import io.github.phs314.quicktts.bot.device.application.port.out.PairingRepository;
 import io.github.phs314.quicktts.bot.device.domain.Device;
-import io.github.phs314.quicktts.bot.device.domain.DeviceId;
-import io.github.phs314.quicktts.bot.device.domain.DeviceName;
-import io.github.phs314.quicktts.bot.device.domain.DeviceToken;
+import io.github.phs314.quicktts.bot.device.domain.vo.DeviceId;
+import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
+import io.github.phs314.quicktts.bot.device.domain.vo.DeviceToken;
 import io.github.phs314.quicktts.bot.device.domain.Pairing;
-import io.github.phs314.quicktts.bot.device.domain.PairingCode;
-import io.github.phs314.quicktts.bot.shared.domain.DiscordUserId;
+import io.github.phs314.quicktts.bot.device.domain.vo.PairingCode;
+import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;

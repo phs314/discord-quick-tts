@@ -1,4 +1,4 @@
-package io.github.phs314.quicktts.bot.speech.domain;
+package io.github.phs314.quicktts.bot.speech.domain.vo;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

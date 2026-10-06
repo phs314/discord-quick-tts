@@ -1,12 +1,12 @@
 package io.github.phs314.quicktts.bot.speech.application.service;
 
-import io.github.phs314.quicktts.bot.shared.domain.DiscordUserId;
+import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.application.UnknownVoiceException;
 import io.github.phs314.quicktts.bot.speech.application.port.in.ManageVoiceUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizer;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoicePreferenceRepository;
-import io.github.phs314.quicktts.bot.speech.domain.Voice;
-import io.github.phs314.quicktts.bot.speech.domain.VoiceId;
+import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
+import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
 import java.util.List;
 import java.util.Optional;
 

@@ -2,7 +2,7 @@ package io.github.phs314.quicktts.bot.device.adapter.out.persistence;
 
 import io.github.phs314.quicktts.bot.device.application.port.out.PairingRepository;
 import io.github.phs314.quicktts.bot.device.domain.Pairing;
-import io.github.phs314.quicktts.bot.device.domain.PairingCode;
+import io.github.phs314.quicktts.bot.device.domain.vo.PairingCode;
 import java.time.Clock;
 import java.util.Map;
 import java.util.Optional;

@@ -3,9 +3,9 @@ package io.github.phs314.quicktts.bot.device.adapter.out.persistence;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.github.phs314.quicktts.bot.device.domain.Device;
-import io.github.phs314.quicktts.bot.device.domain.DeviceId;
-import io.github.phs314.quicktts.bot.device.domain.DeviceName;
-import io.github.phs314.quicktts.bot.shared.domain.DiscordUserId;
+import io.github.phs314.quicktts.bot.device.domain.vo.DeviceId;
+import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
+import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;

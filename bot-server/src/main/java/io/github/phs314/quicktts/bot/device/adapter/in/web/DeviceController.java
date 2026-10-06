@@ -1,9 +1,9 @@
 package io.github.phs314.quicktts.bot.device.adapter.in.web;
 
 import io.github.phs314.quicktts.bot.device.application.port.in.RegisterDeviceUseCase;
-import io.github.phs314.quicktts.bot.device.domain.DeviceName;
-import io.github.phs314.quicktts.bot.device.domain.DeviceToken;
-import io.github.phs314.quicktts.bot.device.domain.PairingCode;
+import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
+import io.github.phs314.quicktts.bot.device.domain.vo.DeviceToken;
+import io.github.phs314.quicktts.bot.device.domain.vo.PairingCode;
 import io.github.phs314.quicktts.common.DeviceRegistrationRequest;
 import io.github.phs314.quicktts.common.DeviceRegistrationResponse;
 import io.github.phs314.quicktts.common.QuickChatApi;

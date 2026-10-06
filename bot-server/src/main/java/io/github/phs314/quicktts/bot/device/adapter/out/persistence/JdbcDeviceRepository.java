@@ -2,9 +2,9 @@ package io.github.phs314.quicktts.bot.device.adapter.out.persistence;
 
 import io.github.phs314.quicktts.bot.device.application.port.out.DeviceRepository;
 import io.github.phs314.quicktts.bot.device.domain.Device;
-import io.github.phs314.quicktts.bot.device.domain.DeviceId;
-import io.github.phs314.quicktts.bot.device.domain.DeviceName;
-import io.github.phs314.quicktts.bot.shared.domain.DiscordUserId;
+import io.github.phs314.quicktts.bot.device.domain.vo.DeviceId;
+import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
+import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;

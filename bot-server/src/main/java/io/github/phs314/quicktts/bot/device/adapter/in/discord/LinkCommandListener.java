@@ -3,7 +3,7 @@ package io.github.phs314.quicktts.bot.device.adapter.in.discord;
 import io.github.phs314.quicktts.bot.device.application.port.in.IssuePairingCodeUseCase;
 import io.github.phs314.quicktts.bot.device.domain.Pairing;
 import io.github.phs314.quicktts.bot.shared.adapter.in.discord.DiscordSlashCommand;
-import io.github.phs314.quicktts.bot.shared.domain.DiscordUserId;
+import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.DiscordLocale;

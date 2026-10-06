@@ -1,4 +1,4 @@
-package io.github.phs314.quicktts.bot.speech.domain;
+package io.github.phs314.quicktts.bot.speech.domain.vo;
 
 /**
  * 사용자에게 보여 줄 음성 채널 정보.
