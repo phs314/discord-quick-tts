@@ -1,7 +1,7 @@
 package io.github.phs314.quicktts.bot.speech.adapter.out.discord;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
-import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocator;
+import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocatorPort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import java.util.Objects;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
  * 봇이 들어가 있는 서버들의 음성 상태 캐시에서 사용자를 찾는다.
  */
 @Component
-public class JdaVoiceChannelLocator implements VoiceChannelLocator {
+public class JdaVoiceChannelLocator implements VoiceChannelLocatorPort {
 
     private final JDA jda;
 

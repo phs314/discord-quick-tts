@@ -37,7 +37,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │   │   └── vo/                 QuickChatMessage, VoiceChannel, Speech, Voice (값 객체)
 │   ├── application/
 │   │   ├── port/in/            SpeakQuickChatUseCase, ManageVoiceUseCase
-│   │   ├── port/out/           SpeechSynthesizer, VoiceChannelLocator, SpeechPlayer, VoicePreferenceRepository
+│   │   ├── port/out/           SpeechSynthesizerPort, VoiceChannelLocatorPort, SpeechPlayerPort, VoicePreferencePort
 │   │   └── service/            QuickChatService, VoiceService
 │   └── adapter/
 │       ├── in/web/             quick chat REST 컨트롤러
@@ -50,7 +50,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │   │   └── vo/                 PairingCode, DeviceToken, DeviceId, DeviceName (값 객체)
 │   ├── application/
 │   │   ├── port/in/            IssuePairingCode, RegisterDevice, AuthenticateDevice (공개 입구)
-│   │   ├── port/out/           PairingRepository, DeviceRepository
+│   │   ├── port/out/           PairingPort, DevicePort
 │   │   └── service/            DeviceRegistrationService
 │   └── adapter/
 │       ├── in/web/             기기 등록 REST 컨트롤러
@@ -68,7 +68,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 
 그 밖에:
 
-- TTS 엔진은 `SpeechSynthesizer` 포트 뒤에 있습니다. 지금은 무료인 Microsoft Edge "소리 내어 읽기" 목소리(선희, 인준, 현수)와 Google 번역 목소리를 쓰고, Edge 가 실패하면 Google 번역 목소리로 대신 읽습니다. 엔진을 추가하려면 `speech/adapter/out/tts` 에 `TtsEngine` 구현을 하나 더 만들면 됩니다. 둘 다 공식 API 가 아니라서 언제든 막힐 수 있습니다.
+- TTS 엔진은 `SpeechSynthesizerPort` 뒤에 있습니다. 지금은 무료인 Microsoft Edge "소리 내어 읽기" 목소리(선희, 인준, 현수)와 Google 번역 목소리를 쓰고, Edge 가 실패하면 Google 번역 목소리로 대신 읽습니다. 엔진을 추가하려면 `speech/adapter/out/tts` 에 `TtsEngine` 구현을 하나 더 만들면 됩니다. 둘 다 공식 API 가 아니라서 언제든 막힐 수 있습니다.
 - 기기 토큰은 서버에 SHA-256 해시로만 저장합니다. 연결 코드는 5분짜리 일회용이고 메모리에만 둡니다.
 
 ## 준비물

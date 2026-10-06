@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.phs314.quicktts.bot.device.application.InvalidPairingCodeException;
-import io.github.phs314.quicktts.bot.device.application.port.out.DeviceRepository;
-import io.github.phs314.quicktts.bot.device.application.port.out.PairingRepository;
+import io.github.phs314.quicktts.bot.device.application.port.out.DevicePort;
+import io.github.phs314.quicktts.bot.device.application.port.out.PairingPort;
 import io.github.phs314.quicktts.bot.device.domain.Device;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceId;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
@@ -31,8 +31,8 @@ class DeviceRegistrationServiceTest {
     private static final DiscordUserId OTHER = new DiscordUserId(7L);
     private static final DeviceName PC = new DeviceName("현수-PC");
 
-    private final FakePairingRepository pairings = new FakePairingRepository();
-    private final FakeDeviceRepository devices = new FakeDeviceRepository();
+    private final FakePairingPort pairings = new FakePairingPort();
+    private final FakeDevicePort devices = new FakeDevicePort();
 
     @Test
     void 연결_코드로_등록한_기기_토큰은_코드를_받은_사용자로_인증된다() {
@@ -121,7 +121,7 @@ class DeviceRegistrationServiceTest {
         return new DeviceRegistrationService(pairings, devices, Clock.fixed(now, ZoneOffset.UTC));
     }
 
-    private static class FakePairingRepository implements PairingRepository {
+    private static class FakePairingPort implements PairingPort {
 
         private final Map<PairingCode, Pairing> byCode = new HashMap<>();
 
@@ -136,7 +136,7 @@ class DeviceRegistrationServiceTest {
         }
     }
 
-    private static class FakeDeviceRepository implements DeviceRepository {
+    private static class FakeDevicePort implements DevicePort {
 
         private final Map<String, Device> byHash = new HashMap<>();
 

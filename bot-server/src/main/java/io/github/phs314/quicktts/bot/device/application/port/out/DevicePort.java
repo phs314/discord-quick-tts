@@ -6,7 +6,7 @@ import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import java.util.List;
 import java.util.Optional;
 
-public interface DeviceRepository {
+public interface DevicePort {
 
     void save(Device device);
 

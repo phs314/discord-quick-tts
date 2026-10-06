@@ -4,7 +4,7 @@ import io.github.phs314.quicktts.bot.device.domain.Pairing;
 import io.github.phs314.quicktts.bot.device.domain.vo.PairingCode;
 import java.util.Optional;
 
-public interface PairingRepository {
+public interface PairingPort {
 
     void save(Pairing pairing);
 

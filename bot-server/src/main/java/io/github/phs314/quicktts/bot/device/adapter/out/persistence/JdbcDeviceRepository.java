@@ -1,6 +1,6 @@
 package io.github.phs314.quicktts.bot.device.adapter.out.persistence;
 
-import io.github.phs314.quicktts.bot.device.application.port.out.DeviceRepository;
+import io.github.phs314.quicktts.bot.device.application.port.out.DevicePort;
 import io.github.phs314.quicktts.bot.device.domain.Device;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceId;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
  * 등록된 기기를 {@code device} 테이블에 저장한다. 스키마는 {@code schema.sql} 에 있다.
  */
 @Component
-public class JdbcDeviceRepository implements DeviceRepository {
+public class JdbcDeviceRepository implements DevicePort {
 
     private static final String COLUMNS = "id, token_hash, discord_user_id, name, registered_at";
 

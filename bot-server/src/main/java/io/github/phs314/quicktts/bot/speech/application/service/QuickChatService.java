@@ -6,9 +6,9 @@ import io.github.phs314.quicktts.bot.speech.application.port.in.FindMyVoiceChann
 import io.github.phs314.quicktts.bot.speech.application.port.in.ManageVoiceUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatUseCase;
-import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayer;
-import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizer;
-import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocator;
+import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizerPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocatorPort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
@@ -17,14 +17,14 @@ import java.util.Optional;
 
 public class QuickChatService implements SpeakQuickChatUseCase, FindMyVoiceChannelUseCase {
 
-    private final VoiceChannelLocator voiceChannelLocator;
-    private final SpeechSynthesizer speechSynthesizer;
-    private final SpeechPlayer speechPlayer;
+    private final VoiceChannelLocatorPort voiceChannelLocator;
+    private final SpeechSynthesizerPort speechSynthesizer;
+    private final SpeechPlayerPort speechPlayer;
     private final ManageVoiceUseCase voices;
 
-    public QuickChatService(VoiceChannelLocator voiceChannelLocator,
-                            SpeechSynthesizer speechSynthesizer,
-                            SpeechPlayer speechPlayer,
+    public QuickChatService(VoiceChannelLocatorPort voiceChannelLocator,
+                            SpeechSynthesizerPort speechSynthesizer,
+                            SpeechPlayerPort speechPlayer,
                             ManageVoiceUseCase voices) {
         this.voiceChannelLocator = voiceChannelLocator;
         this.speechSynthesizer = speechSynthesizer;

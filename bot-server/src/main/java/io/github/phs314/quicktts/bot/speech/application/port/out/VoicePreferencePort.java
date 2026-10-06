@@ -7,7 +7,7 @@ import java.util.Optional;
 /**
  * 사용자가 고른 목소리를 기억한다.
  */
-public interface VoicePreferenceRepository {
+public interface VoicePreferencePort {
 
     Optional<VoiceId> find(DiscordUserId user);
 
