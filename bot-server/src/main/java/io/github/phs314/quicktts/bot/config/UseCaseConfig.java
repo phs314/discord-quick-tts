@@ -1,13 +1,13 @@
 package io.github.phs314.quicktts.bot.config;
 
-import io.github.phs314.quicktts.bot.device.application.port.out.DeviceRepository;
-import io.github.phs314.quicktts.bot.device.application.port.out.PairingRepository;
+import io.github.phs314.quicktts.bot.device.application.port.out.DevicePort;
+import io.github.phs314.quicktts.bot.device.application.port.out.PairingPort;
 import io.github.phs314.quicktts.bot.device.application.service.DeviceRegistrationService;
 import io.github.phs314.quicktts.bot.speech.application.port.in.ManageVoiceUseCase;
-import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayer;
-import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizer;
-import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocator;
-import io.github.phs314.quicktts.bot.speech.application.port.out.VoicePreferenceRepository;
+import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizerPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocatorPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.VoicePreferencePort;
 import io.github.phs314.quicktts.bot.speech.application.service.QuickChatService;
 import io.github.phs314.quicktts.bot.speech.application.service.VoiceService;
 import java.time.Clock;
@@ -26,25 +26,25 @@ public class UseCaseConfig {
     }
 
     @Bean
-    public ManageVoiceUseCase manageVoiceUseCase(SpeechSynthesizer speechSynthesizer,
-                                                 VoicePreferenceRepository voicePreferenceRepository) {
-        return new VoiceService(speechSynthesizer, voicePreferenceRepository);
+    public ManageVoiceUseCase manageVoiceUseCase(SpeechSynthesizerPort speechSynthesizer,
+                                                 VoicePreferencePort voicePreferencePort) {
+        return new VoiceService(speechSynthesizer, voicePreferencePort);
     }
 
     /** quick chat 읽어 주기와 "어느 채널에서 읽힐지" 조회 유스케이스를 함께 맡는다. */
     @Bean
-    public QuickChatService quickChatService(VoiceChannelLocator voiceChannelLocator,
-                                             SpeechSynthesizer speechSynthesizer,
-                                             SpeechPlayer speechPlayer,
+    public QuickChatService quickChatService(VoiceChannelLocatorPort voiceChannelLocator,
+                                             SpeechSynthesizerPort speechSynthesizer,
+                                             SpeechPlayerPort speechPlayer,
                                              ManageVoiceUseCase manageVoiceUseCase) {
         return new QuickChatService(voiceChannelLocator, speechSynthesizer, speechPlayer, manageVoiceUseCase);
     }
 
     /** 연결 코드 발급, 기기 등록, 기기 인증 유스케이스를 함께 맡는다. */
     @Bean
-    public DeviceRegistrationService deviceRegistrationService(PairingRepository pairingRepository,
-                                                               DeviceRepository deviceRepository,
+    public DeviceRegistrationService deviceRegistrationService(PairingPort pairingPort,
+                                                               DevicePort devicePort,
                                                                Clock clock) {
-        return new DeviceRegistrationService(pairingRepository, deviceRepository, clock);
+        return new DeviceRegistrationService(pairingPort, devicePort, clock);
     }
 }

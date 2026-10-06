@@ -2,7 +2,7 @@ package io.github.phs314.quicktts.bot.speech.adapter.out.tts;
 
 import io.github.phs314.quicktts.bot.config.QuickTtsProperties;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesisException;
-import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizer;
+import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizerPort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
@@ -17,7 +17,7 @@ import org.springframework.stereotype.Component;
  * 고른 엔진이 실패하면 Google 번역 목소리로 대신 읽어서 아무 소리도 안 나는 일을 줄인다.
  */
 @Component
-public class MultiEngineSpeechSynthesizer implements SpeechSynthesizer {
+public class MultiEngineSpeechSynthesizer implements SpeechSynthesizerPort {
 
     private static final Logger log = LoggerFactory.getLogger(MultiEngineSpeechSynthesizer.class);
 

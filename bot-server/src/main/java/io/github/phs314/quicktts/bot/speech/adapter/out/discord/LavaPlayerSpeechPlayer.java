@@ -7,7 +7,7 @@ import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
-import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayer;
+import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import java.io.IOException;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component;
  * 음성을 임시 파일로 저장한 뒤 LavaPlayer 로 디스코드 음성 채널에 재생한다.
  */
 @Component
-public class LavaPlayerSpeechPlayer implements SpeechPlayer {
+public class LavaPlayerSpeechPlayer implements SpeechPlayerPort {
 
     private static final Logger log = LoggerFactory.getLogger(LavaPlayerSpeechPlayer.class);
 

@@ -6,8 +6,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.application.SpeakerNotInVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatCommand;
-import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayer;
-import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocator;
+import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocatorPort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
@@ -24,7 +24,7 @@ class QuickChatServiceTest {
     private static final VoiceChannelDetails DETAILS = new VoiceChannelDetails(CHANNEL, "우리 서버", null, "일반");
 
     private final List<String> played = new ArrayList<>();
-    private final SpeechPlayer recordingPlayer =
+    private final SpeechPlayerPort recordingPlayer =
             (channel, speech) -> played.add(channel + ":" + new String(speech.audio(), StandardCharsets.UTF_8));
     private final VoiceServiceTest.FakeSynthesizer synthesizer = new VoiceServiceTest.FakeSynthesizer();
     private final VoiceService voices = new VoiceService(synthesizer, new VoiceServiceTest.InMemoryVoicePreferences());
@@ -56,7 +56,7 @@ class QuickChatServiceTest {
         assertThat(service.findMyVoiceChannel(new DiscordUserId(7L))).isEmpty();
     }
 
-    private QuickChatService service(VoiceChannelLocator locator) {
+    private QuickChatService service(VoiceChannelLocatorPort locator) {
         return new QuickChatService(locator, synthesizer, recordingPlayer, voices);
     }
 }

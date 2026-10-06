@@ -3,8 +3,8 @@ package io.github.phs314.quicktts.bot.speech.application.service;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.application.UnknownVoiceException;
 import io.github.phs314.quicktts.bot.speech.application.port.in.ManageVoiceUseCase;
-import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizer;
-import io.github.phs314.quicktts.bot.speech.application.port.out.VoicePreferenceRepository;
+import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizerPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.VoicePreferencePort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
 import java.util.List;
@@ -12,10 +12,10 @@ import java.util.Optional;
 
 public class VoiceService implements ManageVoiceUseCase {
 
-    private final SpeechSynthesizer speechSynthesizer;
-    private final VoicePreferenceRepository voicePreferences;
+    private final SpeechSynthesizerPort speechSynthesizer;
+    private final VoicePreferencePort voicePreferences;
 
-    public VoiceService(SpeechSynthesizer speechSynthesizer, VoicePreferenceRepository voicePreferences) {
+    public VoiceService(SpeechSynthesizerPort speechSynthesizer, VoicePreferencePort voicePreferences) {
         this.speechSynthesizer = speechSynthesizer;
         this.voicePreferences = voicePreferences;
     }

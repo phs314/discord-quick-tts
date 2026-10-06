@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.application.UnknownVoiceException;
-import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizer;
-import io.github.phs314.quicktts.bot.speech.application.port.out.VoicePreferenceRepository;
+import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizerPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.VoicePreferencePort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
@@ -52,7 +52,7 @@ class VoiceServiceTest {
         assertThat(service.currentVoice(USER)).isEqualTo(SUNHI);
     }
 
-    static class FakeSynthesizer implements SpeechSynthesizer {
+    static class FakeSynthesizer implements SpeechSynthesizerPort {
 
         @Override
         public List<Voice> voices() {
@@ -70,7 +70,7 @@ class VoiceServiceTest {
         }
     }
 
-    static class InMemoryVoicePreferences implements VoicePreferenceRepository {
+    static class InMemoryVoicePreferences implements VoicePreferencePort {
 
         final Map<DiscordUserId, VoiceId> byUser = new HashMap<>();
 
