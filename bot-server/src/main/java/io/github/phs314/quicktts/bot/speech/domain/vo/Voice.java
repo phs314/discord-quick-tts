@@ -1,4 +1,4 @@
-package io.github.phs314.quicktts.bot.speech.domain;
+package io.github.phs314.quicktts.bot.speech.domain.vo;
 
 /**
  * 사용자가 고를 수 있는 목소리.

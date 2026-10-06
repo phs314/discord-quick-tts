@@ -1,6 +1,6 @@
 package io.github.phs314.quicktts.bot.device.application.port.in;
 
-import io.github.phs314.quicktts.bot.shared.domain.DiscordUserId;
+import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import java.util.Optional;
 
 /**

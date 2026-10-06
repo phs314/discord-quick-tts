@@ -1,11 +1,11 @@
 package io.github.phs314.quicktts.bot.speech.adapter.in.web;
 
 import io.github.phs314.quicktts.bot.device.application.port.in.AuthenticateDeviceUseCase;
-import io.github.phs314.quicktts.bot.shared.domain.DiscordUserId;
+import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.application.port.in.FindMyVoiceChannelUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatUseCase;
-import io.github.phs314.quicktts.bot.speech.domain.QuickChatMessage;
+import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
 import io.github.phs314.quicktts.common.QuickChatApi;
 import io.github.phs314.quicktts.common.QuickChatRequest;
 import io.github.phs314.quicktts.common.VoiceChannelResponse;

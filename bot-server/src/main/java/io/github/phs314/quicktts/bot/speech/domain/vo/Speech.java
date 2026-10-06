@@ -1,4 +1,4 @@
-package io.github.phs314.quicktts.bot.speech.domain;
+package io.github.phs314.quicktts.bot.speech.domain.vo;
 
 /**
  * 문장을 음성으로 만든 결과.

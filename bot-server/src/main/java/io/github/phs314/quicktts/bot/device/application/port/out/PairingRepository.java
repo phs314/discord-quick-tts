@@ -1,7 +1,7 @@
 package io.github.phs314.quicktts.bot.device.application.port.out;
 
 import io.github.phs314.quicktts.bot.device.domain.Pairing;
-import io.github.phs314.quicktts.bot.device.domain.PairingCode;
+import io.github.phs314.quicktts.bot.device.domain.vo.PairingCode;
 import java.util.Optional;
 
 public interface PairingRepository {

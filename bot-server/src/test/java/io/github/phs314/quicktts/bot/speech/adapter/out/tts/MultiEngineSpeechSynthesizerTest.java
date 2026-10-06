@@ -5,10 +5,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.phs314.quicktts.bot.config.QuickTtsProperties;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesisException;
-import io.github.phs314.quicktts.bot.speech.domain.QuickChatMessage;
-import io.github.phs314.quicktts.bot.speech.domain.Speech;
-import io.github.phs314.quicktts.bot.speech.domain.Voice;
-import io.github.phs314.quicktts.bot.speech.domain.VoiceId;
+import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
+import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
+import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
+import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.junit.jupiter.api.Test;

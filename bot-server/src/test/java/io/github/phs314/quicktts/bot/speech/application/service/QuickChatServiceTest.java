@@ -3,14 +3,14 @@ package io.github.phs314.quicktts.bot.speech.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import io.github.phs314.quicktts.bot.shared.domain.DiscordUserId;
+import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.application.SpeakerNotInVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayer;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocator;
-import io.github.phs314.quicktts.bot.speech.domain.QuickChatMessage;
-import io.github.phs314.quicktts.bot.speech.domain.VoiceChannel;
-import io.github.phs314.quicktts.bot.speech.domain.VoiceChannelDetails;
+import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
+import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
+import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;

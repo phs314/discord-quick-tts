@@ -1,6 +1,6 @@
 package io.github.phs314.quicktts.bot.speech.application.service;
 
-import io.github.phs314.quicktts.bot.shared.domain.DiscordUserId;
+import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.application.SpeakerNotInVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.port.in.FindMyVoiceChannelUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.ManageVoiceUseCase;
@@ -9,10 +9,10 @@ import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatUs
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayer;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizer;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocator;
-import io.github.phs314.quicktts.bot.speech.domain.Speech;
-import io.github.phs314.quicktts.bot.speech.domain.VoiceChannel;
-import io.github.phs314.quicktts.bot.speech.domain.VoiceChannelDetails;
-import io.github.phs314.quicktts.bot.speech.domain.VoiceId;
+import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
+import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
+import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
+import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
 import java.util.Optional;
 
 public class QuickChatService implements SpeakQuickChatUseCase, FindMyVoiceChannelUseCase {

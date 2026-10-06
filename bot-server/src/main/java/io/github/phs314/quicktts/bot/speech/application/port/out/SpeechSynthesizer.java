@@ -1,9 +1,9 @@
 package io.github.phs314.quicktts.bot.speech.application.port.out;
 
-import io.github.phs314.quicktts.bot.speech.domain.QuickChatMessage;
-import io.github.phs314.quicktts.bot.speech.domain.Speech;
-import io.github.phs314.quicktts.bot.speech.domain.Voice;
-import io.github.phs314.quicktts.bot.speech.domain.VoiceId;
+import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
+import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
+import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
+import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
 import java.util.List;
 
 /**

@@ -1,4 +1,4 @@
-package io.github.phs314.quicktts.bot.speech.domain;
+package io.github.phs314.quicktts.bot.speech.domain.vo;
 
 import io.github.phs314.quicktts.bot.shared.domain.InvalidDomainValueException;
 

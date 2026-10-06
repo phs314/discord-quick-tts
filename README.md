@@ -33,7 +33,8 @@
 ```
 bot-server/src/main/java/io/github/phs314/quicktts/bot/
 ├── speech/
-│   ├── domain/                 QuickChatMessage, VoiceChannel, Speech, Voice
+│   ├── domain/
+│   │   └── vo/                 QuickChatMessage, VoiceChannel, Speech, Voice (값 객체)
 │   ├── application/
 │   │   ├── port/in/            SpeakQuickChatUseCase, ManageVoiceUseCase
 │   │   ├── port/out/           SpeechSynthesizer, VoiceChannelLocator, SpeechPlayer, VoicePreferenceRepository
@@ -45,7 +46,8 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │       ├── out/discord/        JDA + LavaPlayer 로 채널 찾기, 재생
 │       └── out/persistence/    사용자별 목소리 저장소 (H2)
 ├── device/
-│   ├── domain/                 PairingCode, Pairing, DeviceToken, Device
+│   ├── domain/                 Pairing, Device (엔티티)
+│   │   └── vo/                 PairingCode, DeviceToken, DeviceId, DeviceName (값 객체)
 │   ├── application/
 │   │   ├── port/in/            IssuePairingCode, RegisterDevice, AuthenticateDevice (공개 입구)
 │   │   ├── port/out/           PairingRepository, DeviceRepository
@@ -54,7 +56,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │       ├── in/web/             기기 등록 REST 컨트롤러
 │       ├── in/discord/         /연결 슬래시 명령
 │       └── out/persistence/    기기 저장소 (H2, JdbcClient), 메모리 연결 코드 저장소
-├── shared/                     공유 커널과 공통 예외 처리
+├── shared/                     공유 커널(domain/vo 의 DiscordUserId)과 공통 예외 처리
 └── config/                     설정 값, JDA, 포트-어댑터 조립
 ```
 

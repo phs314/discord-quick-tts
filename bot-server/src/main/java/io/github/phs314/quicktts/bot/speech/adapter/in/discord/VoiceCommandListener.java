@@ -1,11 +1,11 @@
 package io.github.phs314.quicktts.bot.speech.adapter.in.discord;
 
 import io.github.phs314.quicktts.bot.shared.adapter.in.discord.DiscordSlashCommand;
-import io.github.phs314.quicktts.bot.shared.domain.DiscordUserId;
+import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.application.UnknownVoiceException;
 import io.github.phs314.quicktts.bot.speech.application.port.in.ManageVoiceUseCase;
-import io.github.phs314.quicktts.bot.speech.domain.Voice;
-import io.github.phs314.quicktts.bot.speech.domain.VoiceId;
+import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
+import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
 import java.util.stream.Collectors;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
