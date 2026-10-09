@@ -1,7 +1,7 @@
 package io.github.phs314.quicktts.bot.device.adapter.in.discord;
 
+import io.github.phs314.quicktts.bot.device.application.port.in.DeviceDto;
 import io.github.phs314.quicktts.bot.device.application.port.in.ManageOwnDevicesUseCase;
-import io.github.phs314.quicktts.bot.device.domain.Device;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceId;
 import io.github.phs314.quicktts.bot.shared.adapter.in.discord.DiscordSlashCommand;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
@@ -49,7 +49,7 @@ public class UnlinkCommandListener extends ListenerAdapter implements DiscordSla
         if (!COMMAND_NAME.equals(event.getName())) {
             return;
         }
-        List<Device> devices = manageOwnDevices.listDevices(ownerOf(event.getUser().getIdLong()));
+        List<DeviceDto> devices = manageOwnDevices.listDevices(ownerOf(event.getUser().getIdLong()));
         if (devices.isEmpty()) {
             event.reply("연결된 PC 가 없습니다.").setEphemeral(true).queue();
             return;

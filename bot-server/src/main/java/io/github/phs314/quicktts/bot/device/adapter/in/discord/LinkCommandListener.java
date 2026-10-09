@@ -1,7 +1,7 @@
 package io.github.phs314.quicktts.bot.device.adapter.in.discord;
 
 import io.github.phs314.quicktts.bot.device.application.port.in.IssuePairingCodeUseCase;
-import io.github.phs314.quicktts.bot.device.domain.Pairing;
+import io.github.phs314.quicktts.bot.device.application.port.in.IssuedPairingCodeDto;
 import io.github.phs314.quicktts.bot.shared.adapter.in.discord.DiscordSlashCommand;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import lombok.RequiredArgsConstructor;
@@ -36,12 +36,12 @@ public class LinkCommandListener extends ListenerAdapter implements DiscordSlash
         if (!COMMAND_NAME.equals(event.getName())) {
             return;
         }
-        Pairing pairing = issuePairingCode.issue(new DiscordUserId(event.getUser().getIdLong()));
+        IssuedPairingCodeDto issued = issuePairingCode.issue(new DiscordUserId(event.getUser().getIdLong()));
         event.reply("""
                         연결 코드: **%s**
                         Quick TTS 데스크톱 앱에 %d분 안에 입력해 주세요. 이 코드는 한 번만 쓸 수 있습니다.
                         연결한 PC 를 끊으려면 `/연결해제` 를 쓰세요."""
-                        .formatted(pairing.code().display(), Pairing.VALID_FOR.toMinutes()))
+                        .formatted(issued.code().display(), issued.validFor().toMinutes()))
                 .setEphemeral(true)
                 .queue();
     }

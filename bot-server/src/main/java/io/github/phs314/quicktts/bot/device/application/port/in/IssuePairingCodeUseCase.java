@@ -1,6 +1,5 @@
 package io.github.phs314.quicktts.bot.device.application.port.in;
 
-import io.github.phs314.quicktts.bot.device.domain.Pairing;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 
 /**
@@ -8,5 +7,5 @@ import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
  */
 public interface IssuePairingCodeUseCase {
 
-    Pairing issue(DiscordUserId owner);
+    IssuedPairingCodeDto issue(DiscordUserId owner);
 }

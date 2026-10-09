@@ -2,7 +2,7 @@ package io.github.phs314.quicktts.bot.device.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.github.phs314.quicktts.bot.device.domain.Device;
+import io.github.phs314.quicktts.bot.device.application.port.in.DeviceDto;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceId;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceToken;
@@ -25,7 +25,7 @@ class ManageOwnDevicesServiceTest {
         devices.registered(OWNER, PC, NOW);
         devices.registered(OTHER, new DeviceName("남의-PC"), NOW);
 
-        assertThat(service.listDevices(OWNER)).extracting(Device::name).containsExactly(PC);
+        assertThat(service.listDevices(OWNER)).extracting(DeviceDto::name).containsExactly(PC);
     }
 
     @Test

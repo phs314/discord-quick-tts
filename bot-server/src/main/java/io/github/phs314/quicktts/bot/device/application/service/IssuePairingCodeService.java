@@ -1,6 +1,7 @@
 package io.github.phs314.quicktts.bot.device.application.service;
 
 import io.github.phs314.quicktts.bot.device.application.port.in.IssuePairingCodeUseCase;
+import io.github.phs314.quicktts.bot.device.application.port.in.IssuedPairingCodeDto;
 import io.github.phs314.quicktts.bot.device.application.port.out.PairingPort;
 import io.github.phs314.quicktts.bot.device.domain.Pairing;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
@@ -16,9 +17,9 @@ public class IssuePairingCodeService implements IssuePairingCodeUseCase {
     private final Clock clock;
 
     @Override
-    public Pairing issue(DiscordUserId owner) {
+    public IssuedPairingCodeDto issue(DiscordUserId owner) {
         Pairing pairing = Pairing.issue(owner, clock.instant());
         pairingPort.save(pairing);
-        return pairing;
+        return IssuedPairingCodeDto.from(pairing);
     }
 }
