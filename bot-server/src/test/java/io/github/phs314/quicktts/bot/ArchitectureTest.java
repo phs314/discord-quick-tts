@@ -7,10 +7,15 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.library.Architectures.onionArchitecture;
 
+import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
+import com.tngtech.archunit.lang.ArchCondition;
 import com.tngtech.archunit.lang.ArchRule;
+import com.tngtech.archunit.lang.ConditionEvents;
+import com.tngtech.archunit.lang.SimpleConditionEvent;
+import java.util.List;
 
 /**
  * 바운디드 컨텍스트(speech, device)와 각 컨텍스트 안의 헥사고날 의존 방향, 포트 이름 규칙을 지킨다.
@@ -81,10 +86,37 @@ class ArchitectureTest {
             .that().resideInAPackage("..bot.*.application.port.in..").and().areInterfaces()
             .should().haveSimpleNameEndingWith("UseCase");
 
+    /** 서비스는 입력 포트 하나만 구현하고, 이름은 그 입력 포트 이름의 UseCase 를 Service 로 바꾼 것이다 (ADR 0008). */
+    @ArchTest
+    static final ArchRule eachServiceImplementsExactlyOneUseCase = classes()
+            .that().resideInAPackage("..bot.*.application.service..").and().areTopLevelClasses()
+            .should(implementExactlyOneUseCaseNamedAfterIt());
+
     @ArchTest
     static final ArchRule coreIsFrameworkFree = noClasses()
             .that().resideInAnyPackage("..bot.*.domain..", "..bot.*.application..")
             .should().dependOnClassesThat().resideInAnyPackage(
                     "org.springframework..", "net.dv8tion..", "com.sedmelluq..", "club.minnced..",
                     "..bot.config..");
+
+    private static ArchCondition<JavaClass> implementExactlyOneUseCaseNamedAfterIt() {
+        return new ArchCondition<>("implement exactly one UseCase and be named after it") {
+            @Override
+            public void check(JavaClass service, ConditionEvents events) {
+                List<JavaClass> useCases = service.getRawInterfaces().stream()
+                        .filter(port -> port.getPackageName().endsWith(".application.port.in"))
+                        .toList();
+                if (useCases.size() != 1) {
+                    events.add(SimpleConditionEvent.violated(service, service.getSimpleName()
+                            + " 가 입력 포트 " + useCases.size() + "개를 구현합니다. 하나만 구현해야 합니다."));
+                    return;
+                }
+                String expected = useCases.getFirst().getSimpleName().replaceFirst("UseCase$", "Service");
+                if (!service.getSimpleName().equals(expected)) {
+                    events.add(SimpleConditionEvent.violated(service, service.getSimpleName()
+                            + " 의 이름은 " + expected + " 이어야 합니다."));
+                }
+            }
+        };
+    }
 }
