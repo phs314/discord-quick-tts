@@ -1,6 +1,7 @@
 package io.github.phs314.quicktts.bot.speech.application.port.out;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
+import io.github.phs314.quicktts.bot.speech.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import java.util.Optional;
 
@@ -15,5 +16,5 @@ public interface VoiceChannelLocatorPort {
      * 봇이 그 디스코드 서버에서 쓰이고 있는 음성 채널. 봇이 들어가 있고 봇 말고 사람이 한 명이라도 남아 있는 채널이다.
      * 봇이 어느 채널에도 없거나 있는 채널에 사람이 없으면 빈 값이다.
      */
-    Optional<VoiceChannelDetails> findBotChannelInUse(long guildId);
+    Optional<VoiceChannelDetails> findBotChannelInUse(GuildId guildId);
 }

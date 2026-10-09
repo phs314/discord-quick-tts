@@ -1,5 +1,6 @@
 package io.github.phs314.quicktts.bot.speech.adapter.out.discord;
 
+import io.github.phs314.quicktts.bot.speech.domain.vo.GuildId;
 import jakarta.annotation.PostConstruct;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
@@ -37,7 +38,7 @@ public class EmptyVoiceChannelWatcher extends ListenerAdapter {
         }
         boolean onlyBotsLeft = botChannel.getMembers().stream().map(Member::getUser).allMatch(User::isBot);
         if (onlyBotsLeft) {
-            speechPlayer.leave(event.getGuild().getIdLong());
+            speechPlayer.leave(new GuildId(event.getGuild().getIdLong()));
         }
     }
 }
