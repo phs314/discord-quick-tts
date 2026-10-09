@@ -84,19 +84,41 @@ class ArchitectureTest {
             .should().beInterfaces()
             .andShould().haveSimpleNameEndingWith("Port");
 
-    /** 입력 포트 인터페이스 이름은 UseCase 로 끝낸다 (ADR 0004). */
+    /** port.in 바로 아래에는 클래스를 두지 않고 usecase, command, dto 폴더로 나눈다 (ADR 0012). */
     @ArchTest
-    static final ArchRule inputPortsAreNamedUseCase = classes()
-            .that().resideInAPackage("..bot.*.application.port.in..").and().areInterfaces()
-            .should().haveSimpleNameEndingWith("UseCase");
+    static final ArchRule inputPortPackageHasOnlySubpackages = noClasses()
+            .should().resideInAPackage("..bot.*.application.port.in");
 
-    /** 입력 포트 패키지의 클래스는 들어가는 값이면 Command, 나오는 값이면 Dto 로 끝낸다 (ADR 0010). */
+    /** usecase 폴더에는 입력 포트 인터페이스만 두고 이름은 UseCase 로 끝낸다 (ADR 0004, 0012). */
     @ArchTest
-    static final ArchRule inputPortValuesAreNamedCommandOrDto = classes()
-            .that().resideInAPackage("..bot.*.application.port.in..").and().areNotInterfaces()
-            .and().areTopLevelClasses()
-            .should().haveSimpleNameEndingWith("Command")
-            .orShould().haveSimpleNameEndingWith("Dto");
+    static final ArchRule useCasesAreInterfacesNamedUseCase = classes()
+            .that().resideInAPackage("..bot.*.application.port.in.usecase..")
+            .should().beInterfaces()
+            .andShould().haveSimpleNameEndingWith("UseCase");
+
+    /** command 폴더에는 유스케이스로 들어가는 값만 두고 이름은 Command 로 끝낸다 (ADR 0012). */
+    @ArchTest
+    static final ArchRule commandsAreNamedCommand = classes()
+            .that().resideInAPackage("..bot.*.application.port.in.command..").and().areTopLevelClasses()
+            .should().haveSimpleNameEndingWith("Command");
+
+    /** dto 폴더에는 유스케이스가 돌려주는 값만 두고 이름은 Dto 로 끝낸다 (ADR 0010, 0012). */
+    @ArchTest
+    static final ArchRule dtosAreNamedDto = classes()
+            .that().resideInAPackage("..bot.*.application.port.in.dto..").and().areTopLevelClasses()
+            .should().haveSimpleNameEndingWith("Dto");
+
+    /** 애플리케이션 예외는 각 컨텍스트의 application.exception 폴더에 모은다 (ADR 0012). */
+    @ArchTest
+    static final ArchRule applicationExceptionsLiveInExceptionPackage = classes()
+            .that().resideInAPackage("..bot.*.application..").and().areAssignableTo(Throwable.class)
+            .should().resideInAPackage("..bot.*.application.exception..");
+
+    /** exception 폴더에는 예외만 둔다 (ADR 0012). */
+    @ArchTest
+    static final ArchRule exceptionPackageHoldsOnlyExceptions = classes()
+            .that().resideInAPackage("..bot.*.application.exception..")
+            .should().beAssignableTo(Throwable.class);
 
     /** 인바운드 어댑터는 애그리거트(domain 패키지 바로 아래 클래스)를 쓰지 않고 입력 포트의 Dto 로만 본다 (ADR 0010). */
     @ArchTest
@@ -132,7 +154,7 @@ class ArchitectureTest {
             @Override
             public void check(JavaClass service, ConditionEvents events) {
                 List<JavaClass> useCases = service.getRawInterfaces().stream()
-                        .filter(port -> port.getPackageName().endsWith(".application.port.in"))
+                        .filter(port -> port.getPackageName().endsWith(".application.port.in.usecase"))
                         .toList();
                 if (useCases.size() != 1) {
                     events.add(SimpleConditionEvent.violated(service, service.getSimpleName()

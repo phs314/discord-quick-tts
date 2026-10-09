@@ -1,4 +1,4 @@
-package io.github.phs314.quicktts.bot.speech.application;
+package io.github.phs314.quicktts.bot.speech.application.exception;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 

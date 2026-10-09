@@ -1,4 +1,4 @@
-package io.github.phs314.quicktts.bot.speech.application.port.in;
+package io.github.phs314.quicktts.bot.speech.application.port.in.usecase;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
@@ -16,7 +16,7 @@ public interface ManageVoiceUseCase {
     Voice currentVoice(DiscordUserId user);
 
     /**
-     * @throws io.github.phs314.quicktts.bot.speech.application.UnknownVoiceException 없는 목소리일 때
+     * @throws io.github.phs314.quicktts.bot.speech.application.exception.UnknownVoiceException 없는 목소리일 때
      */
     Voice changeVoice(DiscordUserId user, VoiceId voice);
 }

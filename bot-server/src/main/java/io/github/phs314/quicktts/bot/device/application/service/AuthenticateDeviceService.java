@@ -1,6 +1,6 @@
 package io.github.phs314.quicktts.bot.device.application.service;
 
-import io.github.phs314.quicktts.bot.device.application.port.in.AuthenticateDeviceUseCase;
+import io.github.phs314.quicktts.bot.device.application.port.in.usecase.AuthenticateDeviceUseCase;
 import io.github.phs314.quicktts.bot.device.application.port.out.DevicePort;
 import io.github.phs314.quicktts.bot.device.domain.Device;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceToken;
