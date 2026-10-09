@@ -49,7 +49,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │   ├── domain/                 Pairing, Device (엔티티)
 │   │   └── vo/                 PairingCode, DeviceToken, DeviceId, DeviceName (값 객체)
 │   ├── application/
-│   │   ├── port/in/            IssuePairingCode, RegisterDevice, AuthenticateDevice, ManageOwnDevices (공개 입구)
+│   │   ├── port/in/            IssuePairingCode, RegisterDevice, AuthenticateDevice, ManageOwnDevices (공개 입구), DeviceDto 등
 │   │   ├── port/out/           PairingPort, DevicePort
 │   │   └── service/            입력 포트마다 하나 (RegisterDeviceService 등)
 │   └── adapter/
@@ -66,6 +66,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 - `speech` 는 `device` 를 공개 입구(`device.application.port.in`)로만 씁니다. quick chat 요청의 기기 토큰 주인을 물을 때가 유일한 접점입니다.
 - `device` 는 `speech` 를 모르고, `shared` 는 어느 컨텍스트도 모릅니다.
 - 서비스는 입력 포트(`...UseCase`) 하나만 구현하고 이름은 `...Service` 입니다 ([ADR 0008](docs/adr/0008-one-service-per-use-case.md)).
+- 인바운드 어댑터는 애그리거트(`Device`, `Pairing`)를 직접 쓰지 않고, 입력 포트가 돌려주는 `...Dto` 로만 봅니다. `port/in` 에는 `...UseCase`, `...Command`, `...Dto` 만 둡니다 ([ADR 0010](docs/adr/0010-use-cases-return-dtos.md)).
 
 그 밖에:
 
