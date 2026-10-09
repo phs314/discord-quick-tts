@@ -4,6 +4,7 @@ import io.github.phs314.quicktts.bot.device.application.port.out.DevicePort;
 import io.github.phs314.quicktts.bot.device.domain.Device;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceId;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
+import io.github.phs314.quicktts.bot.device.domain.vo.DeviceTokenHash;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -30,7 +31,7 @@ public class JdbcDeviceRepository implements DevicePort {
         jdbcClient.sql("insert into device (" + COLUMNS + ")"
                         + " values (:id, :tokenHash, :discordUserId, :name, :registeredAt)")
                 .param("id", device.id().value())
-                .param("tokenHash", device.tokenHash())
+                .param("tokenHash", device.tokenHash().value())
                 .param("discordUserId", device.owner().value())
                 .param("name", device.name().value())
                 .param("registeredAt", Timestamp.from(device.registeredAt()))
@@ -38,9 +39,9 @@ public class JdbcDeviceRepository implements DevicePort {
     }
 
     @Override
-    public Optional<Device> findByTokenHash(String tokenHash) {
+    public Optional<Device> findByTokenHash(DeviceTokenHash tokenHash) {
         return jdbcClient.sql("select " + COLUMNS + " from device where token_hash = :tokenHash")
-                .param("tokenHash", tokenHash)
+                .param("tokenHash", tokenHash.value())
                 .query(JdbcDeviceRepository::toDevice)
                 .optional();
     }
@@ -72,7 +73,7 @@ public class JdbcDeviceRepository implements DevicePort {
     private static Device toDevice(ResultSet rs, int rowNum) throws SQLException {
         return new Device(
                 new DeviceId(rs.getString("id")),
-                rs.getString("token_hash"),
+                new DeviceTokenHash(rs.getString("token_hash")),
                 new DiscordUserId(rs.getLong("discord_user_id")),
                 new DeviceName(rs.getString("name")),
                 rs.getTimestamp("registered_at").toInstant());

@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.github.phs314.quicktts.bot.device.domain.Device;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceId;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
+import io.github.phs314.quicktts.bot.device.domain.vo.DeviceTokenHash;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -41,7 +42,7 @@ class JdbcDeviceRepositoryTest {
 
         assertThat(repository.findByTokenHash(device.tokenHash())).get()
                 .usingRecursiveComparison().isEqualTo(device);
-        assertThat(repository.findByTokenHash("z".repeat(64))).isEmpty();
+        assertThat(repository.findByTokenHash(new DeviceTokenHash("f".repeat(64)))).isEmpty();
     }
 
     @Test
@@ -104,6 +105,6 @@ class JdbcDeviceRepositoryTest {
     }
 
     private static Device device(DiscordUserId owner, String hashSeed, String name, Instant registeredAt) {
-        return new Device(DeviceId.generate(), hashSeed.repeat(64), owner, new DeviceName(name), registeredAt);
+        return new Device(DeviceId.generate(), new DeviceTokenHash(hashSeed.repeat(64)), owner, new DeviceName(name), registeredAt);
     }
 }
