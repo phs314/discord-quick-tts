@@ -6,14 +6,14 @@ import io.github.phs314.quicktts.bot.device.domain.Device;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
+@Service
+@RequiredArgsConstructor
 public class ManageOwnDevicesService implements ManageOwnDevicesUseCase {
 
     private final DevicePort devicePort;
-
-    public ManageOwnDevicesService(DevicePort devicePort) {
-        this.devicePort = devicePort;
-    }
 
     @Override
     public List<Device> listDevices(DiscordUserId owner) {

@@ -12,23 +12,17 @@ import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
+@Service
+@RequiredArgsConstructor
 public class SpeakQuickChatService implements SpeakQuickChatUseCase {
 
     private final VoiceChannelLocatorPort voiceChannelLocator;
     private final SpeechSynthesizerPort speechSynthesizer;
     private final SpeechPlayerPort speechPlayer;
     private final ManageVoiceUseCase voices;
-
-    public SpeakQuickChatService(VoiceChannelLocatorPort voiceChannelLocator,
-                                 SpeechSynthesizerPort speechSynthesizer,
-                                 SpeechPlayerPort speechPlayer,
-                                 ManageVoiceUseCase voices) {
-        this.voiceChannelLocator = voiceChannelLocator;
-        this.speechSynthesizer = speechSynthesizer;
-        this.speechPlayer = speechPlayer;
-        this.voices = voices;
-    }
 
     @Override
     public void speak(SpeakQuickChatCommand command) {

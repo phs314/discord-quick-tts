@@ -11,18 +11,16 @@ import io.github.phs314.quicktts.bot.device.domain.vo.DeviceToken;
 import io.github.phs314.quicktts.bot.device.domain.vo.PairingCode;
 import java.time.Clock;
 import java.time.Instant;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
+@Service
+@RequiredArgsConstructor
 public class RegisterDeviceService implements RegisterDeviceUseCase {
 
     private final PairingPort pairingPort;
     private final DevicePort devicePort;
     private final Clock clock;
-
-    public RegisterDeviceService(PairingPort pairingPort, DevicePort devicePort, Clock clock) {
-        this.pairingPort = pairingPort;
-        this.devicePort = devicePort;
-        this.clock = clock;
-    }
 
     @Override
     public DeviceToken register(PairingCode code, DeviceName name) {

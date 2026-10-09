@@ -9,16 +9,15 @@ import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
+@Service
+@RequiredArgsConstructor
 public class ManageVoiceService implements ManageVoiceUseCase {
 
     private final SpeechSynthesizerPort speechSynthesizer;
     private final VoicePreferencePort voicePreferences;
-
-    public ManageVoiceService(SpeechSynthesizerPort speechSynthesizer, VoicePreferencePort voicePreferences) {
-        this.speechSynthesizer = speechSynthesizer;
-        this.voicePreferences = voicePreferences;
-    }
 
     @Override
     public List<Voice> voices() {
