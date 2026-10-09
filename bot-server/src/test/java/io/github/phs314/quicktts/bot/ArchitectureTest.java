@@ -3,6 +3,7 @@ package io.github.phs314.quicktts.bot;
 import static com.tngtech.archunit.base.DescribedPredicate.alwaysTrue;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideOutsideOfPackage;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.library.Architectures.onionArchitecture;
 
@@ -12,7 +13,7 @@ import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 
 /**
- * 바운디드 컨텍스트(speech, device)와 각 컨텍스트 안의 헥사고날 의존 방향을 지킨다.
+ * 바운디드 컨텍스트(speech, device)와 각 컨텍스트 안의 헥사고날 의존 방향, 포트 이름 규칙을 지킨다.
  */
 @AnalyzeClasses(packages = "io.github.phs314.quicktts.bot", importOptions = ImportOption.DoNotIncludeTests.class)
 class ArchitectureTest {
@@ -59,6 +60,26 @@ class ArchitectureTest {
     static final ArchRule sharedKernelDependsOnNoContext = noClasses()
             .that().resideInAPackage("..bot.shared..")
             .should().dependOnClassesThat().resideInAnyPackage("..bot.speech..", "..bot.device..");
+
+    /** 인바운드 어댑터는 입력 포트로만 애플리케이션을 부른다. 서비스 구현이나 출력 포트를 직접 쓰지 않는다. */
+    @ArchTest
+    static final ArchRule inboundAdaptersUseOnlyInputPorts = noClasses()
+            .that().resideInAPackage("..bot.*.adapter.in..")
+            .should().dependOnClassesThat().resideInAnyPackage(
+                    "..bot.*.application.service..", "..bot.*.application.port.out..");
+
+    /** 출력 포트 패키지에는 인터페이스만 두고 이름은 Port 로 끝낸다 (ADR 0004). */
+    @ArchTest
+    static final ArchRule outputPortsAreInterfacesNamedPort = classes()
+            .that().resideInAPackage("..bot.*.application.port.out..")
+            .should().beInterfaces()
+            .andShould().haveSimpleNameEndingWith("Port");
+
+    /** 입력 포트 인터페이스 이름은 UseCase 로 끝낸다 (ADR 0004). */
+    @ArchTest
+    static final ArchRule inputPortsAreNamedUseCase = classes()
+            .that().resideInAPackage("..bot.*.application.port.in..").and().areInterfaces()
+            .should().haveSimpleNameEndingWith("UseCase");
 
     @ArchTest
     static final ArchRule coreIsFrameworkFree = noClasses()
