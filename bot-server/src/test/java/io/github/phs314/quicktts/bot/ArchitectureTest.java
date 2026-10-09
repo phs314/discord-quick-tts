@@ -1,6 +1,8 @@
 package io.github.phs314.quicktts.bot;
 
 import static com.tngtech.archunit.base.DescribedPredicate.alwaysTrue;
+import static com.tngtech.archunit.base.DescribedPredicate.not;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.assignableTo;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyPackage;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideOutsideOfPackage;
@@ -87,6 +89,20 @@ class ArchitectureTest {
     static final ArchRule inputPortsAreNamedUseCase = classes()
             .that().resideInAPackage("..bot.*.application.port.in..").and().areInterfaces()
             .should().haveSimpleNameEndingWith("UseCase");
+
+    /** 입력 포트 패키지의 클래스는 들어가는 값이면 Command, 나오는 값이면 Dto 로 끝낸다 (ADR 0010). */
+    @ArchTest
+    static final ArchRule inputPortValuesAreNamedCommandOrDto = classes()
+            .that().resideInAPackage("..bot.*.application.port.in..").and().areNotInterfaces()
+            .and().areTopLevelClasses()
+            .should().haveSimpleNameEndingWith("Command")
+            .orShould().haveSimpleNameEndingWith("Dto");
+
+    /** 인바운드 어댑터는 애그리거트(domain 패키지 바로 아래 클래스)를 쓰지 않고 입력 포트의 Dto 로만 본다 (ADR 0010). */
+    @ArchTest
+    static final ArchRule inboundAdaptersDoNotUseAggregates = noClasses()
+            .that().resideInAPackage("..bot.*.adapter.in..")
+            .should().dependOnClassesThat(resideInAPackage("..bot.*.domain").and(not(assignableTo(Throwable.class))));
 
     /** 서비스는 입력 포트 하나만 구현하고, 이름은 그 입력 포트 이름의 UseCase 를 Service 로 바꾼 것이다 (ADR 0008). */
     @ArchTest
