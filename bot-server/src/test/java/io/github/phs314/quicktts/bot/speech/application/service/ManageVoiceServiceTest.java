@@ -17,14 +17,14 @@ import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
-class VoiceServiceTest {
+class ManageVoiceServiceTest {
 
     static final Voice SUNHI = new Voice(new VoiceId("edge:sunhi"), "선희");
     static final Voice INJOON = new Voice(new VoiceId("edge:injoon"), "인준");
     private static final DiscordUserId USER = new DiscordUserId(42L);
 
     private final InMemoryVoicePreferences preferences = new InMemoryVoicePreferences();
-    private final VoiceService service = new VoiceService(new FakeSynthesizer(), preferences);
+    private final ManageVoiceService service = new ManageVoiceService(new FakeSynthesizer(), preferences);
 
     @Test
     void 고른_적이_없으면_기본_목소리다() {

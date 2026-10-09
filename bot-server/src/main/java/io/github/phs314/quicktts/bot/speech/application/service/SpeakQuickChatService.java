@@ -1,9 +1,7 @@
 package io.github.phs314.quicktts.bot.speech.application.service;
 
-import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.application.SpeakerNotInVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.VoiceChannelInUseException;
-import io.github.phs314.quicktts.bot.speech.application.port.in.FindMyVoiceChannelUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.ManageVoiceUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatUseCase;
@@ -14,19 +12,18 @@ import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
-import java.util.Optional;
 
-public class QuickChatService implements SpeakQuickChatUseCase, FindMyVoiceChannelUseCase {
+public class SpeakQuickChatService implements SpeakQuickChatUseCase {
 
     private final VoiceChannelLocatorPort voiceChannelLocator;
     private final SpeechSynthesizerPort speechSynthesizer;
     private final SpeechPlayerPort speechPlayer;
     private final ManageVoiceUseCase voices;
 
-    public QuickChatService(VoiceChannelLocatorPort voiceChannelLocator,
-                            SpeechSynthesizerPort speechSynthesizer,
-                            SpeechPlayerPort speechPlayer,
-                            ManageVoiceUseCase voices) {
+    public SpeakQuickChatService(VoiceChannelLocatorPort voiceChannelLocator,
+                                 SpeechSynthesizerPort speechSynthesizer,
+                                 SpeechPlayerPort speechPlayer,
+                                 ManageVoiceUseCase voices) {
         this.voiceChannelLocator = voiceChannelLocator;
         this.speechSynthesizer = speechSynthesizer;
         this.speechPlayer = speechPlayer;
@@ -57,10 +54,5 @@ public class QuickChatService implements SpeakQuickChatUseCase, FindMyVoiceChann
                 .ifPresent(inUse -> {
                     throw new VoiceChannelInUseException(inUse);
                 });
-    }
-
-    @Override
-    public Optional<VoiceChannelDetails> findMyVoiceChannel(DiscordUserId user) {
-        return voiceChannelLocator.findCurrentChannel(user);
     }
 }
