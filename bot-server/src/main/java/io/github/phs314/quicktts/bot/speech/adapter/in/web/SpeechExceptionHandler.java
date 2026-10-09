@@ -2,7 +2,7 @@ package io.github.phs314.quicktts.bot.speech.adapter.in.web;
 
 import io.github.phs314.quicktts.bot.speech.application.SpeakerNotInVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.VoiceChannelInUseException;
-import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesisException;
+import io.github.phs314.quicktts.bot.speech.application.SpeechSynthesisException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
