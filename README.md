@@ -57,12 +57,12 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │       ├── in/discord/         /연결 슬래시 명령
 │       └── out/persistence/    기기 저장소 (H2, JdbcClient), 메모리 연결 코드 저장소
 ├── shared/                     공유 커널(domain/vo 의 DiscordUserId)과 공통 예외 처리
-└── config/                     설정 값, JDA, 포트-어댑터 조립
+└── config/                     설정 값, JDA, 시계
 ```
 
 `ArchitectureTest`(ArchUnit)가 빌드 때마다 다음 규칙을 확인합니다.
 
-- 각 컨텍스트의 `domain` 과 `application` 은 스프링, JDA, LavaPlayer 를 모르고, 어댑터끼리는 서로 모릅니다.
+- 각 컨텍스트의 `domain` 은 스프링, JDA, LavaPlayer 를 모르고, `application` 은 스프링 중 `@Service`, `@Transactional` 만 씁니다 ([ADR 0009](docs/adr/0009-spring-annotations-on-services.md)). 어댑터끼리는 서로 모릅니다.
 - `speech` 는 `device` 를 공개 입구(`device.application.port.in`)로만 씁니다. quick chat 요청의 기기 토큰 주인을 물을 때가 유일한 접점입니다.
 - `device` 는 `speech` 를 모르고, `shared` 는 어느 컨텍스트도 모릅니다.
 - 서비스는 입력 포트(`...UseCase`) 하나만 구현하고 이름은 `...Service` 입니다 ([ADR 0008](docs/adr/0008-one-service-per-use-case.md)).
