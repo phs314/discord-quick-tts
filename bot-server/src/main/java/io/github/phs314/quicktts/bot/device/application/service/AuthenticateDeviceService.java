@@ -6,14 +6,14 @@ import io.github.phs314.quicktts.bot.device.domain.Device;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceToken;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
+@Service
+@RequiredArgsConstructor
 public class AuthenticateDeviceService implements AuthenticateDeviceUseCase {
 
     private final DevicePort devicePort;
-
-    public AuthenticateDeviceService(DevicePort devicePort) {
-        this.devicePort = devicePort;
-    }
 
     @Override
     public Optional<DiscordUserId> authenticate(String rawDeviceToken) {
