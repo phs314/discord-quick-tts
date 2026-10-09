@@ -8,7 +8,7 @@ public interface SpeakQuickChatUseCase {
     /**
      * @throws io.github.phs314.quicktts.bot.speech.application.SpeakerNotInVoiceChannelException
      *         보낸 사용자가 봇이 있는 서버의 음성 채널에 없을 때
-     * @throws io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesisException
+     * @throws io.github.phs314.quicktts.bot.speech.application.SpeechSynthesisException
      *         음성 생성에 실패했을 때
      */
     void speak(SpeakQuickChatCommand command);
