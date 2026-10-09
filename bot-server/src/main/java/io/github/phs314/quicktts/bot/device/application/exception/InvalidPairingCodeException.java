@@ -1,4 +1,4 @@
-package io.github.phs314.quicktts.bot.device.application;
+package io.github.phs314.quicktts.bot.device.application.exception;
 
 /**
  * 없는 연결 코드이거나 만료된 연결 코드일 때 던진다.

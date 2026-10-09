@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.phs314.quicktts.bot.config.QuickTtsProperties;
-import io.github.phs314.quicktts.bot.speech.application.SpeechSynthesisException;
+import io.github.phs314.quicktts.bot.speech.application.exception.SpeechSynthesisException;
 import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;

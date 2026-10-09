@@ -1,7 +1,7 @@
 package io.github.phs314.quicktts.bot.device.application.service;
 
-import io.github.phs314.quicktts.bot.device.application.InvalidPairingCodeException;
-import io.github.phs314.quicktts.bot.device.application.port.in.RegisterDeviceUseCase;
+import io.github.phs314.quicktts.bot.device.application.exception.InvalidPairingCodeException;
+import io.github.phs314.quicktts.bot.device.application.port.in.usecase.RegisterDeviceUseCase;
 import io.github.phs314.quicktts.bot.device.application.port.out.DevicePort;
 import io.github.phs314.quicktts.bot.device.application.port.out.PairingPort;
 import io.github.phs314.quicktts.bot.device.domain.Device;

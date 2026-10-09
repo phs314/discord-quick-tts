@@ -1,10 +1,10 @@
 package io.github.phs314.quicktts.bot.speech.application.service;
 
-import io.github.phs314.quicktts.bot.speech.application.SpeakerNotInVoiceChannelException;
-import io.github.phs314.quicktts.bot.speech.application.VoiceChannelInUseException;
-import io.github.phs314.quicktts.bot.speech.application.port.in.ManageVoiceUseCase;
-import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatCommand;
-import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatUseCase;
+import io.github.phs314.quicktts.bot.speech.application.exception.SpeakerNotInVoiceChannelException;
+import io.github.phs314.quicktts.bot.speech.application.exception.VoiceChannelInUseException;
+import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
+import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.ManageVoiceUseCase;
+import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.SpeakQuickChatUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocatorPort;

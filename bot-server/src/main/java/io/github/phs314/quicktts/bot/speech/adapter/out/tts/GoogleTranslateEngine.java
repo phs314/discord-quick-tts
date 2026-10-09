@@ -1,6 +1,6 @@
 package io.github.phs314.quicktts.bot.speech.adapter.out.tts;
 
-import io.github.phs314.quicktts.bot.speech.application.SpeechSynthesisException;
+import io.github.phs314.quicktts.bot.speech.application.exception.SpeechSynthesisException;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;

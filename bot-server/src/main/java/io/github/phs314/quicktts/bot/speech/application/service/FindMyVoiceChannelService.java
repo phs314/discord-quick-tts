@@ -1,7 +1,7 @@
 package io.github.phs314.quicktts.bot.speech.application.service;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
-import io.github.phs314.quicktts.bot.speech.application.port.in.FindMyVoiceChannelUseCase;
+import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.FindMyVoiceChannelUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocatorPort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import java.util.Optional;

@@ -1,4 +1,4 @@
-package io.github.phs314.quicktts.bot.device.application.port.in;
+package io.github.phs314.quicktts.bot.device.application.port.in.usecase;
 
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceToken;
@@ -10,7 +10,7 @@ import io.github.phs314.quicktts.bot.device.domain.vo.PairingCode;
 public interface RegisterDeviceUseCase {
 
     /**
-     * @throws io.github.phs314.quicktts.bot.device.application.InvalidPairingCodeException
+     * @throws io.github.phs314.quicktts.bot.device.application.exception.InvalidPairingCodeException
      *         없는 코드이거나 만료된 코드일 때
      */
     DeviceToken register(PairingCode code, DeviceName name);

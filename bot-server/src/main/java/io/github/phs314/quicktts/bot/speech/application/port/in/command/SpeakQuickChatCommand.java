@@ -1,4 +1,4 @@
-package io.github.phs314.quicktts.bot.speech.application.port.in;
+package io.github.phs314.quicktts.bot.speech.application.port.in.command;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;

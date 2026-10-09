@@ -2,7 +2,7 @@ package io.github.phs314.quicktts.bot.device.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.github.phs314.quicktts.bot.device.application.port.in.DeviceDto;
+import io.github.phs314.quicktts.bot.device.application.port.in.dto.DeviceDto;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceId;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceToken;

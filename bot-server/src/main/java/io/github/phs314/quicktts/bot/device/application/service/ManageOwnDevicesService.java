@@ -1,7 +1,7 @@
 package io.github.phs314.quicktts.bot.device.application.service;
 
-import io.github.phs314.quicktts.bot.device.application.port.in.DeviceDto;
-import io.github.phs314.quicktts.bot.device.application.port.in.ManageOwnDevicesUseCase;
+import io.github.phs314.quicktts.bot.device.application.port.in.dto.DeviceDto;
+import io.github.phs314.quicktts.bot.device.application.port.in.usecase.ManageOwnDevicesUseCase;
 import io.github.phs314.quicktts.bot.device.application.port.out.DevicePort;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;

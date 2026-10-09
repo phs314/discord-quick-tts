@@ -1,4 +1,4 @@
-package io.github.phs314.quicktts.bot.device.application.port.in;
+package io.github.phs314.quicktts.bot.device.application.port.in.dto;
 
 import io.github.phs314.quicktts.bot.device.domain.Pairing;
 import io.github.phs314.quicktts.bot.device.domain.vo.PairingCode;

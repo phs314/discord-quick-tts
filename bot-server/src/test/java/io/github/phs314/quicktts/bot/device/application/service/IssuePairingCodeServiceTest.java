@@ -2,7 +2,7 @@ package io.github.phs314.quicktts.bot.device.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.github.phs314.quicktts.bot.device.application.port.in.IssuedPairingCodeDto;
+import io.github.phs314.quicktts.bot.device.application.port.in.dto.IssuedPairingCodeDto;
 import io.github.phs314.quicktts.bot.device.domain.Pairing;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import java.time.Clock;

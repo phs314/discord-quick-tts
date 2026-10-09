@@ -3,7 +3,7 @@ package io.github.phs314.quicktts.bot.device.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import io.github.phs314.quicktts.bot.device.application.InvalidPairingCodeException;
+import io.github.phs314.quicktts.bot.device.application.exception.InvalidPairingCodeException;
 import io.github.phs314.quicktts.bot.device.domain.Pairing;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceToken;

@@ -18,7 +18,7 @@ public interface SpeechSynthesizerPort {
     VoiceId defaultVoice();
 
     /**
-     * @throws io.github.phs314.quicktts.bot.speech.application.SpeechSynthesisException 음성 생성에 실패했을 때
+     * @throws io.github.phs314.quicktts.bot.speech.application.exception.SpeechSynthesisException 음성 생성에 실패했을 때
      */
     Speech synthesize(QuickChatMessage message, VoiceId voice);
 }

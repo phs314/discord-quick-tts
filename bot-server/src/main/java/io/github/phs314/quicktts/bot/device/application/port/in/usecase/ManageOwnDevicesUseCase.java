@@ -1,5 +1,6 @@
-package io.github.phs314.quicktts.bot.device.application.port.in;
+package io.github.phs314.quicktts.bot.device.application.port.in.usecase;
 
+import io.github.phs314.quicktts.bot.device.application.port.in.dto.DeviceDto;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import java.util.List;
