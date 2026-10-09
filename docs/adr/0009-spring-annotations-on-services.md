@@ -6,7 +6,7 @@ ADR 0001 에서는 `application` 이 스프링을 전혀 모르게 하고, 서�
 
 - 서비스에는 `@Service` 와 Lombok `@RequiredArgsConstructor` 를 붙이고 생성자를 직접 쓰지 않습니다. 컴포넌트 스캔이 서비스를 등록하므로 `UseCaseConfig` 는 없애고, 남은 `Clock` 빈은 `ClockConfig` 로 옮겼습니다.
 - `application` 은 스프링 중 `org.springframework.stereotype`(`@Service`)와 `org.springframework.transaction.annotation`(`@Transactional`)만 쓸 수 있습니다. 나머지 스프링, JDA, LavaPlayer 는 여전히 모릅니다. `domain` 은 계속 스프링을 전혀 모릅니다. `ArchitectureTest` 가 둘 다 확인합니다.
-- Lombok 은 서비스의 생성자에만 씁니다. 값 객체(record)와 애그리거트(POJO class, ADR 0003)는 그대로 직접 씁니다.
+- ~~Lombok 은 서비스의 생성자에만 씁니다.~~ ADR 0011 로 필드 주입만 하는 모든 스프링 빈으로 넓혔습니다. 값 객체(record)와 애그리거트(POJO class, ADR 0003)는 그대로 직접 씁니다.
 - 서비스 테스트는 지금처럼 스프링 없이 `new` 로 만들어 가짜 포트를 넣어 돌립니다. Lombok 이 만든 생성자도 필드 순서대로 인자를 받습니다.
 
 ## @Transactional 을 붙이는 기준
