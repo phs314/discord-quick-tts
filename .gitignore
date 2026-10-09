@@ -6,6 +6,11 @@
 .gradle/
 build/
 
+# JVM 크래시·힙 덤프 (메모리 부족 시 작업 폴더에 생김)
+hs_err_pid*.log
+replay_pid*.log
+java_pid*.hprof
+
 # IDE
 .idea/
 *.iml
