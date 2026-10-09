@@ -10,12 +10,12 @@ import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
 import java.util.List;
 import java.util.Optional;
 
-public class VoiceService implements ManageVoiceUseCase {
+public class ManageVoiceService implements ManageVoiceUseCase {
 
     private final SpeechSynthesizerPort speechSynthesizer;
     private final VoicePreferencePort voicePreferences;
 
-    public VoiceService(SpeechSynthesizerPort speechSynthesizer, VoicePreferencePort voicePreferences) {
+    public ManageVoiceService(SpeechSynthesizerPort speechSynthesizer, VoicePreferencePort voicePreferences) {
         this.speechSynthesizer = speechSynthesizer;
         this.voicePreferences = voicePreferences;
     }
