@@ -36,9 +36,9 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │   ├── domain/
 │   │   └── vo/                 QuickChatMessage, VoiceChannel, Speech, Voice (값 객체)
 │   ├── application/
-│   │   ├── port/in/            SpeakQuickChatUseCase, ManageVoiceUseCase
+│   │   ├── port/in/            SpeakQuickChatUseCase, FindMyVoiceChannelUseCase, ManageVoiceUseCase
 │   │   ├── port/out/           SpeechSynthesizerPort, VoiceChannelLocatorPort, SpeechPlayerPort, VoicePreferencePort
-│   │   └── service/            QuickChatService, VoiceService
+│   │   └── service/            입력 포트마다 하나 (SpeakQuickChatService 등)
 │   └── adapter/
 │       ├── in/web/             quick chat REST 컨트롤러
 │       ├── in/discord/         /목소리 슬래시 명령
@@ -49,9 +49,9 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │   ├── domain/                 Pairing, Device (엔티티)
 │   │   └── vo/                 PairingCode, DeviceToken, DeviceId, DeviceName (값 객체)
 │   ├── application/
-│   │   ├── port/in/            IssuePairingCode, RegisterDevice, AuthenticateDevice (공개 입구)
+│   │   ├── port/in/            IssuePairingCode, RegisterDevice, AuthenticateDevice, ManageOwnDevices (공개 입구)
 │   │   ├── port/out/           PairingPort, DevicePort
-│   │   └── service/            DeviceRegistrationService
+│   │   └── service/            입력 포트마다 하나 (RegisterDeviceService 등)
 │   └── adapter/
 │       ├── in/web/             기기 등록 REST 컨트롤러
 │       ├── in/discord/         /연결 슬래시 명령
@@ -65,6 +65,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 - 각 컨텍스트의 `domain` 과 `application` 은 스프링, JDA, LavaPlayer 를 모르고, 어댑터끼리는 서로 모릅니다.
 - `speech` 는 `device` 를 공개 입구(`device.application.port.in`)로만 씁니다. quick chat 요청의 기기 토큰 주인을 물을 때가 유일한 접점입니다.
 - `device` 는 `speech` 를 모르고, `shared` 는 어느 컨텍스트도 모릅니다.
+- 서비스는 입력 포트(`...UseCase`) 하나만 구현하고 이름은 `...Service` 입니다 ([ADR 0008](docs/adr/0008-one-service-per-use-case.md)).
 
 그 밖에:
 
