@@ -2,7 +2,9 @@ package io.github.phs314.quicktts.bot;
 
 import static com.tngtech.archunit.base.DescribedPredicate.alwaysTrue;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyPackage;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideOutsideOfPackage;
+import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideOutsideOfPackages;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.library.Architectures.onionArchitecture;
@@ -93,11 +95,21 @@ class ArchitectureTest {
             .should(implementExactlyOneUseCaseNamedAfterIt());
 
     @ArchTest
-    static final ArchRule coreIsFrameworkFree = noClasses()
-            .that().resideInAnyPackage("..bot.*.domain..", "..bot.*.application..")
+    static final ArchRule domainIsFrameworkFree = noClasses()
+            .that().resideInAPackage("..bot.*.domain..")
             .should().dependOnClassesThat().resideInAnyPackage(
                     "org.springframework..", "net.dv8tion..", "com.sedmelluq..", "club.minnced..",
                     "..bot.config..");
+
+    /** 서비스에는 빈 등록(@Service)과 트랜잭션(@Transactional) 애너테이션만 허용한다 (ADR 0009). */
+    @ArchTest
+    static final ArchRule applicationUsesOnlySpringAnnotations = noClasses()
+            .that().resideInAPackage("..bot.*.application..")
+            .should().dependOnClassesThat(resideInAnyPackage(
+                            "org.springframework..", "net.dv8tion..", "com.sedmelluq..", "club.minnced..",
+                            "..bot.config..")
+                    .and(resideOutsideOfPackages(
+                            "org.springframework.stereotype..", "org.springframework.transaction.annotation..")));
 
     private static ArchCondition<JavaClass> implementExactlyOneUseCaseNamedAfterIt() {
         return new ArchCondition<>("implement exactly one UseCase and be named after it") {
