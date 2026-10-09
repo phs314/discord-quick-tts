@@ -7,20 +7,18 @@ import java.time.Clock;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 /**
  * 연결 코드는 몇 분만 살아 있으면 되므로 메모리에만 둔다. 서버를 재시작하면 사라진다.
  */
 @Component
+@RequiredArgsConstructor
 public class InMemoryPairingRepository implements PairingPort {
 
     private final Map<PairingCode, Pairing> pairings = new ConcurrentHashMap<>();
     private final Clock clock;
-
-    public InMemoryPairingRepository(Clock clock) {
-        this.clock = clock;
-    }
 
     @Override
     public void save(Pairing pairing) {

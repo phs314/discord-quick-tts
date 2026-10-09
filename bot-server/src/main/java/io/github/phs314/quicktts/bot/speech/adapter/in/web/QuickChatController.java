@@ -10,6 +10,7 @@ import io.github.phs314.quicktts.common.QuickChatApi;
 import io.github.phs314.quicktts.common.QuickChatRequest;
 import io.github.phs314.quicktts.common.VoiceChannelResponse;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,19 +25,12 @@ import org.springframework.web.bind.annotation.RestController;
  * 보낸 사람은 device 컨텍스트의 공개 유스케이스에 기기 토큰을 물어서 알아낸다.
  */
 @RestController
+@RequiredArgsConstructor
 public class QuickChatController {
 
     private final AuthenticateDeviceUseCase authenticateDevice;
     private final SpeakQuickChatUseCase speakQuickChat;
     private final FindMyVoiceChannelUseCase findMyVoiceChannel;
-
-    public QuickChatController(AuthenticateDeviceUseCase authenticateDevice,
-                               SpeakQuickChatUseCase speakQuickChat,
-                               FindMyVoiceChannelUseCase findMyVoiceChannel) {
-        this.authenticateDevice = authenticateDevice;
-        this.speakQuickChat = speakQuickChat;
-        this.findMyVoiceChannel = findMyVoiceChannel;
-    }
 
     @PostMapping(QuickChatApi.PATH)
     public ResponseEntity<Void> quickChat(

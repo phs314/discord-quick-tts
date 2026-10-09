@@ -7,6 +7,7 @@ import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import java.util.Objects;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
@@ -19,13 +20,10 @@ import org.springframework.stereotype.Component;
  * 봇이 들어가 있는 서버들의 음성 상태 캐시에서 사용자와 봇이 있는 음성 채널을 찾는다.
  */
 @Component
+@RequiredArgsConstructor
 public class JdaVoiceChannelLocator implements VoiceChannelLocatorPort {
 
     private final JDA jda;
-
-    public JdaVoiceChannelLocator(JDA jda) {
-        this.jda = jda;
-    }
 
     @Override
     public Optional<VoiceChannelDetails> findCurrentChannel(DiscordUserId user) {

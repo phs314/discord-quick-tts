@@ -4,6 +4,7 @@ import io.github.phs314.quicktts.bot.device.application.port.in.IssuePairingCode
 import io.github.phs314.quicktts.bot.device.domain.Pairing;
 import io.github.phs314.quicktts.bot.shared.adapter.in.discord.DiscordSlashCommand;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.DiscordLocale;
@@ -16,15 +17,12 @@ import org.springframework.stereotype.Component;
  * 누가 쳤는지는 디스코드가 보증하므로 사용자가 자기 ID 를 직접 입력할 필요가 없다.
  */
 @Component
+@RequiredArgsConstructor
 public class LinkCommandListener extends ListenerAdapter implements DiscordSlashCommand {
 
     private static final String COMMAND_NAME = "link";
 
     private final IssuePairingCodeUseCase issuePairingCode;
-
-    public LinkCommandListener(IssuePairingCodeUseCase issuePairingCode) {
-        this.issuePairingCode = issuePairingCode;
-    }
 
     @Override
     public SlashCommandData definition() {
