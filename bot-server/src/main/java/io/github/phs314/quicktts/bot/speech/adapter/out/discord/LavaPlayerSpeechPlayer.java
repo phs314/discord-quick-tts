@@ -8,6 +8,7 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
+import io.github.phs314.quicktts.bot.speech.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import java.io.IOException;
@@ -34,7 +35,7 @@ public class LavaPlayerSpeechPlayer implements SpeechPlayerPort {
 
     private final JDA jda;
     private final AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
-    private final Map<Long, GuildSpeechQueue> queues = new ConcurrentHashMap<>();
+    private final Map<GuildId, GuildSpeechQueue> queues = new ConcurrentHashMap<>();
 
     public LavaPlayerSpeechPlayer(JDA jda) {
         this.jda = jda;
@@ -43,14 +44,14 @@ public class LavaPlayerSpeechPlayer implements SpeechPlayerPort {
 
     @Override
     public void play(VoiceChannel channel, Speech speech) {
-        Guild guild = jda.getGuildById(channel.guildId());
+        Guild guild = jda.getGuildById(channel.guildId().value());
         AudioChannel audioChannel = guild == null ? null : guild.getChannelById(AudioChannel.class, channel.channelId());
         if (audioChannel == null) {
             log.warn("음성 채널을 찾을 수 없습니다: {}", channel);
             return;
         }
 
-        GuildSpeechQueue queue = queues.computeIfAbsent(guild.getIdLong(),
+        GuildSpeechQueue queue = queues.computeIfAbsent(channel.guildId(),
                 id -> new GuildSpeechQueue(playerManager.createPlayer()));
         connect(guild, audioChannel, queue);
 
@@ -83,12 +84,12 @@ public class LavaPlayerSpeechPlayer implements SpeechPlayerPort {
     }
 
     /** 읽던 문장을 모두 버리고 음성 채널에서 나간다. */
-    void leave(long guildId) {
+    void leave(GuildId guildId) {
         GuildSpeechQueue queue = queues.get(guildId);
         if (queue != null) {
             queue.clear();
         }
-        Guild guild = jda.getGuildById(guildId);
+        Guild guild = jda.getGuildById(guildId.value());
         if (guild != null && guild.getAudioManager().isConnected()) {
             guild.getAudioManager().closeAudioConnection();
         }

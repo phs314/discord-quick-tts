@@ -2,6 +2,7 @@ package io.github.phs314.quicktts.bot.speech.adapter.out.discord;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocatorPort;
+import io.github.phs314.quicktts.bot.speech.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import java.util.Objects;
@@ -37,8 +38,8 @@ public class JdaVoiceChannelLocator implements VoiceChannelLocatorPort {
     }
 
     @Override
-    public Optional<VoiceChannelDetails> findBotChannelInUse(long guildId) {
-        Guild guild = jda.getGuildById(guildId);
+    public Optional<VoiceChannelDetails> findBotChannelInUse(GuildId guildId) {
+        Guild guild = jda.getGuildById(guildId.value());
         AudioChannel channel = guild == null ? null : guild.getAudioManager().getConnectedChannel();
         if (channel == null || channel.getMembers().stream().map(Member::getUser).allMatch(User::isBot)) {
             return Optional.empty();
@@ -54,7 +55,7 @@ public class JdaVoiceChannelLocator implements VoiceChannelLocatorPort {
 
     private static VoiceChannelDetails toDetails(Guild guild, AudioChannel channel) {
         return new VoiceChannelDetails(
-                new VoiceChannel(guild.getIdLong(), channel.getIdLong()),
+                new VoiceChannel(new GuildId(guild.getIdLong()), channel.getIdLong()),
                 guild.getName(),
                 guild.getIconUrl(),
                 channel.getName());

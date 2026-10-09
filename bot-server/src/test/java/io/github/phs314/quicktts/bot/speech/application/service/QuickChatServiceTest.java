@@ -9,6 +9,7 @@ import io.github.phs314.quicktts.bot.speech.application.VoiceChannelInUseExcepti
 import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocatorPort;
+import io.github.phs314.quicktts.bot.speech.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
@@ -22,10 +23,10 @@ import org.junit.jupiter.api.Test;
 class QuickChatServiceTest {
 
     private static final DiscordUserId SPEAKER = new DiscordUserId(42L);
-    private static final VoiceChannel CHANNEL = new VoiceChannel(1L, 2L);
+    private static final VoiceChannel CHANNEL = new VoiceChannel(new GuildId(1L), 2L);
     private static final VoiceChannelDetails DETAILS = new VoiceChannelDetails(CHANNEL, "우리 서버", null, "일반");
     private static final VoiceChannelDetails OTHER_CHANNEL_IN_SAME_SERVER =
-            new VoiceChannelDetails(new VoiceChannel(1L, 3L), "우리 서버", null, "게임");
+            new VoiceChannelDetails(new VoiceChannel(new GuildId(1L), 3L), "우리 서버", null, "게임");
 
     private final List<String> played = new ArrayList<>();
     private final SpeechPlayerPort recordingPlayer =
@@ -94,7 +95,7 @@ class QuickChatServiceTest {
     }
 
     private QuickChatService service(Function<DiscordUserId, Optional<VoiceChannelDetails>> speakers,
-                                     Function<Long, Optional<VoiceChannelDetails>> botChannelInUse) {
+                                     Function<GuildId, Optional<VoiceChannelDetails>> botChannelInUse) {
         return new QuickChatService(new FakeVoiceChannelLocator(speakers, botChannelInUse),
                 synthesizer, recordingPlayer, voices);
     }
@@ -104,7 +105,7 @@ class QuickChatServiceTest {
     }
 
     private record FakeVoiceChannelLocator(Function<DiscordUserId, Optional<VoiceChannelDetails>> speakers,
-                                           Function<Long, Optional<VoiceChannelDetails>> botChannelInUse)
+                                           Function<GuildId, Optional<VoiceChannelDetails>> botChannelInUse)
             implements VoiceChannelLocatorPort {
 
         @Override
@@ -113,7 +114,7 @@ class QuickChatServiceTest {
         }
 
         @Override
-        public Optional<VoiceChannelDetails> findBotChannelInUse(long guildId) {
+        public Optional<VoiceChannelDetails> findBotChannelInUse(GuildId guildId) {
             return botChannelInUse.apply(guildId);
         }
     }
