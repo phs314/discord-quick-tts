@@ -4,6 +4,7 @@ import io.github.phs314.quicktts.bot.device.application.port.in.AuthenticateDevi
 import io.github.phs314.quicktts.bot.device.application.port.out.DevicePort;
 import io.github.phs314.quicktts.bot.device.domain.Device;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceToken;
+import io.github.phs314.quicktts.bot.device.domain.vo.DeviceTokenHash;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -20,7 +21,7 @@ public class AuthenticateDeviceService implements AuthenticateDeviceUseCase {
         if (rawDeviceToken == null || rawDeviceToken.isBlank()) {
             return Optional.empty();
         }
-        String tokenHash = new DeviceToken(rawDeviceToken).hash();
+        DeviceTokenHash tokenHash = new DeviceToken(rawDeviceToken).hash();
         return devicePort.findByTokenHash(tokenHash).map(Device::owner);
     }
 }

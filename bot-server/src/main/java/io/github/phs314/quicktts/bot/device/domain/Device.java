@@ -3,6 +3,7 @@ package io.github.phs314.quicktts.bot.device.domain;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceId;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceToken;
+import io.github.phs314.quicktts.bot.device.domain.vo.DeviceTokenHash;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import java.time.Instant;
 import java.util.Objects;
@@ -15,7 +16,7 @@ public class Device {
     /** 사용자가 기기를 골라 해제할 때 쓰는 식별자 */
     private final DeviceId id;
     /** 기기 토큰의 해시 ({@link DeviceToken#hash()}) */
-    private final String tokenHash;
+    private final DeviceTokenHash tokenHash;
     /** 이 기기로 quick chat 을 보내는 사용자 */
     private final DiscordUserId owner;
     /** 사용자에게 보여 줄 PC 이름 */
@@ -24,7 +25,7 @@ public class Device {
     private final Instant registeredAt;
 
     /** 저장소에서 읽어 온 기기를 되살릴 때 쓴다. 새로 등록할 때는 {@link #register} 를 쓴다. */
-    public Device(DeviceId id, String tokenHash, DiscordUserId owner, DeviceName name, Instant registeredAt) {
+    public Device(DeviceId id, DeviceTokenHash tokenHash, DiscordUserId owner, DeviceName name, Instant registeredAt) {
         this.id = Objects.requireNonNull(id);
         this.tokenHash = Objects.requireNonNull(tokenHash);
         this.owner = Objects.requireNonNull(owner);
@@ -40,7 +41,7 @@ public class Device {
         return id;
     }
 
-    public String tokenHash() {
+    public DeviceTokenHash tokenHash() {
         return tokenHash;
     }
 

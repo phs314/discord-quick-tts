@@ -28,10 +28,10 @@ public record DeviceToken(String value) {
     }
 
     /** 저장과 조회에 쓰는 SHA-256 해시 (16진수). */
-    public String hash() {
+    public DeviceTokenHash hash() {
         try {
             byte[] digest = MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8));
-            return HexFormat.of().formatHex(digest);
+            return new DeviceTokenHash(HexFormat.of().formatHex(digest));
         } catch (NoSuchAlgorithmException e) {
             throw new IllegalStateException("SHA-256 을 쓸 수 없습니다.", e);
         }
