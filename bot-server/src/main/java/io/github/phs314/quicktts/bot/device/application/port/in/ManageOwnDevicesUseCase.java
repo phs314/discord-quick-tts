@@ -1,6 +1,5 @@
 package io.github.phs314.quicktts.bot.device.application.port.in;
 
-import io.github.phs314.quicktts.bot.device.domain.Device;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import java.util.List;
@@ -10,7 +9,7 @@ import java.util.List;
  */
 public interface ManageOwnDevicesUseCase {
 
-    List<Device> listDevices(DiscordUserId owner);
+    List<DeviceDto> listDevices(DiscordUserId owner);
 
     /** 그 사용자의 기기가 아니거나 이미 해제됐으면 false. */
     boolean unlink(DiscordUserId owner, DeviceId id);
