@@ -8,6 +8,7 @@ import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.components.actionrow.ActionRow;
 import net.dv8tion.jda.api.components.selections.StringSelectMenu;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Component;
  * 해제된 PC 의 클라이언트는 다음 전송 때 연결 코드를 다시 묻는다.
  */
 @Component
+@RequiredArgsConstructor
 public class UnlinkCommandListener extends ListenerAdapter implements DiscordSlashCommand {
 
     private static final String COMMAND_NAME = "unlink";
@@ -34,10 +36,6 @@ public class UnlinkCommandListener extends ListenerAdapter implements DiscordSla
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm 등록").withZone(ZoneId.of("Asia/Seoul"));
 
     private final ManageOwnDevicesUseCase manageOwnDevices;
-
-    public UnlinkCommandListener(ManageOwnDevicesUseCase manageOwnDevices) {
-        this.manageOwnDevices = manageOwnDevices;
-    }
 
     @Override
     public SlashCommandData definition() {

@@ -2,6 +2,7 @@ package io.github.phs314.quicktts.bot.speech.adapter.out.discord;
 
 import io.github.phs314.quicktts.bot.speech.domain.vo.GuildId;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.User;
@@ -14,15 +15,11 @@ import org.springframework.stereotype.Component;
  * 봇이 있는 음성 채널에서 사람이 모두 나가면 봇도 바로 나간다.
  */
 @Component
+@RequiredArgsConstructor
 public class EmptyVoiceChannelWatcher extends ListenerAdapter {
 
     private final JDA jda;
     private final LavaPlayerSpeechPlayer speechPlayer;
-
-    public EmptyVoiceChannelWatcher(JDA jda, LavaPlayerSpeechPlayer speechPlayer) {
-        this.jda = jda;
-        this.speechPlayer = speechPlayer;
-    }
 
     @PostConstruct
     void register() {

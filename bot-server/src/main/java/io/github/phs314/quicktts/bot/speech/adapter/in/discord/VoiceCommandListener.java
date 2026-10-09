@@ -7,6 +7,7 @@ import io.github.phs314.quicktts.bot.speech.application.port.in.ManageVoiceUseCa
 import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.DiscordLocale;
@@ -22,16 +23,13 @@ import org.springframework.stereotype.Component;
  * 목소리를 고르지 않고 치면 지금 목소리와 고를 수 있는 목록을 보여 준다.
  */
 @Component
+@RequiredArgsConstructor
 public class VoiceCommandListener extends ListenerAdapter implements DiscordSlashCommand {
 
     private static final String COMMAND_NAME = "voice";
     private static final String VOICE_OPTION = "voice";
 
     private final ManageVoiceUseCase manageVoice;
-
-    public VoiceCommandListener(ManageVoiceUseCase manageVoice) {
-        this.manageVoice = manageVoice;
-    }
 
     @Override
     public SlashCommandData definition() {

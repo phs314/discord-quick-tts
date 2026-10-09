@@ -10,6 +10,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
 
@@ -17,15 +18,12 @@ import org.springframework.stereotype.Component;
  * 등록된 기기를 {@code device} 테이블에 저장한다. 스키마는 {@code schema.sql} 에 있다.
  */
 @Component
+@RequiredArgsConstructor
 public class JdbcDeviceRepository implements DevicePort {
 
     private static final String COLUMNS = "id, token_hash, discord_user_id, name, registered_at";
 
     private final JdbcClient jdbcClient;
-
-    public JdbcDeviceRepository(JdbcClient jdbcClient) {
-        this.jdbcClient = jdbcClient;
-    }
 
     @Override
     public void save(Device device) {
