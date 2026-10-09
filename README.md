@@ -36,7 +36,9 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │   ├── domain/
 │   │   └── vo/                 QuickChatMessage, VoiceChannel, Speech, Voice (값 객체)
 │   ├── application/
-│   │   ├── port/in/            SpeakQuickChatUseCase, FindMyVoiceChannelUseCase, ManageVoiceUseCase
+│   │   ├── exception/          SpeakerNotInVoiceChannel, VoiceChannelInUse, UnknownVoice, SpeechSynthesis 예외
+│   │   ├── port/in/usecase/    SpeakQuickChatUseCase, FindMyVoiceChannelUseCase, ManageVoiceUseCase
+│   │   ├── port/in/command/    SpeakQuickChatCommand
 │   │   ├── port/out/           SpeechSynthesizerPort, VoiceChannelLocatorPort, SpeechPlayerPort, VoicePreferencePort
 │   │   └── service/            입력 포트마다 하나 (SpeakQuickChatService 등)
 │   └── adapter/
@@ -49,7 +51,9 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │   ├── domain/                 Pairing, Device (엔티티)
 │   │   └── vo/                 PairingCode, DeviceToken, DeviceId, DeviceName (값 객체)
 │   ├── application/
-│   │   ├── port/in/            IssuePairingCode, RegisterDevice, AuthenticateDevice, ManageOwnDevices (공개 입구), DeviceDto 등
+│   │   ├── exception/          InvalidPairingCodeException
+│   │   ├── port/in/usecase/    IssuePairingCode, RegisterDevice, AuthenticateDevice, ManageOwnDevices (port/in 전체가 공개 입구)
+│   │   ├── port/in/dto/        DeviceDto, IssuedPairingCodeDto
 │   │   ├── port/out/           PairingPort, DevicePort
 │   │   └── service/            입력 포트마다 하나 (RegisterDeviceService 등)
 │   └── adapter/
@@ -67,6 +71,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 - `device` 는 `speech` 를 모르고, `shared` 는 어느 컨텍스트도 모릅니다.
 - 서비스는 입력 포트(`...UseCase`) 하나만 구현하고 이름은 `...Service` 입니다 ([ADR 0008](docs/adr/0008-one-service-per-use-case.md)).
 - 인바운드 어댑터는 애그리거트(`Device`, `Pairing`)를 직접 쓰지 않고, 입력 포트가 돌려주는 `...Dto` 로만 봅니다. `port/in` 에는 `...UseCase`, `...Command`, `...Dto` 만 둡니다 ([ADR 0010](docs/adr/0010-use-cases-return-dtos.md)).
+- `port/in` 은 `usecase` / `command` / `dto` 폴더로 나누고, 애플리케이션 예외는 `application/exception` 에 모읍니다 ([ADR 0012](docs/adr/0012-application-subpackages.md)).
 
 그 밖에:
 
