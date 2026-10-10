@@ -4,10 +4,10 @@
 
 ```
 [디스코드] /연결 → 나만 보이는 연결 코드
-[PC] 첫 실행 때 코드 입력 → POST /api/devices → 이 PC 전용 기기 토큰 저장
+[PC] 첫 실행 때 코드 입력 → POST /api/v1/devices → 이 PC 전용 기기 토큰 저장
 
 [PC] Ctrl+Shift+Space → 입력 위젯 → Enter
-        │  POST /api/quick-chat (Authorization: Bearer <기기 토큰>)
+        │  POST /api/v1/quick-chat (Authorization: Bearer <기기 토큰>)
         ▼
 [bot-server] 토큰 주인이 있는 음성 채널을 찾아 TTS 로 읽어 줌
 ```
