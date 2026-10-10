@@ -33,20 +33,20 @@
 ```
 bot-server/src/main/java/io/github/phs314/quicktts/bot/
 ├── speech/
-│   ├── domain/
+│   ├── domain/                 BotSeat (디스코드 서버별 봇 자리, 애그리거트)
 │   │   └── vo/                 QuickChatMessage, VoiceChannel, Speech, Voice (값 객체)
 │   ├── application/
 │   │   ├── exception/          SpeakerNotInVoiceChannel, VoiceChannelInUse, UnknownVoice, SpeechSynthesis 예외
-│   │   ├── port/in/usecase/    SpeakQuickChatUseCase, FindMyVoiceChannelUseCase, ManageVoiceUseCase
+│   │   ├── port/in/usecase/    SpeakQuickChat, FindMyVoiceChannel, ManageVoice, LeaveEmptyVoiceChannel, FollowBotMove
 │   │   ├── port/in/command/    SpeakQuickChatCommand
-│   │   ├── port/out/           SpeechSynthesizerPort, VoiceChannelLocatorPort, SpeechPlayerPort, VoicePreferencePort
+│   │   ├── port/out/           SpeechSynthesizerPort, VoiceChannelLocatorPort, SpeechPlayerPort, VoicePreferencePort, BotSeatPort
 │   │   └── service/            입력 포트마다 하나 (SpeakQuickChatService 등)
 │   └── adapter/
 │       ├── in/web/             quick chat REST 컨트롤러
-│       ├── in/discord/         /목소리 슬래시 명령
+│       ├── in/discord/         /목소리 슬래시 명령, 음성 채널 입·퇴장 소식
 │       ├── out/tts/            TTS 엔진 (Edge, Google 번역) 과 엔진 고르기
-│       ├── out/discord/        JDA + LavaPlayer 로 채널 찾기, 재생
-│       └── out/persistence/    사용자별 목소리 저장소 (H2)
+│       ├── out/discord/        JDA + LavaPlayer 로 채널 찾기, 들어가기·재생·나가기
+│       └── out/persistence/    사용자별 목소리 저장소 (H2), 메모리 봇 자리 저장소
 ├── device/
 │   ├── domain/                 Pairing, Device (엔티티)
 │   │   └── vo/                 PairingCode, DeviceToken, DeviceId, DeviceName (값 객체)
@@ -70,11 +70,12 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 - `speech` 는 `device` 를 공개 입구(`device.application.port.in`)로만 씁니다. quick chat 요청의 기기 토큰 주인을 물을 때가 유일한 접점입니다.
 - `device` 는 `speech` 를 모르고, `shared` 는 어느 컨텍스트도 모릅니다.
 - 서비스는 입력 포트(`...UseCase`) 하나만 구현하고 이름은 `...Service` 입니다 ([ADR 0008](docs/adr/0008-one-service-per-use-case.md)).
-- 인바운드 어댑터는 애그리거트(`Device`, `Pairing`)를 직접 쓰지 않고, 입력 포트가 돌려주는 `...Dto` 로만 봅니다. `port/in` 에는 `...UseCase`, `...Command`, `...Dto` 만 둡니다 ([ADR 0010](docs/adr/0010-use-cases-return-dtos.md)).
+- 인바운드 어댑터는 애그리거트(`Device`, `Pairing`, `BotSeat`)를 직접 쓰지 않고, 입력 포트가 돌려주는 `...Dto` 로만 봅니다. `port/in` 에는 `...UseCase`, `...Command`, `...Dto` 만 둡니다 ([ADR 0010](docs/adr/0010-use-cases-return-dtos.md)).
 - `port/in` 은 `usecase` / `command` / `dto` 폴더로 나누고, 애플리케이션 예외는 `application/exception` 에 모읍니다 ([ADR 0012](docs/adr/0012-application-subpackages.md)).
 
 그 밖에:
 
+- 같은 디스코드 서버에서는 먼저 쓰고 있는 음성 채널이 우선이고, 사람이 다 나가면 봇도 나갑니다. 이 판단은 디스코드 서버마다 하나인 봇 자리(`BotSeat`)가 하고, 잠금도 디스코드 서버마다 따로입니다 ([ADR 0007](docs/adr/0007-first-come-voice-channel.md), [ADR 0014](docs/adr/0014-bot-seat-aggregate.md)).
 - TTS 엔진은 `SpeechSynthesizerPort` 뒤에 있습니다. 지금은 무료인 Microsoft Edge "소리 내어 읽기" 목소리(선희, 인준, 현수)와 Google 번역 목소리를 쓰고, Edge 가 실패하면 Google 번역 목소리로 대신 읽습니다. 엔진을 추가하려면 `speech/adapter/out/tts` 에 `TtsEngine` 구현을 하나 더 만들면 됩니다. 둘 다 공식 API 가 아니라서 언제든 막힐 수 있습니다.
 - 기기 토큰은 서버에 SHA-256 해시로만 저장합니다. 연결 코드는 5분짜리 일회용이고 메모리에만 둡니다.
 - API 경로는 `/api/v1` 아래에 있습니다. 오류 응답은 ProblemDetail 에 `code` 속성(`ApiErrorCode`)을 실어 보내고, 클라이언트는 이 코드로 안내 문구를 고릅니다 ([ADR 0013](docs/adr/0013-api-versioning-and-error-codes.md)).

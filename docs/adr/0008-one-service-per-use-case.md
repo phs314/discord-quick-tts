@@ -20,4 +20,4 @@
 - 새 유스케이스는 기존 서비스를 키우지 않고 새 입력 포트와 새 서비스로 추가합니다.
 - 한 입력 포트 안의 메서드(`ManageOwnDevicesUseCase` 의 목록·해제·모두 해제, `ManageVoiceUseCase` 의 목록·현재 목소리·바꾸기)는 계속 한 서비스에 둡니다. 읽기와 쓰기를 나눌지는 따로 판단합니다.
 - `ArchitectureTest` 가 `application/service` 의 클래스는 입력 포트를 하나만 구현하고, 이름이 그 입력 포트의 `UseCase` 를 `Service` 로 바꾼 것인지 확인합니다.
-- 먼저 온 채널 규칙(ADR 0007)과 그 잠금은 이제 `SpeakQuickChatService` 에만 있습니다. 디스코드 서버별 잠금이나 봇 자리 도메인 객체는 이 결정과 별개입니다.
+- ~~먼저 온 채널 규칙(ADR 0007)과 그 잠금은 이제 `SpeakQuickChatService` 에만 있습니다.~~ ADR 0014 로 규칙은 `BotSeat`, 잠금은 디스코드 서버별로 `BotSeatPort` 에 있습니다. 서비스는 9개가 됐습니다(`LeaveEmptyVoiceChannelService`, `FollowBotMoveService` 추가).
