@@ -77,6 +77,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 
 - TTS 엔진은 `SpeechSynthesizerPort` 뒤에 있습니다. 지금은 무료인 Microsoft Edge "소리 내어 읽기" 목소리(선희, 인준, 현수)와 Google 번역 목소리를 쓰고, Edge 가 실패하면 Google 번역 목소리로 대신 읽습니다. 엔진을 추가하려면 `speech/adapter/out/tts` 에 `TtsEngine` 구현을 하나 더 만들면 됩니다. 둘 다 공식 API 가 아니라서 언제든 막힐 수 있습니다.
 - 기기 토큰은 서버에 SHA-256 해시로만 저장합니다. 연결 코드는 5분짜리 일회용이고 메모리에만 둡니다.
+- API 경로는 `/api/v1` 아래에 있습니다. 오류 응답은 ProblemDetail 에 `code` 속성(`ApiErrorCode`)을 실어 보내고, 클라이언트는 이 코드로 안내 문구를 고릅니다 ([ADR 0013](docs/adr/0013-api-versioning-and-error-codes.md)).
 
 ## 준비물
 
