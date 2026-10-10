@@ -9,6 +9,8 @@ javafx-plugin = "0.1.0"
 jnativehook = "2.2.2"
 jackson = "3.2.3"
 archunit = "1.5.1"
+junit = "6.0.3"
+assertj = "3.27.7"
 
 [libraries]
 jda = { module = "net.dv8tion:JDA", version.ref = "jda" }
@@ -19,6 +21,10 @@ lavaplayer = { module = "dev.arbjerg:lavaplayer", version.ref = "lavaplayer" }
 jnativehook = { module = "com.github.kwhat:jnativehook", version.ref = "jnativehook" }
 jackson-databind = { module = "tools.jackson.core:jackson-databind", version.ref = "jackson" }
 archunit-junit5 = { module = "com.tngtech.archunit:archunit-junit5", version.ref = "archunit" }
+junit-bom = { module = "org.junit:junit-bom", version.ref = "junit" }
+junit-jupiter = { module = "org.junit.jupiter:junit-jupiter" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
+assertj-core = { module = "org.assertj:assertj-core", version.ref = "assertj" }
 
 [plugins]
 spring-boot = { id = "org.springframework.boot", version.ref = "spring-boot" }
