@@ -1,6 +1,7 @@
 package io.github.phs314.quicktts.bot.shared.adapter.in.web;
 
 import io.github.phs314.quicktts.bot.shared.domain.InvalidDomainValueException;
+import io.github.phs314.quicktts.common.ApiErrorCode;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,6 +15,6 @@ public class DomainExceptionHandler {
 
     @ExceptionHandler(InvalidDomainValueException.class)
     public ProblemDetail invalidRequest(InvalidDomainValueException e) {
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+        return ApiProblem.of(HttpStatus.BAD_REQUEST, ApiErrorCode.INVALID_VALUE, e.getMessage());
     }
 }

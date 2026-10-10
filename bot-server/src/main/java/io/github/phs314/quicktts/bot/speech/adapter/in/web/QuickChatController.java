@@ -12,7 +12,6 @@ import io.github.phs314.quicktts.common.VoiceChannelResponse;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,25 +35,26 @@ public class QuickChatController {
     public ResponseEntity<Void> quickChat(
             @RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) String authorization,
             @RequestBody QuickChatRequest request) {
-        Optional<DiscordUserId> speaker = bearerToken(authorization).flatMap(authenticateDevice::authenticate);
-        if (speaker.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        speakQuickChat.speak(new SpeakQuickChatCommand(speaker.get(), new QuickChatMessage(request.text())));
+        DiscordUserId speaker = authenticatedUser(authorization);
+        speakQuickChat.speak(new SpeakQuickChatCommand(speaker, new QuickChatMessage(request.text())));
         return ResponseEntity.accepted().build();
     }
 
     @GetMapping(QuickChatApi.MY_VOICE_CHANNEL_PATH)
     public ResponseEntity<VoiceChannelResponse> myVoiceChannel(
             @RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) String authorization) {
-        Optional<DiscordUserId> user = bearerToken(authorization).flatMap(authenticateDevice::authenticate);
-        if (user.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        return findMyVoiceChannel.findMyVoiceChannel(user.get())
+        DiscordUserId user = authenticatedUser(authorization);
+        return findMyVoiceChannel.findMyVoiceChannel(user)
                 .map(details -> ResponseEntity.ok(new VoiceChannelResponse(
                         details.serverName(), details.serverIconUrl(), details.channelName())))
                 .orElseGet(() -> ResponseEntity.noContent().build());
+    }
+
+    /** 기기 토큰의 주인. 토큰이 없거나 해제된 기기면 401 로 끝난다. */
+    private DiscordUserId authenticatedUser(String authorization) {
+        return bearerToken(authorization)
+                .flatMap(authenticateDevice::authenticate)
+                .orElseThrow(DeviceUnauthorizedException::new);
     }
 
     private static Optional<String> bearerToken(String authorization) {
