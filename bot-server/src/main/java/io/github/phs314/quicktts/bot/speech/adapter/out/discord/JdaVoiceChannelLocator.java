@@ -12,12 +12,11 @@ import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
-import net.dv8tion.jda.api.entities.User;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import org.springframework.stereotype.Component;
 
 /**
- * 봇이 들어가 있는 서버들의 음성 상태 캐시에서 사용자와 봇이 있는 음성 채널을 찾는다.
+ * 봇이 들어가 있는 디스코드 서버들의 음성 상태 캐시에서 사용자가 있는 음성 채널과 채널에 남은 사람을 본다.
  */
 @Component
 @RequiredArgsConstructor
@@ -36,13 +35,20 @@ public class JdaVoiceChannelLocator implements VoiceChannelLocatorPort {
     }
 
     @Override
-    public Optional<VoiceChannelDetails> findBotChannelInUse(GuildId guildId) {
-        Guild guild = jda.getGuildById(guildId.value());
-        AudioChannel channel = guild == null ? null : guild.getAudioManager().getConnectedChannel();
-        if (channel == null || channel.getMembers().stream().map(Member::getUser).allMatch(User::isBot)) {
-            return Optional.empty();
-        }
-        return Optional.of(toDetails(guild, channel));
+    public Optional<VoiceChannelDetails> findDetails(VoiceChannel channel) {
+        return findAudioChannel(channel).map(audioChannel -> toDetails(audioChannel.getGuild(), audioChannel));
+    }
+
+    @Override
+    public boolean hasPeople(VoiceChannel channel) {
+        return findAudioChannel(channel)
+                .map(audioChannel -> audioChannel.getMembers().stream().map(Member::getUser).anyMatch(user -> !user.isBot()))
+                .orElse(false);
+    }
+
+    private Optional<AudioChannel> findAudioChannel(VoiceChannel channel) {
+        Guild guild = jda.getGuildById(channel.guildId().value());
+        return Optional.ofNullable(guild == null ? null : guild.getChannelById(AudioChannel.class, channel.channelId()));
     }
 
     private static Optional<VoiceChannelDetails> currentChannel(Member member) {

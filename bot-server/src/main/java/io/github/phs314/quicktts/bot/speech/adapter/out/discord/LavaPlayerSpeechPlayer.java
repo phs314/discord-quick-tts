@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * 음성을 임시 파일로 저장한 뒤 LavaPlayer 로 디스코드 음성 채널에 재생한다.
+ * 디스코드 음성 채널에 들어가고 나가며, 음성을 임시 파일로 저장한 뒤 LavaPlayer 로 재생한다.
  */
 @Component
 public class LavaPlayerSpeechPlayer implements SpeechPlayerPort {
@@ -43,18 +43,25 @@ public class LavaPlayerSpeechPlayer implements SpeechPlayerPort {
     }
 
     @Override
-    public void play(VoiceChannel channel, Speech speech) {
+    public void join(VoiceChannel channel) {
         Guild guild = jda.getGuildById(channel.guildId().value());
         AudioChannel audioChannel = guild == null ? null : guild.getChannelById(AudioChannel.class, channel.channelId());
         if (audioChannel == null) {
             log.warn("음성 채널을 찾을 수 없습니다: {}", channel);
             return;
         }
+        AudioManager audioManager = guild.getAudioManager();
+        if (audioManager.getSendingHandler() == null) {
+            audioManager.setSendingHandler(new AudioPlayerSendHandler(queue(channel.guildId()).player()));
+        }
+        if (!audioChannel.equals(audioManager.getConnectedChannel())) {
+            audioManager.openAudioConnection(audioChannel);
+        }
+    }
 
-        GuildSpeechQueue queue = queues.computeIfAbsent(channel.guildId(),
-                id -> new GuildSpeechQueue(playerManager.createPlayer()));
-        connect(guild, audioChannel, queue);
-
+    @Override
+    public void play(GuildId guildId, Speech speech) {
+        GuildSpeechQueue queue = queue(guildId);
         Path audioFile = writeTempFile(speech);
         playerManager.loadItem(audioFile.toString(), new AudioLoadResultHandler() {
             @Override
@@ -83,8 +90,8 @@ public class LavaPlayerSpeechPlayer implements SpeechPlayerPort {
         });
     }
 
-    /** 읽던 문장을 모두 버리고 음성 채널에서 나간다. */
-    void leave(GuildId guildId) {
+    @Override
+    public void leave(GuildId guildId) {
         GuildSpeechQueue queue = queues.get(guildId);
         if (queue != null) {
             queue.clear();
@@ -95,14 +102,8 @@ public class LavaPlayerSpeechPlayer implements SpeechPlayerPort {
         }
     }
 
-    private static void connect(Guild guild, AudioChannel channel, GuildSpeechQueue queue) {
-        AudioManager audioManager = guild.getAudioManager();
-        if (audioManager.getSendingHandler() == null) {
-            audioManager.setSendingHandler(new AudioPlayerSendHandler(queue.player()));
-        }
-        if (!channel.equals(audioManager.getConnectedChannel())) {
-            audioManager.openAudioConnection(channel);
-        }
+    private GuildSpeechQueue queue(GuildId guildId) {
+        return queues.computeIfAbsent(guildId, id -> new GuildSpeechQueue(playerManager.createPlayer()));
     }
 
     private static Path writeTempFile(Speech speech) {

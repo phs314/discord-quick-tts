@@ -6,7 +6,6 @@ import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 
 class FindMyVoiceChannelServiceTest {
@@ -17,9 +16,9 @@ class FindMyVoiceChannelServiceTest {
 
     @Test
     void 보내기_전에_어느_음성_채널에서_읽힐지_알려_준다() {
-        FindMyVoiceChannelService service = new FindMyVoiceChannelService(new FakeVoiceChannelLocator(
-                user -> user.equals(SPEAKER) ? Optional.of(DETAILS) : Optional.empty(),
-                guildId -> Optional.empty()));
+        FakeVoiceChannelLocator discord = new FakeVoiceChannelLocator();
+        discord.enter(SPEAKER, DETAILS);
+        FindMyVoiceChannelService service = new FindMyVoiceChannelService(discord);
 
         assertThat(service.findMyVoiceChannel(SPEAKER)).contains(DETAILS);
         assertThat(service.findMyVoiceChannel(new DiscordUserId(7L))).isEmpty();
