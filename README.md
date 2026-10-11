@@ -94,6 +94,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 - 기기 토큰은 서버에 SHA-256 해시로만 저장합니다. 연결 코드는 5분짜리 일회용이고 메모리에만 둡니다.
 - DB 는 배포 서버가 MySQL, 이 PC 에서 띄우는 서버(개발, exe)가 H2 파일입니다. 스키마는 Flyway 마이그레이션(`bot-server/src/main/resources/db/migration`)으로 관리하고, 저장소 테스트는 H2 와 MySQL 양쪽에서 돕니다 ([ADR 0016](docs/adr/0016-mysql-and-flyway.md)).
 - API 경로는 `/api/v1` 아래에 있습니다. 오류 응답은 ProblemDetail 에 `code` 속성(`ApiErrorCode`)을 실어 보내고, 클라이언트는 이 코드로 안내 문구를 고릅니다 ([ADR 0013](docs/adr/0013-api-versioning-and-error-codes.md)).
+- `QuickTtsApiIntegrationTest` 가 봇 서버를 통째로 띄워 `/api/v1` 을 HTTP 로 부르고 응답까지 확인합니다. 디스코드와 TTS 엔진만 출력 포트 대역으로 바꿔서 디스코드에 접속하지 않고 소리도 나지 않습니다 ([ADR 0017](docs/adr/0017-api-integration-test.md)).
 
 ## 준비물
 
