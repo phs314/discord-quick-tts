@@ -12,29 +12,41 @@ import java.awt.TrayIcon;
 import java.util.Optional;
 
 /**
- * 작업 표시줄 트레이 아이콘. 종료, 윈도우 시작 시 실행 메뉴와 전송 실패 알림을 맡는다.
+ * 작업 표시줄 트레이 아이콘. 종료, 단축키 바꾸기, 윈도우 시작 시 실행 메뉴와 전송 실패 알림을 맡는다.
  */
 class TrayMenu {
 
     private TrayIcon trayIcon;
 
-    void install(Runnable onExit, Optional<WindowsStartup> startup) {
+    void install(Hotkey hotkey, Runnable onChangeHotkey, Runnable onExit, Optional<WindowsStartup> startup) {
         if (!SystemTray.isSupported()) {
             return;
         }
         EventQueue.invokeLater(() -> {
             PopupMenu menu = new PopupMenu();
+            MenuItem changeHotkey = new MenuItem("Change Shortcut...");
+            changeHotkey.addActionListener(e -> onChangeHotkey.run());
+            menu.add(changeHotkey);
             startup.ifPresent(windowsStartup -> menu.add(startWithWindowsItem(windowsStartup)));
             MenuItem exit = new MenuItem("Exit");
             exit.addActionListener(e -> onExit.run());
             menu.add(exit);
 
-            trayIcon = new TrayIcon(createIcon(), "Discord Quick TTS (Ctrl+Shift+Space)", menu);
+            trayIcon = new TrayIcon(createIcon(), tooltip(hotkey), menu);
             trayIcon.setImageAutoSize(true);
             try {
                 SystemTray.getSystemTray().add(trayIcon);
             } catch (AWTException e) {
                 trayIcon = null;
+            }
+        });
+    }
+
+    /** 트레이 아이콘에 마우스를 올리면 보이는 단축키 안내를 바꾼다. */
+    void showHotkey(Hotkey hotkey) {
+        EventQueue.invokeLater(() -> {
+            if (trayIcon != null) {
+                trayIcon.setToolTip(tooltip(hotkey));
             }
         });
     }
@@ -68,6 +80,10 @@ class TrayMenu {
             }
         });
         return item;
+    }
+
+    private static String tooltip(Hotkey hotkey) {
+        return "Discord Quick TTS (" + hotkey + ")";
     }
 
     private static Image createIcon() {
