@@ -47,7 +47,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │       ├── in/discord/         /목소리 슬래시 명령, 음성 채널 입·퇴장 소식
 │       ├── out/tts/            TTS 엔진 (Edge, Google 번역) 과 엔진 고르기
 │       ├── out/discord/        JDA + LavaPlayer 로 채널 찾기, 들어가기·재생·나가기
-│       └── out/persistence/    사용자별 목소리 저장소 (H2), 메모리 봇 자리 저장소
+│       └── out/persistence/    사용자별 목소리 저장소 (JdbcClient), 메모리 봇 자리 저장소
 ├── device/
 │   ├── domain/                 Pairing, Device (엔티티)
 │   │   └── vo/                 PairingCode, DeviceToken, DeviceId, DeviceName (값 객체)
@@ -60,7 +60,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │   └── adapter/
 │       ├── in/web/             기기 등록 REST 컨트롤러
 │       ├── in/discord/         /연결 슬래시 명령
-│       └── out/persistence/    기기 저장소 (H2, JdbcClient), 메모리 연결 코드 저장소
+│       └── out/persistence/    기기 저장소 (JdbcClient), 메모리 연결 코드 저장소
 ├── guild/
 │   ├── domain/                 AllowedGuild (허용한 디스코드 서버)
 │   ├── application/
@@ -72,7 +72,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │   └── adapter/
 │       ├── in/discord/         /허용목록 슬래시 명령, 초대·시작 때 확인
 │       ├── out/discord/        봇이 들어가 있는 서버 보기·나가기, 봇 주인 알아내기
-│       ├── out/persistence/    허용 목록 저장소 (H2)
+│       ├── out/persistence/    허용 목록 저장소 (JdbcClient)
 │       └── out/settings/       허용 목록을 쓸지 설정 값
 ├── shared/                     공유 커널(domain/vo 의 DiscordUserId, GuildId)과 공통 예외 처리
 └── config/                     설정 값, JDA, 시계
@@ -92,17 +92,19 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 - 같은 디스코드 서버에서는 먼저 쓰고 있는 음성 채널이 우선이고, 사람이 다 나가면 봇도 나갑니다. 이 판단은 디스코드 서버마다 하나인 봇 자리(`BotSeat`)가 하고, 잠금도 디스코드 서버마다 따로입니다 ([ADR 0007](docs/adr/0007-first-come-voice-channel.md), [ADR 0014](docs/adr/0014-bot-seat-aggregate.md)).
 - TTS 엔진은 `SpeechSynthesizerPort` 뒤에 있습니다. 지금은 무료인 Microsoft Edge "소리 내어 읽기" 목소리(선희, 인준, 현수)와 Google 번역 목소리를 쓰고, Edge 가 실패하면 Google 번역 목소리로 대신 읽습니다. 엔진을 추가하려면 `speech/adapter/out/tts` 에 `TtsEngine` 구현을 하나 더 만들면 됩니다. 둘 다 공식 API 가 아니라서 언제든 막힐 수 있습니다.
 - 기기 토큰은 서버에 SHA-256 해시로만 저장합니다. 연결 코드는 5분짜리 일회용이고 메모리에만 둡니다.
+- DB 는 배포 서버가 MySQL, 이 PC 에서 띄우는 서버(개발, exe)가 H2 파일입니다. 스키마는 Flyway 마이그레이션(`bot-server/src/main/resources/db/migration`)으로 관리하고, 저장소 테스트는 H2 와 MySQL 양쪽에서 돕니다 ([ADR 0016](docs/adr/0016-mysql-and-flyway.md)).
 - API 경로는 `/api/v1` 아래에 있습니다. 오류 응답은 ProblemDetail 에 `code` 속성(`ApiErrorCode`)을 실어 보내고, 클라이언트는 이 코드로 안내 문구를 고릅니다 ([ADR 0013](docs/adr/0013-api-versioning-and-error-codes.md)).
 
 ## 준비물
 
 - JDK 25
+- Docker (선택): 있으면 테스트가 MySQL 에서도 돕니다. 없으면 MySQL 쪽 테스트만 건너뜁니다.
 - 디스코드 봇 (Discord Developer Portal 에서 만들고, `bot` 과 `applications.commands` 스코프, `View Channels`, `Connect`, `Speak` 권한으로 서버에 초대)
 
 ## 봇 서버 실행
 
 1. `.env.example` 을 `.env` 로 복사하고 `DISCORD_TOKEN` 을 채웁니다. `.env` 는 커밋되지 않습니다.
-2. 실행합니다. 등록된 기기는 `data/` 폴더의 H2 파일에 저장됩니다.
+2. 실행합니다. 등록된 기기와 목소리 설정은 `data/` 폴더의 H2 파일에 저장됩니다. MySQL 을 쓰려면 `.env` 에 `QUICKTTS_DB_URL`, `QUICKTTS_DB_USERNAME`, `QUICKTTS_DB_PASSWORD` 를 채웁니다(`.env.example` 참고).
 
 ```bash
 ./gradlew :bot-server:bootRun
