@@ -43,6 +43,8 @@ public class QuickChatApp extends Application {
     private Stage stage;
     private InputBar inputBar;
     private TextField input;
+    /** 단축키 바꾸기 창이 이미 떠 있으면 트레이 메뉴를 또 눌러도 하나만 띄운다. */
+    private boolean changingHotkey;
 
     @Override
     public void start(Stage primaryStage) {
@@ -68,7 +70,7 @@ public class QuickChatApp extends Application {
             }
         });
 
-        hotkey = new GlobalHotkey(() -> Platform.runLater(this::toggle));
+        hotkey = new GlobalHotkey(config.hotkey(), () -> Platform.runLater(this::toggle));
         try {
             hotkey.register();
         } catch (NativeHookException e) {
@@ -76,7 +78,8 @@ public class QuickChatApp extends Application {
             return;
         }
 
-        trayMenu.install(() -> Platform.runLater(Platform::exit), WindowsStartup.forThisApp());
+        trayMenu.install(config.hotkey(), () -> Platform.runLater(this::changeHotkey),
+                () -> Platform.runLater(Platform::exit), WindowsStartup.forThisApp());
         // 이미 떠 있는데 exe 를 또 실행하면 새로 뜨는 대신 입력창을 연다.
         if (singleInstance != null) {
             singleInstance.onShowRequested(() -> Platform.runLater(this::show));
@@ -179,6 +182,28 @@ public class QuickChatApp extends Application {
             }
             return null;
         });
+    }
+
+    /** 새 단축키를 눌러서 정하는 창을 띄우고, 저장하면 설정 파일에 쓰고 바로 바꾼다. */
+    private void changeHotkey() {
+        if (changingHotkey) {
+            return;
+        }
+        changingHotkey = true;
+        HotkeyDialog dialog = new HotkeyDialog(config.hotkey());
+        useAppIcon(dialog);
+        hotkey.startRecording(dialog::pressed);
+        try {
+            dialog.showAndWait().ifPresent(newHotkey -> {
+                config = config.withHotkey(newHotkey);
+                config.save();
+                hotkey.change(newHotkey);
+                trayMenu.showHotkey(newHotkey);
+            });
+        } finally {
+            hotkey.stopRecording();
+            changingHotkey = false;
+        }
     }
 
     /**
