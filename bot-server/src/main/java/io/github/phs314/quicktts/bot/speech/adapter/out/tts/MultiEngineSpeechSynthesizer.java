@@ -3,7 +3,7 @@ package io.github.phs314.quicktts.bot.speech.adapter.out.tts;
 import io.github.phs314.quicktts.bot.config.QuickTtsProperties;
 import io.github.phs314.quicktts.bot.speech.application.exception.SpeechSynthesisException;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizerPort;
-import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
+import io.github.phs314.quicktts.bot.speech.domain.vo.SpokenText;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
@@ -45,15 +45,15 @@ public class MultiEngineSpeechSynthesizer implements SpeechSynthesizerPort {
     }
 
     @Override
-    public Speech synthesize(QuickChatMessage message, VoiceId voice) {
+    public Speech synthesize(SpokenText text, VoiceId voice) {
         try {
-            return engineOf(voice).synthesize(message.text(), voice);
+            return engineOf(voice).synthesize(text.text(), voice);
         } catch (SpeechSynthesisException e) {
             if (voice.equals(GoogleTranslateEngine.VOICE_ID) || !offers(GoogleTranslateEngine.VOICE_ID)) {
                 throw e;
             }
             log.warn("{} 목소리로 읽지 못해 Google 번역 목소리로 대신 읽습니다.", voice.value(), e);
-            return engineOf(GoogleTranslateEngine.VOICE_ID).synthesize(message.text(), GoogleTranslateEngine.VOICE_ID);
+            return engineOf(GoogleTranslateEngine.VOICE_ID).synthesize(text.text(), GoogleTranslateEngine.VOICE_ID);
         }
     }
 

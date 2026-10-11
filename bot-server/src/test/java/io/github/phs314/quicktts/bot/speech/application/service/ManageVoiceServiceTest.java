@@ -7,7 +7,7 @@ import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.application.exception.UnknownVoiceException;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoicePreferencePort;
-import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
+import io.github.phs314.quicktts.bot.speech.domain.vo.SpokenText;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
@@ -65,8 +65,8 @@ class ManageVoiceServiceTest {
         }
 
         @Override
-        public Speech synthesize(QuickChatMessage message, VoiceId voice) {
-            return new Speech((voice.value() + ":" + message.text()).getBytes(), "txt");
+        public Speech synthesize(SpokenText text, VoiceId voice) {
+            return new Speech((voice.value() + ":" + text.text()).getBytes(), "txt");
         }
     }
 

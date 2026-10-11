@@ -11,6 +11,7 @@ import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesiz
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocatorPort;
 import io.github.phs314.quicktts.bot.speech.domain.BotSeat;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
+import io.github.phs314.quicktts.bot.speech.domain.vo.SpokenText;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
@@ -29,12 +30,13 @@ public class SpeakQuickChatService implements SpeakQuickChatUseCase {
 
     @Override
     public void speak(SpeakQuickChatCommand command) {
+        SpokenText text = command.message().toSpokenText();
         VoiceChannel channel = voiceChannelLocator.findCurrentChannel(command.speaker())
                 .map(VoiceChannelDetails::channel)
                 .orElseThrow(() -> new SpeakerNotInVoiceChannelException(command.speaker()));
 
         VoiceId voice = voices.currentVoice(command.speaker()).id();
-        Speech speech = speechSynthesizer.synthesize(command.message(), voice);
+        Speech speech = speechSynthesizer.synthesize(text, voice);
 
         // 같은 디스코드 서버에서는 자리 잡기와 재생 순서 넣기가 한 번에 하나씩 일어나서 다른 채널의 요청이 끼어들지 못한다.
         botSeats.withSeat(channel.guildId(), seat -> {
