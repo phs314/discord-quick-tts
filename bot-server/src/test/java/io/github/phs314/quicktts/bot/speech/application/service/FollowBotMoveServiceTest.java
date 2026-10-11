@@ -2,7 +2,7 @@ package io.github.phs314.quicktts.bot.speech.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.github.phs314.quicktts.bot.speech.domain.vo.GuildId;
+import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;

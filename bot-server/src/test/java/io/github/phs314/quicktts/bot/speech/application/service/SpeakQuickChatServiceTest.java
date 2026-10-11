@@ -4,10 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
+import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.application.exception.SpeakerNotInVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.exception.VoiceChannelInUseException;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
-import io.github.phs314.quicktts.bot.speech.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;

@@ -1,6 +1,6 @@
 package io.github.phs314.quicktts.bot.speech.application.port.in.usecase;
 
-import io.github.phs314.quicktts.bot.speech.domain.vo.GuildId;
+import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 
 /**
  * 봇이 있는 음성 채널에 사람이 아무도 남지 않으면 봇을 내보낸다.

@@ -3,7 +3,7 @@ package io.github.phs314.quicktts.bot.speech.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
-import io.github.phs314.quicktts.bot.speech.domain.vo.GuildId;
+import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import org.junit.jupiter.api.Test;
