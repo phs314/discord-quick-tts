@@ -2,6 +2,7 @@ package io.github.phs314.quicktts.client;
 
 import java.awt.AWTException;
 import java.awt.CheckboxMenuItem;
+import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.Image;
 import java.awt.MenuItem;
@@ -9,10 +10,12 @@ import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.Toolkit;
 import java.awt.TrayIcon;
+import java.io.IOException;
+import java.net.URI;
 import java.util.Optional;
 
 /**
- * 작업 표시줄 트레이 아이콘. 종료, 단축키 바꾸기, 윈도우 시작 시 실행 메뉴와 전송 실패 알림을 맡는다.
+ * 작업 표시줄 트레이 아이콘. 종료, 단축키 바꾸기, 윈도우 시작 시 실행 메뉴와 전송 실패·새 버전 알림을 맡는다.
  */
 class TrayMenu {
 
@@ -61,6 +64,24 @@ class TrayMenu {
         });
     }
 
+    /**
+     * 새 버전이 나왔다고 알리고, 알림을 누르거나 메뉴의 Download 를 누르면 Release 페이지를 연다.
+     */
+    void showUpdate(UpdateChecker.Release release) {
+        EventQueue.invokeLater(() -> {
+            if (trayIcon == null) {
+                return;
+            }
+            MenuItem download = new MenuItem("Download v" + release.version() + "...");
+            download.addActionListener(e -> openInBrowser(release.page()));
+            trayIcon.getPopupMenu().insert(download, 0);
+            // 윈도우에서는 알림을 누르거나 트레이 아이콘을 두 번 누르면 불린다.
+            trayIcon.addActionListener(e -> openInBrowser(release.page()));
+            trayIcon.displayMessage("Discord Quick TTS",
+                    "새 버전 " + release.version() + " 이 나왔습니다. 눌러서 내려받으세요.", TrayIcon.MessageType.INFO);
+        });
+    }
+
     void remove() {
         EventQueue.invokeLater(() -> {
             if (trayIcon != null) {
@@ -80,6 +101,14 @@ class TrayMenu {
             }
         });
         return item;
+    }
+
+    private void openInBrowser(URI page) {
+        try {
+            Desktop.getDesktop().browse(page);
+        } catch (IOException | UnsupportedOperationException e) {
+            showError("브라우저를 열지 못했습니다: " + page);
+        }
     }
 
     private static String tooltip(Hotkey hotkey) {
