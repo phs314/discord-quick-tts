@@ -1,0 +1,61 @@
+package io.github.phs314.quicktts.bot.guild.adapter.out.persistence;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
+
+import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
+import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
+import java.time.Instant;
+import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
+
+class JdbcAllowedGuildRepositoryTest {
+
+    private static final GuildId FIRST = new GuildId(987654321098765432L);
+    private static final GuildId SECOND = new GuildId(123456789012345678L);
+    private static final Instant EARLIER = Instant.parse("2026-10-11T00:00:00Z");
+    private static final Instant LATER = Instant.parse("2026-10-11T01:00:00Z");
+
+    private JdbcAllowedGuildRepository repository;
+
+    @BeforeEach
+    void setUp() {
+        var dataSource = new DriverManagerDataSource("jdbc:h2:mem:" + UUID.randomUUID() + ";DB_CLOSE_DELAY=-1");
+        new ResourceDatabasePopulator(new ClassPathResource("schema.sql")).execute(dataSource);
+        repository = new JdbcAllowedGuildRepository(JdbcClient.create(dataSource));
+    }
+
+    @Test
+    void 넣은_순서대로_돌려준다() {
+        repository.add(AllowedGuild.allow(SECOND, LATER));
+        repository.add(AllowedGuild.allow(FIRST, EARLIER));
+
+        assertThat(repository.findAll()).extracting(AllowedGuild::guildId, AllowedGuild::allowedAt)
+                .containsExactly(
+                        tuple(FIRST, EARLIER),
+                        tuple(SECOND, LATER));
+        assertThat(repository.exists(FIRST)).isTrue();
+    }
+
+    @Test
+    void 이미_있는_서버는_다시_넣지_않는다() {
+        assertThat(repository.add(AllowedGuild.allow(FIRST, EARLIER))).isTrue();
+        assertThat(repository.add(AllowedGuild.allow(FIRST, LATER))).isFalse();
+
+        assertThat(repository.findAll()).extracting(AllowedGuild::allowedAt).containsExactly(EARLIER);
+    }
+
+    @Test
+    void 지우면_없다() {
+        repository.add(AllowedGuild.allow(FIRST, EARLIER));
+
+        assertThat(repository.delete(FIRST)).isTrue();
+        assertThat(repository.delete(FIRST)).isFalse();
+        assertThat(repository.exists(FIRST)).isFalse();
+    }
+}

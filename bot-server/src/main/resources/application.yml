@@ -29,3 +29,7 @@ quicktts:
     default-voice: ${QUICKTTS_DEFAULT_VOICE:edge:ko-KR-SunHiNeural}
     # Edge 목소리 서버가 확인하는 Edge 브라우저 버전. Edge 목소리가 갑자기 안 되면 최신 버전으로 올린다.
     edge-chromium-version: 143.0.3650.75
+  guild-allowlist:
+    # 켜 두면 봇 주인이 /허용목록 으로 넣은 디스코드 서버에만 봇이 남고, 다른 곳에 초대되면 안내를 남기고 나간다.
+    # 누구나 초대할 수 있게 공개할 때 false 로 바꾼다.
+    enabled: ${QUICKTTS_GUILD_ALLOWLIST_ENABLED:true}

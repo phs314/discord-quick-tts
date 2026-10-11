@@ -12,4 +12,12 @@ public record GuildId(long value) {
             throw new InvalidDomainValueException("디스코드 서버 ID 는 양수여야 합니다.");
         }
     }
+
+    public static GuildId parse(String value) {
+        try {
+            return new GuildId(Long.parseLong(value.strip()));
+        } catch (NumberFormatException e) {
+            throw new InvalidDomainValueException("디스코드 서버 ID 형식이 아닙니다: " + value, e);
+        }
+    }
 }

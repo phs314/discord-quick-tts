@@ -17,3 +17,9 @@ create table if not exists voice_preference (
     discord_user_id bigint       primary key,
     voice_id        varchar(100) not null
 );
+
+-- 봇 주인이 /허용목록 으로 넣은 디스코드 서버. 허용 목록을 켜 두면 여기 없는 디스코드 서버에서는 봇이 나간다.
+create table if not exists allowed_guild (
+    guild_id   bigint    primary key,
+    allowed_at timestamp not null
+);
