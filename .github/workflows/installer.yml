@@ -1,0 +1,61 @@
+name: 설치 파일
+
+# Windows 에서 설치 마법사(QuickTTS-버전.exe)가 만들어지는지 확인하고, 만든 파일을 Actions 아티팩트로 올린다.
+# 클라이언트나 빌드 설정이 바뀔 때만 돌고, Actions 탭의 "Run workflow" 로 언제든 새로 만들 수 있다.
+on:
+  pull_request:
+    paths:
+      - 'desktop-client/**'
+      - 'gradle/**'
+      - '*.gradle.kts'
+      - '.github/workflows/installer.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'desktop-client/**'
+      - 'gradle/**'
+      - '*.gradle.kts'
+      - '.github/workflows/installer.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  installer:
+    name: Windows 설치 파일
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      # jpackage 가 설치 파일을 만들 때 쓰는 WiX. README 에서 PC 에 깔라고 안내하는 것과 같은 3.14 버전을 PATH 에 넣는다.
+      - name: WiX 설치
+        shell: pwsh
+        run: |
+          Invoke-WebRequest https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip -OutFile "$env:RUNNER_TEMP\wix.zip"
+          Expand-Archive "$env:RUNNER_TEMP\wix.zip" -DestinationPath "$env:RUNNER_TEMP\wix"
+          "$env:RUNNER_TEMP\wix" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+
+      # 실패하면 WiX 오류 줄을 주석(annotation)으로 남겨 PR 의 Checks 요약에서 바로 보이게 한다.
+      - name: 설치 파일 만들기
+        shell: bash
+        run: |
+          set -o pipefail
+          if ! ./gradlew :desktop-client:packageInstaller -PjpackageVerbose 2>&1 | tee build-output.txt; then
+            summary=$( { grep -i -E "error|LGHT|CNDL" build-output.txt || tail -n 40 build-output.txt; } | head -n 60 | tr -d '\r')
+            echo "::error title=packageInstaller 실패::$(printf '%s' "$summary" | sed -e 's/%/%25/g' | sed -e ':a;N;$!ba;s/\n/%0A/g')"
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: QuickTTS-installer
+          path: desktop-client/build/distributions/QuickTTS-*.exe
+          retention-days: 14
