@@ -22,7 +22,7 @@ import com.tngtech.archunit.lang.SimpleConditionEvent;
 import java.util.List;
 
 /**
- * 바운디드 컨텍스트(speech, device)와 각 컨텍스트 안의 헥사고날 의존 방향, 포트 이름 규칙을 지킨다.
+ * 바운디드 컨텍스트(speech, device, guild)와 각 컨텍스트 안의 헥사고날 의존 방향, 포트 이름 규칙을 지킨다.
  */
 @AnalyzeClasses(packages = "io.github.phs314.quicktts.bot", importOptions = ImportOption.DoNotIncludeTests.class)
 class ArchitectureTest {
@@ -56,6 +56,28 @@ class ArchitectureTest {
             .ignoreDependency(resideInAPackage("..bot.speech.adapter.in.web.."), resideInAPackage(DEVICE_PUBLIC_API));
 
     @ArchTest
+    static final ArchRule guildIsHexagonal = onionArchitecture()
+            .domainModels("..bot.guild.domain..")
+            .applicationServices("..bot.guild.application..")
+            .adapter("discord-command", "..bot.guild.adapter.in.discord..")
+            .adapter("discord", "..bot.guild.adapter.out.discord..")
+            .adapter("persistence", "..bot.guild.adapter.out.persistence..")
+            .adapter("settings", "..bot.guild.adapter.out.settings..")
+            .withOptionalLayers(true)
+            .ignoreDependency(resideInAPackage("..bot.config.."), alwaysTrue());
+
+    /** guild 는 봇이 머물 디스코드 서버만 다룬다. speech, device 와 서로 모른다 (ADR 0015). */
+    @ArchTest
+    static final ArchRule guildIsIndependentOfOtherContexts = noClasses()
+            .that().resideInAPackage("..bot.guild..")
+            .should().dependOnClassesThat().resideInAnyPackage("..bot.speech..", "..bot.device..");
+
+    @ArchTest
+    static final ArchRule otherContextsDoNotKnowGuild = noClasses()
+            .that().resideInAnyPackage("..bot.speech..", "..bot.device..")
+            .should().dependOnClassesThat().resideInAPackage("..bot.guild..");
+
+    @ArchTest
     static final ArchRule speechUsesDeviceOnlyThroughItsPublicApi = noClasses()
             .that().resideInAPackage("..bot.speech..")
             .should().dependOnClassesThat(resideInAPackage("..bot.device..").and(resideOutsideOfPackage(DEVICE_PUBLIC_API)));
@@ -68,7 +90,7 @@ class ArchitectureTest {
     @ArchTest
     static final ArchRule sharedKernelDependsOnNoContext = noClasses()
             .that().resideInAPackage("..bot.shared..")
-            .should().dependOnClassesThat().resideInAnyPackage("..bot.speech..", "..bot.device..");
+            .should().dependOnClassesThat().resideInAnyPackage("..bot.speech..", "..bot.device..", "..bot.guild..");
 
     /** 인바운드 어댑터는 입력 포트로만 애플리케이션을 부른다. 서비스 구현이나 출력 포트를 직접 쓰지 않는다. */
     @ArchTest

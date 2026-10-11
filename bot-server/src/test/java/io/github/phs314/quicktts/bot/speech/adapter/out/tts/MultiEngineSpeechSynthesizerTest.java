@@ -62,7 +62,7 @@ class MultiEngineSpeechSynthesizerTest {
     }
 
     private static QuickTtsProperties defaultVoice(String voice) {
-        return new QuickTtsProperties(new QuickTtsProperties.Discord("token"), new QuickTtsProperties.Tts(voice, null));
+        return new QuickTtsProperties(new QuickTtsProperties.Discord("token"), new QuickTtsProperties.Tts(voice, null), null);
     }
 
     private static String text(Speech speech) {
