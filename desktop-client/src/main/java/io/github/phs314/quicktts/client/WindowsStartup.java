@@ -28,7 +28,19 @@ final class WindowsStartup {
         if (appPath == null || !System.getProperty("os.name").startsWith("Windows")) {
             return Optional.empty();
         }
-        return Optional.of(new WindowsStartup(Path.of(appPath)));
+        WindowsStartup startup = new WindowsStartup(Path.of(appPath));
+        startup.pointToThisExe();
+        return Optional.of(startup);
+    }
+
+    /**
+     * 켜 둔 상태에서 exe 위치가 바뀌었으면(다른 경로에 다시 설치, 압축 파일에서 설치 파일로 옮김)
+     * 자동 시작이 옛 경로 대신 지금 실행 중인 exe 를 가리키게 고친다.
+     */
+    private void pointToThisExe() {
+        if (isEnabled()) {
+            setEnabled(true);
+        }
     }
 
     boolean isEnabled() {
