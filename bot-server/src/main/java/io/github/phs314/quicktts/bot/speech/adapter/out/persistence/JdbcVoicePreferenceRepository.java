@@ -9,7 +9,7 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
 
 /**
- * 사용자가 고른 목소리를 {@code voice_preference} 테이블에 저장한다. 스키마는 {@code schema.sql} 에 있다.
+ * 사용자가 고른 목소리를 {@code voice_preference} 테이블에 저장한다. 스키마는 {@code db/migration} 에 있다.
  */
 @Component
 @RequiredArgsConstructor
@@ -27,8 +27,8 @@ public class JdbcVoicePreferenceRepository implements VoicePreferencePort {
 
     @Override
     public void save(DiscordUserId user, VoiceId voice) {
-        jdbcClient.sql("merge into voice_preference (discord_user_id, voice_id) key (discord_user_id)"
-                        + " values (:user, :voice)")
+        jdbcClient.sql("insert into voice_preference (discord_user_id, voice_id) values (:user, :voice)"
+                        + " on duplicate key update voice_id = :voice")
                 .param("user", user.value())
                 .param("voice", voice.value())
                 .update();

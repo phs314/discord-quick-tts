@@ -16,7 +16,7 @@ import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
 
 /**
- * 등록된 기기를 {@code device} 테이블에 저장한다. 스키마는 {@code schema.sql} 에 있다.
+ * 등록된 기기를 {@code device} 테이블에 저장한다. 스키마는 {@code db/migration} 에 있다.
  */
 @Component
 @RequiredArgsConstructor

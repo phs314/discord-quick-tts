@@ -4,15 +4,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
-import java.util.UUID;
+import io.github.phs314.quicktts.bot.support.TestDatabase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
+import org.junit.jupiter.params.Parameter;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 
+@ParameterizedClass
+@EnumSource(TestDatabase.class)
 class JdbcVoicePreferenceRepositoryTest {
+
+    @Parameter
+    TestDatabase database;
 
     private static final DiscordUserId USER = new DiscordUserId(123456789012345678L);
 
@@ -20,9 +25,7 @@ class JdbcVoicePreferenceRepositoryTest {
 
     @BeforeEach
     void setUp() {
-        var dataSource = new DriverManagerDataSource("jdbc:h2:mem:" + UUID.randomUUID() + ";DB_CLOSE_DELAY=-1");
-        new ResourceDatabasePopulator(new ClassPathResource("schema.sql")).execute(dataSource);
-        repository = new JdbcVoicePreferenceRepository(JdbcClient.create(dataSource));
+        repository = new JdbcVoicePreferenceRepository(JdbcClient.create(database.dataSource()));
     }
 
     @Test

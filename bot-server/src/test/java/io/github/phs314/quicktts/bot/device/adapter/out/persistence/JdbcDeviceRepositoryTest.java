@@ -7,31 +7,32 @@ import io.github.phs314.quicktts.bot.device.domain.vo.DeviceId;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceTokenHash;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
+import io.github.phs314.quicktts.bot.support.TestDatabase;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.UUID;
-import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.io.ClassPathResource;
+import org.junit.jupiter.params.Parameter;
+import org.junit.jupiter.params.ParameterizedClass;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 
+@ParameterizedClass
+@EnumSource(TestDatabase.class)
 class JdbcDeviceRepositoryTest {
 
     private static final DiscordUserId OWNER = new DiscordUserId(123456789012345678L);
     private static final DiscordUserId OTHER = new DiscordUserId(987654321098765432L);
     private static final Instant NOW = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
-    private DataSource dataSource;
+    @Parameter
+    TestDatabase database;
+
     private JdbcDeviceRepository repository;
 
     @BeforeEach
     void setUp() {
-        dataSource = new DriverManagerDataSource("jdbc:h2:mem:" + UUID.randomUUID() + ";DB_CLOSE_DELAY=-1");
-        runSchema();
-        repository = new JdbcDeviceRepository(JdbcClient.create(dataSource));
+        repository = new JdbcDeviceRepository(JdbcClient.create(database.dataSource()));
     }
 
     @Test
@@ -76,32 +77,6 @@ class JdbcDeviceRepositoryTest {
 
         assertThat(repository.deleteAllByOwner(OWNER)).isEqualTo(2);
         assertThat(repository.findByOwner(OTHER)).hasSize(1);
-    }
-
-    @Test
-    void 이름과_식별자가_없던_예전_기기도_스키마를_다시_돌리면_목록에_나온다() {
-        JdbcClient jdbc = JdbcClient.create(dataSource);
-        jdbc.sql("drop table device").update();
-        jdbc.sql("""
-                create table device (
-                    token_hash varchar(64) primary key,
-                    discord_user_id bigint not null,
-                    registered_at timestamp not null)
-                """).update();
-        jdbc.sql("insert into device values ('" + "a".repeat(64) + "', :owner, current_timestamp)")
-                .param("owner", OWNER.value())
-                .update();
-
-        runSchema();
-
-        assertThat(repository.findByOwner(OWNER)).singleElement().satisfies(device -> {
-            assertThat(device.id().value()).isNotBlank();
-            assertThat(device.name()).isEqualTo(new DeviceName(null));
-        });
-    }
-
-    private void runSchema() {
-        new ResourceDatabasePopulator(new ClassPathResource("schema.sql")).execute(dataSource);
     }
 
     private static Device device(DiscordUserId owner, String hashSeed, String name, Instant registeredAt) {

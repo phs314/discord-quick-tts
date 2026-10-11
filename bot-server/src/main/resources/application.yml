@@ -8,14 +8,15 @@ spring:
       - optional:file:.env[.properties]
       - optional:file:${user.home}/.discord-quick-tts/server.env[.properties]
   datasource:
-    # 등록된 기기 목록. 기본은 실행 위치의 data/ 폴더에 H2 파일로 저장한다.
-    url: ${QUICKTTS_DB_URL:jdbc:h2:file:./data/quicktts}
+    # 등록된 기기, 목소리 설정. 기본은 실행 위치의 data/ 폴더에 H2 파일로 저장한다.
+    # 배포 서버는 MySQL 을 쓴다. 예: QUICKTTS_DB_URL=jdbc:mysql://localhost:3306/quicktts?connectionTimeZone=UTC
+    # H2 는 MySQL 과 같은 SQL 이 돌도록 MySQL 호환 모드로 연다.
+    url: ${QUICKTTS_DB_URL:jdbc:h2:file:./data/quicktts;MODE=MySQL}
     username: ${QUICKTTS_DB_USERNAME:sa}
     password: ${QUICKTTS_DB_PASSWORD:}
-  sql:
-    init:
-      mode: always
-      encoding: UTF-8
+  flyway:
+    # Flyway 전에 schema.sql 로 만든 DB 는 테이블이 이미 있으므로, 처음 한 번 V1 을 건너뛰고 그 위부터 쌓는다.
+    baseline-on-migrate: true
 
 server:
   port: ${QUICKTTS_PORT:8080}
