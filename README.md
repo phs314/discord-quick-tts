@@ -177,7 +177,7 @@ winget install --id WiXToolset.WiXToolset
 ./gradlew :desktop-client:packageInstaller
 ```
 
-`desktop-client/build/distributions/QuickTTS-0.1.0.exe` 가 생깁니다. GitHub Actions 의 **설치 파일** 워크플로도 같은 파일을 만들어 아티팩트(`QuickTTS-installer`)로 올리므로, WiX 없이 거기서 받아도 됩니다.
+`desktop-client/build/distributions/QuickTTS-0.1.0.exe` 가 생깁니다. GitHub Actions 의 **설치 파일** 워크플로도 같은 파일을 만들어 아티팩트(`QuickTTS-installer`)로 올리므로, WiX 없이 거기서 받아도 됩니다. 정식 버전은 [Releases](https://github.com/phs314/discord-quick-tts/releases/latest) 에서 로그인 없이 받을 수 있습니다.
 
 설치 파일을 실행하면 설치 경로(기본 `%LOCALAPPDATA%\QuickTTS`)를 고르고, 바탕화면과 시작 메뉴에 바로가기를 만들지 체크박스로 고릅니다. 사용자 폴더에 설치하므로 관리자 권한은 묻지 않습니다. 설치 화면은 영어입니다 ([ADR 0018](docs/adr/0018-windows-installer.md)).
 
@@ -194,6 +194,18 @@ winget install --id WiXToolset.WiXToolset
 ```
 
 `desktop-client/build/distributions/QuickTTS-0.1.0-windows.zip` 이 생깁니다. Gradle 빌드 폴더가 아닌 곳(예: `%LOCALAPPDATA%\Programs\QuickTTS`)에 풀어서 쓰세요. 빌드 폴더에서 실행하면 다음에 다시 만들 때 파일이 잠겨 실패합니다.
+
+### 새 버전 내기 (GitHub Releases)
+
+`v1.2.3` 모양의 태그를 푸시하면 **설치 파일** 워크플로가 그 버전으로 설치 파일과 압축 파일을 만들어 [Releases](https://github.com/phs314/discord-quick-tts/releases) 에 올립니다. 버전은 태그에서만 정하므로 코드를 고칠 필요가 없습니다 ([ADR 0020](docs/adr/0020-github-releases-and-update-notice.md)).
+
+```bash
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+- Release 본문에는 설치 안내와 지난 Release 이후 머지된 PR 목록이 자동으로 들어갑니다.
+- QuickTTS 는 켜질 때 최신 Release 를 확인해서, 지금보다 새 버전이 있으면 트레이 알림을 띄웁니다. 알림이나 트레이 메뉴의 **Download v버전...** 을 누르면 Release 페이지가 열리고, 받은 설치 파일을 실행하면 그 자리에 새 버전이 깔립니다.
 
 ### exe 로 쓸 때의 설정과 데이터 위치
 
