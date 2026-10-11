@@ -34,7 +34,10 @@ application {
 
 val appName = "QuickTTS"
 val serverLauncherName = "QuickTTS-Server"
-val appVersion = "0.1.0"
+// 버전은 v1.2.3 태그를 푸시하면 설치 파일 워크플로가 -PappVersion=1.2.3 으로 넘긴다. 그 밖의 빌드는 기본값을 쓴다.
+val appVersion = providers.gradleProperty("appVersion").getOrElse("0.1.0").also {
+    require(Regex("""\d+\.\d+\.\d+""").matches(it)) { "appVersion 은 1.2.3 처럼 숫자 세 개여야 한다: $it" }
+}
 val jpackageInput = layout.buildDirectory.dir("jpackage/input")
 val jpackageImage = layout.buildDirectory.dir("jpackage/image")
 val serverLauncherProperties = layout.buildDirectory.file("jpackage/server-launcher.properties")
@@ -85,6 +88,7 @@ val packageExe by tasks.registering(Exec::class) {
     inputs.dir(jpackageInput)
     inputs.file(serverLauncherProperties)
     inputs.property("serverUrl", serverUrl)
+    inputs.property("appVersion", appVersion)
     inputs.file(icon)
     outputs.dir(jpackageImage)
 
@@ -103,6 +107,8 @@ val packageExe by tasks.registering(Exec::class) {
             "--icon", icon.asFile.path,
             "--java-options", "--enable-native-access=ALL-UNNAMED",
             "--java-options", "-Dquicktts.server-url=" + serverUrl.get(),
+            // 켜질 때 GitHub Releases 에 이보다 새 버전이 있는지 확인하는 데 쓴다.
+            "--java-options", "-Dquicktts.version=$appVersion",
             "--add-launcher", "$serverLauncherName=" + serverLauncherProperties.get().asFile.path,
             "--dest", jpackageImage.get().asFile.path,
         )
