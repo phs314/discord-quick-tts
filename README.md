@@ -22,13 +22,14 @@
 
 ## 봇 서버 구조 (바운디드 컨텍스트 + 헥사고날)
 
-봇 서버는 두 바운디드 컨텍스트로 나뉘고, 각 컨텍스트 안은 헥사고날(도메인 / 포트 / 어댑터)로 나뉩니다. 도메인 용어는 [CONTEXT.md](CONTEXT.md), 구조를 이렇게 정한 이유는 [docs/adr](docs/adr) 에 있습니다.
+봇 서버는 세 바운디드 컨텍스트로 나뉘고, 각 컨텍스트 안은 헥사고날(도메인 / 포트 / 어댑터)로 나뉩니다. 도메인 용어는 [CONTEXT.md](CONTEXT.md), 구조를 이렇게 정한 이유는 [docs/adr](docs/adr) 에 있습니다.
 
 | 컨텍스트 | 다루는 것 |
 | --- | --- |
 | `speech` (핵심) | 누가 무슨 문장을 어느 음성 채널에서 읽게 하나 |
 | `device` (지원) | 이 PC 가 어느 디스코드 사용자의 것인가 (`/연결` 코드 발급, 기기 등록, 기기 인증) |
-| `shared` | 두 컨텍스트가 함께 쓰는 공유 커널 (`DiscordUserId`, 도메인 검증 예외) |
+| `guild` (지원) | 봇이 어느 디스코드 서버에 머물러도 되나 (허용 목록, 봇 주인 확인) |
+| `shared` | 여러 컨텍스트가 함께 쓰는 공유 커널 (`DiscordUserId`, `GuildId`, 도메인 검증 예외) |
 
 ```
 bot-server/src/main/java/io/github/phs314/quicktts/bot/
@@ -60,7 +61,20 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │       ├── in/web/             기기 등록 REST 컨트롤러
 │       ├── in/discord/         /연결 슬래시 명령
 │       └── out/persistence/    기기 저장소 (H2, JdbcClient), 메모리 연결 코드 저장소
-├── shared/                     공유 커널(domain/vo 의 DiscordUserId)과 공통 예외 처리
+├── guild/
+│   ├── domain/                 AllowedGuild (허용한 디스코드 서버)
+│   ├── application/
+│   │   ├── exception/          NotBotOwnerException
+│   │   ├── port/in/usecase/    ManageGuildAllowlist, EnforceGuildAllowlist
+│   │   ├── port/in/dto/        AllowedGuildDto, GuildAllowlistDto
+│   │   ├── port/out/           AllowedGuildPort, JoinedGuildPort, BotOwnerPort, GuildAllowlistSettingPort
+│   │   └── service/            입력 포트마다 하나
+│   └── adapter/
+│       ├── in/discord/         /허용목록 슬래시 명령, 초대·시작 때 확인
+│       ├── out/discord/        봇이 들어가 있는 서버 보기·나가기, 봇 주인 알아내기
+│       ├── out/persistence/    허용 목록 저장소 (H2)
+│       └── out/settings/       허용 목록을 쓸지 설정 값
+├── shared/                     공유 커널(domain/vo 의 DiscordUserId, GuildId)과 공통 예외 처리
 └── config/                     설정 값, JDA, 시계
 ```
 
@@ -68,7 +82,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 
 - 각 컨텍스트의 `domain` 은 스프링, JDA, LavaPlayer 를 모르고, `application` 은 스프링 중 `@Service`, `@Transactional` 만 씁니다 ([ADR 0009](docs/adr/0009-spring-annotations-on-services.md)). 어댑터끼리는 서로 모릅니다.
 - `speech` 는 `device` 를 공개 입구(`device.application.port.in`)로만 씁니다. quick chat 요청의 기기 토큰 주인을 물을 때가 유일한 접점입니다.
-- `device` 는 `speech` 를 모르고, `shared` 는 어느 컨텍스트도 모릅니다.
+- `device` 는 `speech` 를 모르고, `guild` 와 다른 컨텍스트는 서로 모르며, `shared` 는 어느 컨텍스트도 모릅니다.
 - 서비스는 입력 포트(`...UseCase`) 하나만 구현하고 이름은 `...Service` 입니다 ([ADR 0008](docs/adr/0008-one-service-per-use-case.md)).
 - 인바운드 어댑터는 애그리거트(`Device`, `Pairing`, `BotSeat`)를 직접 쓰지 않고, 입력 포트가 돌려주는 `...Dto` 로만 봅니다. `port/in` 에는 `...UseCase`, `...Command`, `...Dto` 만 둡니다 ([ADR 0010](docs/adr/0010-use-cases-return-dtos.md)).
 - `port/in` 은 `usecase` / `command` / `dto` 폴더로 나누고, 애플리케이션 예외는 `application/exception` 에 모읍니다 ([ADR 0012](docs/adr/0012-application-subpackages.md)).
@@ -108,6 +122,16 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 
 읽어 주는 목소리는 사람마다 디스코드에서 `/목소리` 로 바꿀 수 있습니다. 목소리를 고르지 않으면 지금 목소리와 목록을 보여 줍니다. 아무도 고르지 않았을 때의 기본 목소리는 `QUICKTTS_DEFAULT_VOICE` 로 정합니다(기본: 선희).
 
+## 봇을 들일 디스코드 서버 (허용 목록)
+
+봇은 봇 주인(Discord Developer Portal 에서 봇 앱을 만든 사람)이 허용한 디스코드 서버에만 남습니다. 목록에 없는 서버에 초대되면 안내 메시지와 그 서버 ID 를 남기고 나갑니다 ([ADR 0015](docs/adr/0015-guild-allowlist.md)).
+
+- `/허용목록 추가 서버:<서버 ID>`: 서버를 넣습니다. 봇이 아직 없는 서버면 그 서버가 미리 골라진 초대 링크를 함께 보여 줍니다.
+- `/허용목록 삭제 서버:<서버 ID>`: 서버를 빼고, 봇이 그 서버에 있으면 나갑니다.
+- `/허용목록 보기`: 허용한 서버 목록을 봅니다.
+
+봇 주인만 쓸 수 있고, 디스코드 서버 관리자에게만 명령이 보입니다. 봇과의 개인 메시지에서도 됩니다. 처음 켤 때 허용 목록이 비어 있으면 봇이 이미 들어가 있는 서버를 모두 넣습니다. 누구나 초대할 수 있게 공개하려면 `QUICKTTS_GUILD_ALLOWLIST_ENABLED=false` 로 허용 목록을 끕니다.
+
 ## exe 만들기 (Windows)
 
 자바를 설치하지 않은 PC 에서도 돌아가도록 자바 런타임까지 넣은 exe 를 만듭니다. JDK 25 에 들어 있는 `jpackage` 를 쓰므로 다른 도구는 필요 없습니다.
@@ -128,7 +152,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 | 무엇 | 위치 |
 | --- | --- |
 | 봇 토큰 (`DISCORD_TOKEN=...`) | `~/.discord-quick-tts/server.env` |
-| 등록된 PC, 목소리 설정 (H2) | `~/.discord-quick-tts/data/` |
+| 등록된 PC, 목소리 설정, 허용 목록 (H2) | `~/.discord-quick-tts/data/` |
 | 봇 서버 로그 | `~/.discord-quick-tts/logs/bot-server.log` |
 | 클라이언트 설정 (기기 토큰) | `~/.discord-quick-tts/client.properties` |
 
