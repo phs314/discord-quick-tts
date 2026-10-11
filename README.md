@@ -137,18 +137,40 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 
 ## exe 만들기 (Windows)
 
-자바를 설치하지 않은 PC 에서도 돌아가도록 자바 런타임까지 넣은 exe 를 만듭니다. JDK 25 에 들어 있는 `jpackage` 를 쓰므로 다른 도구는 필요 없습니다.
+자바를 설치하지 않은 PC 에서도 돌아가도록 자바 런타임까지 넣은 exe 를 만듭니다. JDK 25 에 들어 있는 `jpackage` 를 씁니다. 설치 마법사와 압축 파일 두 가지로 만들 수 있고, 어느 쪽이든 안의 `QuickTTS` 폴더에는 두 실행 파일이 같은 자바 런타임을 나눠 쓰며 들어 있습니다.
+
+- `QuickTTS.exe`: 데스크톱 클라이언트. 서버 주소가 이 PC 면 켜질 때 봇 서버도 같이 켜고, 트레이의 Exit 로 끌 때 같이 끕니다. 이미 떠 있을 때 다시 실행하면 입력창을 엽니다.
+- `QuickTTS-Server.exe`: 봇 서버. 보통은 직접 실행할 필요가 없습니다.
+
+### 설치 마법사 (권장)
+
+설치 파일을 만들려면 WiX 가 필요합니다. 처음 한 번만 PowerShell 에서 깔고, 새 터미널을 엽니다.
+
+```powershell
+winget install --id WiXToolset.WiXToolset
+```
+
+```bash
+./gradlew :desktop-client:packageInstaller
+```
+
+`desktop-client/build/distributions/QuickTTS-0.1.0.exe` 가 생깁니다. GitHub Actions 의 **설치 파일** 워크플로도 같은 파일을 만들어 아티팩트(`QuickTTS-installer`)로 올리므로, WiX 없이 거기서 받아도 됩니다.
+
+설치 파일을 실행하면 설치 경로(기본 `%LOCALAPPDATA%\QuickTTS`)를 고르고, 바탕화면과 시작 메뉴에 바로가기를 만들지 체크박스로 고릅니다. 사용자 폴더에 설치하므로 관리자 권한은 묻지 않습니다. 설치 화면은 영어입니다 ([ADR 0018](docs/adr/0018-windows-installer.md)).
+
+- 새로 만든 설치 파일을 실행하면 이전 설치를 지우고 그 자리에 새로 설치합니다. 실행 중이면 트레이의 Exit 로 먼저 끄세요.
+- 압축 파일로 쓰던 PC 는 트레이의 Exit 로 끄고 풀어 둔 폴더를 지운 뒤 설치하면 됩니다. Start with Windows 는 새로 설치한 QuickTTS 를 처음 켤 때 새 경로로 바뀝니다.
+- 지울 때는 Windows 설정 → 앱 → 설치된 앱 → QuickTTS → 제거 를 씁니다. 설정과 데이터(`~/.discord-quick-tts`)는 남습니다. 트레이의 **Start with Windows** 를 켜 두었다면 제거 전에 끄세요.
+
+### 압축 파일
+
+설치 없이 풀어서 쓰려면 압축 파일을 만듭니다. WiX 는 필요 없습니다.
 
 ```bash
 ./gradlew :desktop-client:packageZip
 ```
 
-`desktop-client/build/distributions/QuickTTS-0.1.0-windows.zip` 이 생깁니다. 압축 안의 `QuickTTS` 폴더에는 두 실행 파일이 같은 자바 런타임을 나눠 쓰며 들어 있습니다.
-
-- `QuickTTS.exe`: 데스크톱 클라이언트. 서버 주소가 이 PC 면 켜질 때 봇 서버도 같이 켜고, 트레이의 Exit 로 끌 때 같이 끕니다. 이미 떠 있을 때 다시 실행하면 입력창을 엽니다.
-- `QuickTTS-Server.exe`: 봇 서버. 보통은 직접 실행할 필요가 없습니다.
-
-압축을 Gradle 빌드 폴더가 아닌 곳(예: `%LOCALAPPDATA%\Programs\QuickTTS`)에 풀어서 쓰세요. 빌드 폴더에서 실행하면 다음에 다시 만들 때 파일이 잠겨 실패합니다.
+`desktop-client/build/distributions/QuickTTS-0.1.0-windows.zip` 이 생깁니다. Gradle 빌드 폴더가 아닌 곳(예: `%LOCALAPPDATA%\Programs\QuickTTS`)에 풀어서 쓰세요. 빌드 폴더에서 실행하면 다음에 다시 만들 때 파일이 잠겨 실패합니다.
 
 ### exe 로 쓸 때의 설정과 데이터 위치
 
@@ -161,7 +183,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 
 - 트레이 아이콘 메뉴의 **Start with Windows** 를 켜면 윈도우에 로그인할 때 QuickTTS 가 자동으로 켜지고, 그때 봇 서버도 같이 켜집니다.
 - 기본 봇 서버 주소는 `http://localhost:8080` 입니다. 다른 곳에 띄운 서버를 쓰려면 `-PserverUrl=https://...` 를 붙여 만듭니다. 이때 클라이언트는 이 PC 의 봇 서버를 켜지 않습니다.
-- 서명하지 않은 exe 라서 처음 실행할 때 Windows 가 "알 수 없는 게시자" 경고를 띄웁니다. "추가 정보" → "실행" 으로 넘어가면 됩니다.
+- 서명하지 않은 exe 라서 설치 파일이나 exe 를 처음 실행할 때 Windows 가 "알 수 없는 게시자" 경고를 띄웁니다. "추가 정보" → "실행" 으로 넘어가면 됩니다.
 
 ## 커밋 컨벤션
 
