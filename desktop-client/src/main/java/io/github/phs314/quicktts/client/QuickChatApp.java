@@ -84,6 +84,9 @@ public class QuickChatApp extends Application {
         if (singleInstance != null) {
             singleInstance.onShowRequested(() -> Platform.runLater(this::show));
         }
+        // 새 버전이 있으면 트레이 알림으로만 알린다. 확인하지 못해도 조용히 넘어간다.
+        UpdateChecker.forThisApp().ifPresent(checker ->
+                checker.newerRelease().thenAccept(release -> release.ifPresent(trayMenu::showUpdate)));
     }
 
     @Override
