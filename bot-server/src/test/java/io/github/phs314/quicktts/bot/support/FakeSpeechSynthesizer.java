@@ -2,8 +2,8 @@ package io.github.phs314.quicktts.bot.support;
 
 import io.github.phs314.quicktts.bot.speech.application.exception.SpeechSynthesisException;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizerPort;
-import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
+import io.github.phs314.quicktts.bot.speech.domain.vo.SpokenText;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
 import java.nio.charset.StandardCharsets;
@@ -39,10 +39,10 @@ public class FakeSpeechSynthesizer implements SpeechSynthesizerPort {
     }
 
     @Override
-    public Speech synthesize(QuickChatMessage message, VoiceId voice) {
+    public Speech synthesize(SpokenText text, VoiceId voice) {
         if (failing) {
             throw new SpeechSynthesisException("테스트용 TTS 엔진이 고장 났습니다.");
         }
-        return new Speech((voice.value() + ":" + message.text()).getBytes(StandardCharsets.UTF_8), "mp3");
+        return new Speech((voice.value() + ":" + text.text()).getBytes(StandardCharsets.UTF_8), "mp3");
     }
 }

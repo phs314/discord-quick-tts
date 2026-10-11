@@ -3,6 +3,7 @@ package io.github.phs314.quicktts.bot.speech.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import io.github.phs314.quicktts.bot.shared.domain.InvalidDomainValueException;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.application.exception.SpeakerNotInVoiceChannelException;
@@ -42,6 +43,24 @@ class SpeakQuickChatServiceTest {
 
         assertThat(player.actions).containsExactly("join:2", "play:" + ManageVoiceServiceTest.INJOON.id().value() + ":안녕");
         assertThat(seats.channelOf(GUILD)).contains(GENERAL.channel());
+    }
+
+    @Test
+    void 다듬은_문장을_읽는다() {
+        discord.enter(SPEAKER, GENERAL);
+
+        speak(SPEAKER, "ㅋㅋ 좋아👍");
+
+        assertThat(player.actions).containsExactly("join:2", "play:edge:sunhi:키키 좋아");
+    }
+
+    @Test
+    void 다듬고_나서_읽을_내용이_없으면_채널에_들어가지_않는다() {
+        discord.enter(SPEAKER, GENERAL);
+
+        assertThatThrownBy(() -> speak(SPEAKER, "👍")).isInstanceOf(InvalidDomainValueException.class);
+        assertThat(player.actions).isEmpty();
+        assertThat(seats.channelOf(GUILD)).isEmpty();
     }
 
     @Test

@@ -1,6 +1,6 @@
 package io.github.phs314.quicktts.bot.speech.application.port.out;
 
-import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
+import io.github.phs314.quicktts.bot.speech.domain.vo.SpokenText;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
@@ -20,5 +20,5 @@ public interface SpeechSynthesizerPort {
     /**
      * @throws io.github.phs314.quicktts.bot.speech.application.exception.SpeechSynthesisException 음성 생성에 실패했을 때
      */
-    Speech synthesize(QuickChatMessage message, VoiceId voice);
+    Speech synthesize(SpokenText text, VoiceId voice);
 }

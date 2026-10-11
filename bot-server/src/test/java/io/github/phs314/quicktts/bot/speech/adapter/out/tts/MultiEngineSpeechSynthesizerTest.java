@@ -5,8 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.phs314.quicktts.bot.config.QuickTtsProperties;
 import io.github.phs314.quicktts.bot.speech.application.exception.SpeechSynthesisException;
-import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
+import io.github.phs314.quicktts.bot.speech.domain.vo.SpokenText;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
 import java.nio.charset.StandardCharsets;
@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 class MultiEngineSpeechSynthesizerTest {
 
     private static final VoiceId EDGE = new VoiceId("edge:ko-KR-SunHiNeural");
-    private static final QuickChatMessage HELLO = new QuickChatMessage("안녕");
+    private static final SpokenText HELLO = new SpokenText("안녕");
 
     @Test
     void 엔진들의_목소리를_한_목록으로_내놓고_설정한_기본_목소리를_쓴다() {
