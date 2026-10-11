@@ -3,7 +3,7 @@ package io.github.phs314.quicktts.bot.speech.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import io.github.phs314.quicktts.bot.speech.domain.vo.GuildId;
+import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import java.util.Optional;
 import java.util.Set;

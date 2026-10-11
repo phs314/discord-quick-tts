@@ -1,10 +1,10 @@
 package io.github.phs314.quicktts.bot.speech.application.service;
 
+import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.LeaveEmptyVoiceChannelUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.out.BotSeatPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocatorPort;
-import io.github.phs314.quicktts.bot.speech.domain.vo.GuildId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

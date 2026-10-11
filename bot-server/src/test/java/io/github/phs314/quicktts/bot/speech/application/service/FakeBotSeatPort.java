@@ -1,8 +1,8 @@
 package io.github.phs314.quicktts.bot.speech.application.service;
 
+import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.application.port.out.BotSeatPort;
 import io.github.phs314.quicktts.bot.speech.domain.BotSeat;
-import io.github.phs314.quicktts.bot.speech.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import java.util.HashMap;
 import java.util.Map;
