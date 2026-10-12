@@ -1,0 +1,11 @@
+<!doctype html>
+<!-- 설치 마법사 banner.bmp 의 원본. Chromium 에서 493x64 화면, 2배율로 캡처한 뒤 493x58 24비트 BMP 로 줄여 ../banner.bmp 에 덮어쓴다.
+     설치 창은 그림을 가로보다 세로로 더 늘려 보여 주므로, 세로로 조금 길게 그리고 줄여서 늘어난 뒤에 원래 비율이 되게 한다. -->
+<html><head><meta charset="utf-8"><style>
+html,body{margin:0;width:493px;height:64px;overflow:hidden;background:#fff}
+.glow{position:absolute;right:0;top:0;width:230px;height:64px;background:radial-gradient(120% 140% at 100% 50%,#ddd6ff 0%,#efebff 38%,rgba(255,255,255,0) 72%)}
+.icon{position:absolute;right:14px;top:11px;width:42px;height:42px;border-radius:10px;box-shadow:0 3px 10px rgba(46,35,145,.35)}
+.bar{position:absolute;left:0;bottom:0;height:2px;width:493px;background:linear-gradient(90deg,rgba(91,78,240,0) 35%,#5b4ef0 100%)}
+</style></head><body>
+<div class="glow"></div><img class="icon" src="../../../src/main/resources/io/github/phs314/quicktts/client/app-icon.png"><div class="bar"></div>
+</body></html>

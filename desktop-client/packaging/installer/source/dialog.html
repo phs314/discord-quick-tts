@@ -1,0 +1,27 @@
+<!doctype html>
+<!-- 설치 마법사 dialog.bmp 의 원본. Chromium 에서 493x338 화면, 2배율로 캡처한 뒤 493x312 24비트 BMP 로 줄여 ../dialog.bmp 에 덮어쓴다.
+     설치 창은 그림을 가로보다 세로로 더 늘려 보여 주므로, 세로로 조금 길게 그리고 줄여서 늘어난 뒤에 원래 비율이 되게 한다. -->
+<html><head><meta charset="utf-8"><style>
+html,body{margin:0;width:493px;height:338px;overflow:hidden;background:#fff;font-family:Inter,"Noto Sans CJK KR",sans-serif}
+.panel{position:absolute;left:0;top:0;width:164px;height:338px;overflow:hidden;
+ background:radial-gradient(120% 70% at 30% 18%,#6f63ff 0%,rgba(111,99,255,0) 60%),linear-gradient(165deg,#5b4ef0 0%,#4536d6 45%,#2e2391 100%)}
+.panel::after{content:"";position:absolute;inset:0;background:radial-gradient(90% 50% at 90% 100%,rgba(196,170,255,.35),rgba(196,170,255,0) 70%)}
+.wave{position:absolute;border-radius:50%;border:1.5px solid rgba(255,255,255,.10)}
+.icon{position:absolute;left:32px;top:64px;width:100px;height:100px;border-radius:24px;box-shadow:0 10px 28px rgba(18,10,80,.55),0 0 0 1px rgba(255,255,255,.18);z-index:2}
+.name{position:absolute;left:0;width:164px;top:190px;text-align:center;color:#fff;font-weight:700;font-size:21px;letter-spacing:-.2px;z-index:2}
+.tag{position:absolute;left:0;width:164px;top:220px;text-align:center;color:rgba(255,255,255,.72);font-size:10.5px;font-weight:500;letter-spacing:.2px;z-index:2}
+.pill{position:absolute;left:50%;transform:translateX(-50%);top:256px;z-index:2;display:flex;align-items:center;gap:5px;padding:4px 10px 4px 8px;border-radius:999px;background:rgba(0,0,0,.22);color:rgba(255,255,255,.85);font-size:9.5px;font-weight:600;white-space:nowrap}
+.pill i{display:block;width:6px;height:6px;border-radius:50%;background:#23a55a;box-shadow:0 0 0 2px rgba(35,165,90,.25)}
+.edge{position:absolute;left:164px;top:0;width:3px;height:338px;background:linear-gradient(#8b7fff,#c9a8ff)}
+</style></head><body>
+<div class="panel">
+ <div class="wave" style="width:260px;height:260px;left:-48px;top:-22px"></div>
+ <div class="wave" style="width:340px;height:340px;left:-88px;top:-62px"></div>
+ <div class="wave" style="width:420px;height:420px;left:-128px;top:-102px"></div>
+ <img class="icon" src="../../../src/main/resources/io/github/phs314/quicktts/client/app-icon.png">
+ <div class="name">QuickTTS</div>
+ <div class="tag">단축키로 말하는 디스코드 TTS</div>
+ <div class="pill"><i></i>단축키 &rarr; 입력 &rarr; 읽기</div>
+</div>
+<div class="edge"></div>
+</body></html>

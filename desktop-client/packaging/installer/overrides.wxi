@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- jpackage 기본 main.wxs 가 읽는 값. 설치 파일의 언어를 한국어(1042)로 적는다. -->
+<Include xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?undef JpProductLanguage ?>
+  <?define JpProductLanguage=1042 ?>
+</Include>
