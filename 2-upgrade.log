@@ -1,0 +1,36 @@
+**********************
+PowerShell transcript start
+Start time: 20261012170127
+Username: runnervmfi6oq\runneradmin
+RunAs User: runnervmfi6oq\runneradmin
+Configuration Name: 
+Machine: runnervmfi6oq (Microsoft Windows NT 10.0.26100.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -command . 'D:\a\_temp\c4231286-3689-40a4-81ae-46a986a45cae.ps1'
+Process ID: 8684
+PSVersion: 7.6.6
+PSEdition: Core
+GitCommitId: 7.6.6
+OS: Microsoft Windows 10.0.26100
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.4
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+saved screenshots\2-upgrade-01-next.png
+press next: 다음(&N)
+saved screenshots\2-upgrade-02-next.png
+press next: 다음(&N)
+saved screenshots\2-upgrade-03-next.png
+press next: 다음(&N)
+saved screenshots\2-upgrade-04-install.png
+press install: 설치(&I)
+no button to press, buttons: 취소 (enabled=True), 뒤로(&B) (enabled=False), 다음(&N) (enabled=False)
+saved screenshots\2-upgrade-05-waiting.png
+saved screenshots\2-upgrade-06-finish.png
+press finish: 마침(&F)
+2-upgrade done in 6 steps, exit code 0
+**********************
+PowerShell transcript end
+End time: 20261012170146
+**********************

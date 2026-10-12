@@ -1,0 +1,38 @@
+**********************
+PowerShell transcript start
+Start time: 20261012170108
+Username: runnervmfi6oq\runneradmin
+RunAs User: runnervmfi6oq\runneradmin
+Configuration Name: 
+Machine: runnervmfi6oq (Microsoft Windows NT 10.0.26100.0)
+Host Application: C:\Program Files\PowerShell\7\pwsh.dll -command . 'D:\a\_temp\2765c1d7-b37d-4ee6-a3e2-6d9b9da36887.ps1'
+Process ID: 3988
+PSVersion: 7.6.6
+PSEdition: Core
+GitCommitId: 7.6.6
+OS: Microsoft Windows 10.0.26100
+Platform: Win32NT
+PSCompatibleVersions: 1.0, 2.0, 3.0, 4.0, 5.0, 5.1, 6.0, 7.0
+PSRemotingProtocolVersion: 2.4
+SerializationVersion: 1.1.0.1
+WSManStackVersion: 3.0
+**********************
+no button to press, buttons: 취소 (enabled=True), 뒤로(&B) (enabled=False), 다음(&N) (enabled=False)
+skip 1-fresh-01-waiting (window closed)
+saved screenshots\1-fresh-02-next.png
+press next: 다음(&N)
+saved screenshots\1-fresh-03-next.png
+press next: 다음(&N)
+saved screenshots\1-fresh-04-next.png
+press next: 다음(&N)
+saved screenshots\1-fresh-05-install.png
+press install: 설치(&I)
+no button to press, buttons: 취소 (enabled=True), 뒤로(&B) (enabled=False), 다음(&N) (enabled=False)
+saved screenshots\1-fresh-06-waiting.png
+saved screenshots\1-fresh-07-finish.png
+press finish: 마침(&F)
+1-fresh done in 7 steps, exit code 0
+**********************
+PowerShell transcript end
+End time: 20261012170125
+**********************
