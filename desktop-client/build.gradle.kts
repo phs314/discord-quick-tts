@@ -193,6 +193,13 @@ val prepareInstallerResources by tasks.registering {
               <TextStyle Id="QuickTTS_Font_Bigger" FaceName="Malgun Gothic" Size="14" Bold="yes" Red="69" Green="54" Blue="214"/>
             </UI>
             $uiRef""".trimIndent(), "main.wxs"))
+
+        // 새 버전을 옛 버전 위에 설치할 때는 폴더가 비어 있지 않은 게 당연하므로 "폴더가 이미 있다" 확인 창을 건너뛴다.
+        File(out, "InstallDirNotEmptyDlg.wxs").writeText(jpackageResource("InstallDirNotEmptyDlg.wxs")
+            .replaceOnce(""">INSTALLDIR_VALID="0"</Publish>""",
+                """>INSTALLDIR_VALID="0" AND NOT JP_UPGRADABLE_FOUND</Publish>""", "InstallDirNotEmptyDlg.wxs")
+            .replaceOnce(""">INSTALLDIR_VALID="1"</Publish>""",
+                """>INSTALLDIR_VALID="1" OR JP_UPGRADABLE_FOUND</Publish>""", "InstallDirNotEmptyDlg.wxs"))
     }
 }
 
@@ -235,7 +242,7 @@ val packageInstaller by tasks.registering(Exec::class) {
             "--win-menu-group", appName,
             "--win-shortcut-prompt",
             "--win-upgrade-uuid", upgradeUuid,
-            // 설치 화면의 그림과 한국어 문구 (prepareInstallerResources)
+            // 설치 화면의 그림, 한국어 문구, 업그레이드 때 확인 창 건너뛰기 (prepareInstallerResources)
             "--resource-dir", resourceDir.get().asFile.path,
             "--dest", installerDir.get().asFile.path,
         )
