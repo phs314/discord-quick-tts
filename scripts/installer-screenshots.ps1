@@ -25,6 +25,7 @@ public static class Win {
 '@
 
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
+Start-Transcript -Path (Join-Path $OutDir "$Prefix.log") | Out-Null
 $root = [System.Windows.Automation.AutomationElement]::RootElement
 $windowScope = [System.Windows.Automation.TreeScope]::Children
 $buttonCondition = New-Object System.Windows.Automation.PropertyCondition(
@@ -136,7 +137,10 @@ try {
         if ($action.Kind -eq 'finish') { break }
     }
 } catch {
+    Write-Host "error: $_"
+    Write-Host $_.ScriptStackTrace
     Save-Screen "$Prefix-error"
+    Stop-Transcript | Out-Null
     throw
 }
 if ((Get-Date) -ge $deadline) {
@@ -147,3 +151,4 @@ if ((Get-Date) -ge $deadline) {
 if (-not $process.WaitForExit(60000)) { throw "설치 파일이 끝나지 않았다: $Installer" }
 if ($step -eq 0) { throw "설치 창을 찾지 못했다: $Installer" }
 Write-Host "$Prefix done in $step steps, exit code $($process.ExitCode)"
+Stop-Transcript | Out-Null
