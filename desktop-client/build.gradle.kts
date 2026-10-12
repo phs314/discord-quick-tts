@@ -1,3 +1,7 @@
+import java.net.URI
+import java.nio.file.FileSystems
+import java.nio.file.Files
+
 plugins {
     application
     alias(libs.plugins.javafx)
@@ -144,19 +148,69 @@ val packageZip by tasks.registering(Zip::class) {
     destinationDirectory = layout.buildDirectory.dir("distributions")
 }
 
+// 설치 마법사 화면을 우리 그림과 한국어 문구로 바꾸는 jpackage 리소스 폴더(--resource-dir).
+val installerResourceSource = layout.projectDirectory.dir("packaging/installer")
+val installerResources = layout.buildDirectory.dir("jpackage/installer-resources")
+
+val prepareInstallerResources by tasks.registering {
+    description = "설치 마법사에 넣을 그림, 한국어 문구, 고친 WiX 파일을 한 폴더에 모은다."
+    val jdkHome = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
+        .map { it.metadata.installationPath.asFile }
+    val source = installerResourceSource
+    val output = installerResources
+
+    inputs.dir(source)
+    inputs.property("jdkHome", jdkHome.map { it.path })
+    outputs.dir(output)
+
+    doLast {
+        val src = source.asFile
+        val out = output.get().asFile
+        out.deleteRecursively()
+        out.mkdirs()
+        listOf("banner.bmp", "dialog.bmp", "overrides.wxi").forEach { File(src, it).copyTo(File(out, it)) }
+        // jpackage 는 기본 문구 파일(MsiInstallerStrings_en.wxl)의 문화권으로 설치 화면을 만든다.
+        // 이 파일을 ko-kr 문구로 바꿔 끼우면 WiX 의 한국어 화면 문구까지 같이 쓰인다.
+        File(src, "MsiInstallerStrings_ko.wxl").copyTo(File(out, "MsiInstallerStrings_en.wxl"))
+
+        // 나머지는 jpackage 에 들어 있는 원본을 읽어 필요한 곳만 고친다. JDK 가 바뀌어 고칠 자리가 없으면 멈춘다.
+        fun jpackageResource(name: String): String =
+            FileSystems.newFileSystem(URI.create("jrt:/"), mapOf("java.home" to jdkHome.get().path)).use { jrt ->
+                Files.readString(jrt.getPath("modules", "jdk.jpackage", "jdk/jpackage/internal/resources", name))
+            }
+        fun String.replaceOnce(old: String, new: String, file: String): String {
+            check(contains(old)) { "jpackage 의 $file 에서 고칠 자리($old)를 찾지 못했다. JDK 가 바뀌었는지 확인한다." }
+            return replace(old, new)
+        }
+
+        // 배너·옆 그림을 바꾸고, 한국어 문구가 쓰는 글자 모양(맑은 고딕)을 더한다.
+        val uiRef = """<UIRef Id="JpUI"/>"""
+        File(out, "main.wxs").writeText(jpackageResource("main.wxs").replaceOnce(uiRef, """
+            <WixVariable Id="WixUIBannerBmp" Value="${File(out, "banner.bmp").path}"/>
+            <WixVariable Id="WixUIDialogBmp" Value="${File(out, "dialog.bmp").path}"/>
+            <UI>
+              <TextStyle Id="QuickTTS_Font_Title" FaceName="Malgun Gothic" Size="10" Bold="yes"/>
+              <TextStyle Id="QuickTTS_Font_Bigger" FaceName="Malgun Gothic" Size="14" Bold="yes" Red="69" Green="54" Blue="214"/>
+            </UI>
+            $uiRef""".trimIndent(), "main.wxs"))
+    }
+}
+
 val packageInstaller by tasks.registering(Exec::class) {
     group = "distribution"
     description = "QuickTTS exe 폴더를 설치 마법사(QuickTTS-버전.exe)로 만든다. Windows 에서 WiX 가 깔려 있어야 한다."
-    dependsOn(packageExe)
+    dependsOn(packageExe, prepareInstallerResources)
 
     val jdkHome = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(25) }
         .map { it.metadata.installationPath.asFile }
+    val resourceDir = installerResources
     val installerDir = layout.buildDirectory.dir("distributions")
     val installer = installerDir.map { it.file("$appName-$appVersion.exe") }
     // CI 처럼 WiX 오류를 자세히 봐야 할 때 -PjpackageVerbose 를 붙인다.
     val verbose = providers.gradleProperty("jpackageVerbose")
 
     inputs.dir(jpackageImage)
+    inputs.dir(resourceDir)
     outputs.file(installer)
 
     doFirst {
@@ -181,6 +235,8 @@ val packageInstaller by tasks.registering(Exec::class) {
             "--win-menu-group", appName,
             "--win-shortcut-prompt",
             "--win-upgrade-uuid", upgradeUuid,
+            // 설치 화면의 그림과 한국어 문구 (prepareInstallerResources)
+            "--resource-dir", resourceDir.get().asFile.path,
             "--dest", installerDir.get().asFile.path,
         )
         if (verbose.isPresent) {
