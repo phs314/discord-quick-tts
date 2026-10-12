@@ -27,11 +27,11 @@
 
   <!-- WiX 한국어 기본 문구 중 다시 쓰는 것 -->
   <String Id="WelcomeDlgTitle">{\QuickTTS_Font_Bigger}QuickTTS 설치를 시작할게요</String>
-  <String Id="WelcomeDlgDescription">단축키를 누르고 문장을 치면 디스코드 음성 채널에서 읽어 주는 QuickTTS를 이 PC에 설치해요. 계속하려면 "다음"을 누르세요.</String>
+  <String Id="WelcomeDlgDescription">디스코드 음성 채널에서 문장을 읽어 주는 QuickTTS를 이 PC에 설치해요. 계속하려면 "다음"을 누르세요.</String>
 
   <String Id="InstallDirDlgTitle">{\QuickTTS_Font_Title}설치할 폴더</String>
   <String Id="InstallDirDlgDescription">이대로 설치하려면 "다음"을, 다른 폴더를 고르려면 "변경"을 누르세요.</String>
-  <String Id="InstallDirDlgFolderLabel">[ProductName]을(를) 설치할 폴더:</String>
+  <String Id="InstallDirDlgFolderLabel">QuickTTS를 설치할 폴더:</String>
 
   <String Id="VerifyReadyDlgInstallTitle">{\QuickTTS_Font_Title}설치할 준비가 됐어요</String>
   <String Id="VerifyReadyDlgInstallText">"설치"를 누르면 설치를 시작해요. 고른 내용을 바꾸려면 "뒤로"를 누르세요.</String>
