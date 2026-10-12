@@ -143,6 +143,10 @@ public class QuickChatApp extends Application {
         stage.setY(barBottom - stage.getHeight() + SHADOW_MARGIN);
         stage.toFront();
         stage.requestFocus();
+        // 창을 숨겼다 다시 띄우면 JavaFX 가 새 창을 만들면서 한글 조합 입력(IME) 연결을 잃는다.
+        // 포커스가 이미 입력란에 있으면 다시 연결하지 않으므로, 막대로 옮겼다가 입력란으로 돌려서 다시 연결한다.
+        // 연결이 없으면 조합 중인 글자가 화면 왼쪽 위의 따로 뜬 창에 보이고 입력란에는 한 글자씩 늦게 들어온다.
+        inputBar.node().requestFocus();
         input.requestFocus();
         refreshVoiceChannel();
     }
