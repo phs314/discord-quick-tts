@@ -27,7 +27,7 @@
 
   <!-- WiX 한국어 기본 문구 중 다시 쓰는 것 -->
   <String Id="WelcomeDlgTitle">{\QuickTTS_Font_Bigger}QuickTTS 설치를 시작할게요</String>
-  <String Id="WelcomeDlgDescription">단축키를 누르고 문장을 치면 디스코드 음성 채널에서 읽어 주는 QuickTTS 를 이 PC 에 설치해요. 계속하려면 "다음"을 누르세요.</String>
+  <String Id="WelcomeDlgDescription">단축키를 누르고 문장을 치면 디스코드 음성 채널에서 읽어 주는 QuickTTS를 이 PC에 설치해요. 계속하려면 "다음"을 누르세요.</String>
 
   <String Id="InstallDirDlgTitle">{\QuickTTS_Font_Title}설치할 폴더</String>
   <String Id="InstallDirDlgDescription">이대로 설치하려면 "다음"을, 다른 폴더를 고르려면 "변경"을 누르세요.</String>
@@ -40,5 +40,5 @@
   <String Id="ProgressDlgTextInstalling">설치하는 동안 잠시 기다려 주세요.</String>
 
   <String Id="ExitDialogTitle">{\QuickTTS_Font_Bigger}설치를 마쳤어요</String>
-  <String Id="ExitDialogDescription">QuickTTS 를 켠 뒤 디스코드에서 /연결 로 받은 코드를 넣으면 바로 쓸 수 있어요. 창을 닫으려면 "마침"을 누르세요.</String>
+  <String Id="ExitDialogDescription">QuickTTS를 켠 뒤 디스코드에서 /연결로 받은 코드를 넣으면 바로 쓸 수 있어요. 창을 닫으려면 "마침"을 누르세요.</String>
 </WixLocalization>
