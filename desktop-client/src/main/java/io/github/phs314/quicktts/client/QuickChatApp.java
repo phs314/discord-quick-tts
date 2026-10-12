@@ -31,6 +31,8 @@ public class QuickChatApp extends Application {
     private static final double SHADOW_MARGIN = 24;
     /** 화면 높이에서 막대 아래쪽 끝까지의 비율. 0.15 면 화면 맨 아래에서 15% 위에 막대가 놓인다. */
     private static final double BOTTOM_RATIO = 0.15;
+    /** 입력창 창 제목. 화면에는 안 보이고, 윈도우에서 창을 찾아 앞으로 가져올 때 쓴다. */
+    private static final String WINDOW_TITLE = "QuickTTS Quick Chat";
 
     /** {@link Launcher} 가 먼저 잡아 둔 중복 실행 방지 자리. 클래스패스로 바로 띄우면 null 이다. */
     static SingleInstance singleInstance;
@@ -62,6 +64,7 @@ public class QuickChatApp extends Application {
 
         stage = primaryStage;
         stage.initStyle(StageStyle.TRANSPARENT);
+        stage.setTitle(WINDOW_TITLE);
         stage.setAlwaysOnTop(true);
         stage.setScene(createScene());
         stage.focusedProperty().addListener((observable, wasFocused, isFocused) -> {
@@ -135,6 +138,7 @@ public class QuickChatApp extends Application {
     private void show() {
         Rectangle2D screen = Screen.getPrimary().getBounds();
         Rectangle2D usable = Screen.getPrimary().getVisualBounds();
+        WindowsForeground.allowActivation();
         stage.show();
         stage.setX(screen.getMinX() + (screen.getWidth() - stage.getWidth()) / 2);
         double barBottom = screen.getMaxY() - screen.getHeight() * BOTTOM_RATIO;
@@ -143,6 +147,7 @@ public class QuickChatApp extends Application {
         stage.setY(barBottom - stage.getHeight() + SHADOW_MARGIN);
         stage.toFront();
         stage.requestFocus();
+        WindowsForeground.activate(WINDOW_TITLE);
         // 창을 숨겼다 다시 띄우면 JavaFX 가 새 창을 만들면서 한글 조합 입력(IME) 연결을 잃는다.
         // 포커스가 이미 입력란에 있으면 다시 연결하지 않으므로, 막대로 옮겼다가 입력란으로 돌려서 다시 연결한다.
         // 연결이 없으면 조합 중인 글자가 화면 왼쪽 위의 따로 뜬 창에 보이고 입력란에는 한 글자씩 늦게 들어온다.
