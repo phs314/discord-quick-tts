@@ -1,0 +1,62 @@
+name: 설치 화면 미리보기
+
+# 설치 마법사를 Windows 러너에서 실제로 띄워 화면마다 캡처하고 아티팩트(installer-screenshots)로 올린다.
+# 처음 설치(0.0.1)와 그 위에 새 버전(0.0.2)을 까는 업그레이드를 차례로 찍는다.
+# 설치 화면의 그림이나 문구를 바꾼 PR 에서만 돌고, Actions 탭의 "Run workflow" 로 언제든 다시 찍을 수 있다.
+on:
+  pull_request:
+    paths:
+      - 'desktop-client/packaging/**'
+      - 'desktop-client/build.gradle.kts'
+      - 'scripts/installer-screenshots.ps1'
+      - '.github/workflows/installer-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview:
+    name: 설치 화면 캡처
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 25
+
+      - uses: gradle/actions/setup-gradle@v6
+
+      # 설치 파일 워크플로와 같은 WiX 3.14
+      - name: WiX 설치
+        shell: pwsh
+        run: |
+          Invoke-WebRequest https://github.com/wixtoolset/wix3/releases/download/wix3141rtm/wix314-binaries.zip -OutFile "$env:RUNNER_TEMP\wix.zip"
+          Expand-Archive "$env:RUNNER_TEMP\wix.zip" -DestinationPath "$env:RUNNER_TEMP\wix"
+          "$env:RUNNER_TEMP\wix" | Out-File -FilePath $env:GITHUB_PATH -Append -Encoding utf8
+
+      - name: 설치 파일 두 버전 만들기
+        shell: bash
+        run: |
+          mkdir -p "$RUNNER_TEMP/installers"
+          for version in 0.0.1 0.0.2; do
+            ./gradlew :desktop-client:packageInstaller -PappVersion=$version
+            cp "desktop-client/build/distributions/QuickTTS-$version.exe" "$RUNNER_TEMP/installers/"
+          done
+
+      - name: 처음 설치 화면 캡처
+        shell: pwsh
+        run: ./scripts/installer-screenshots.ps1 -Installer "$env:RUNNER_TEMP\installers\QuickTTS-0.0.1.exe" -OutDir screenshots -Prefix 1-fresh
+
+      - name: 업그레이드 화면 캡처
+        shell: pwsh
+        run: ./scripts/installer-screenshots.ps1 -Installer "$env:RUNNER_TEMP\installers\QuickTTS-0.0.2.exe" -OutDir screenshots -Prefix 2-upgrade
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: installer-screenshots
+          path: screenshots/
+          retention-days: 14
