@@ -15,6 +15,7 @@ import javafx.scene.control.Tooltip;
 import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.InputMethodEvent;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -44,6 +45,7 @@ final class InputBar {
                 + "-fx-prompt-text-fill: #80848e; -fx-padding: 0 4 0 4;" + FONT);
         HBox.setHgrow(input, Priority.ALWAYS);
         input.textProperty().addListener((observable, before, text) -> updateCount(text.length()));
+        input.addEventFilter(InputMethodEvent.INPUT_METHOD_TEXT_CHANGED, this::keepCaretAfterComposingText);
         updateCount(0);
 
         channelChip.setAlignment(Pos.CENTER_LEFT);
@@ -126,6 +128,20 @@ final class InputBar {
         Label dot = new Label("|");
         dot.setStyle("-fx-text-fill: #4e5058; -fx-font-size: 12px;");
         return dot;
+    }
+
+    /**
+     * 윈도우 한글 입력기는 조합 중인 글자 안의 커서 위치를 알려 주지 않아(늘 0) JavaFX 가 커서를 조합 글자 왼쪽에 둔다.
+     * 커서 위치를 조합 글자 끝으로 바꾼 같은 이벤트를 다시 보내서, 메모장처럼 커서가 마지막 글자 뒤에 오게 한다.
+     */
+    private void keepCaretAfterComposingText(InputMethodEvent event) {
+        int composedLength = event.getComposed().stream().mapToInt(run -> run.getText().length()).sum();
+        if (composedLength == 0 || event.getCaretPosition() != 0) {
+            return;
+        }
+        event.consume();
+        input.fireEvent(new InputMethodEvent(input, input, InputMethodEvent.INPUT_METHOD_TEXT_CHANGED,
+                event.getComposed(), event.getCommitted(), composedLength));
     }
 
     private void updateCount(int length) {
