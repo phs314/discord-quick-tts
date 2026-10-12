@@ -50,7 +50,12 @@ function Find-MsiDialog {
 function Save-Shot($window, $name) {
     [Win]::SetForegroundWindow([IntPtr]$window.Current.NativeWindowHandle) | Out-Null
     Start-Sleep -Milliseconds 700
+    # 잠깐 떴다 사라지는 창(설치 준비 중)은 찍기 전에 없어질 수 있다. 그때는 건너뛴다.
     $r = Get-Rect $window
+    if ($r.Right - $r.Left -le 0 -or $r.Bottom - $r.Top -le 0) {
+        Write-Host "skip $name (window closed)"
+        return
+    }
     $bmp = New-Object System.Drawing.Bitmap ($r.Right - $r.Left), ($r.Bottom - $r.Top)
     $g = [System.Drawing.Graphics]::FromImage($bmp)
     $g.CopyFromScreen($r.Left, $r.Top, 0, 0, $bmp.Size)

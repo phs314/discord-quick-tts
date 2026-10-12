@@ -54,6 +54,18 @@ jobs:
         shell: pwsh
         run: ./scripts/installer-screenshots.ps1 -Installer "$env:RUNNER_TEMP\installers\QuickTTS-0.0.2.exe" -OutDir screenshots -Prefix 2-upgrade
 
+      # 임시: 아티팩트를 받을 수 없는 곳에서도 볼 수 있게 캡처를 base64 로 로그에 남긴다.
+      - name: 캡처를 로그에 남기기
+        if: always()
+        shell: bash
+        run: |
+          for f in screenshots/*.png; do
+            [ -e "$f" ] || continue
+            echo "=====BEGIN $(basename "$f")"
+            base64 -w 4000 "$f"
+            echo "=====END"
+          done
+
       - uses: actions/upload-artifact@v7
         if: always()
         with:
