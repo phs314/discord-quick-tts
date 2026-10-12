@@ -12,12 +12,15 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes, System.Drawing
+Add-Type -AssemblyName UIAutomationClient, UIAutomationTypes, System.Drawing, System.Windows.Forms
 Add-Type @'
 using System;
 using System.Runtime.InteropServices;
 public static class Win {
+    [StructLayout(LayoutKind.Sequential)] public struct RECT { public int Left, Top, Right, Bottom; }
     [DllImport("user32.dll")] public static extern bool SetForegroundWindow(IntPtr hWnd);
+    [DllImport("user32.dll")] public static extern bool IsWindowVisible(IntPtr hWnd);
+    [DllImport("user32.dll")] public static extern bool GetWindowRect(IntPtr hWnd, out RECT rect);
 }
 '@
 
@@ -27,10 +30,19 @@ $windowScope = [System.Windows.Automation.TreeScope]::Children
 $buttonCondition = New-Object System.Windows.Automation.PropertyCondition(
     [System.Windows.Automation.AutomationElement]::ControlTypeProperty, [System.Windows.Automation.ControlType]::Button)
 
-# Windows Installer 대화상자 창(MsiDialogCloseClass / MsiDialogNoCloseClass)을 찾는다.
+function Get-Rect($window) {
+    $r = [Win+RECT]::new()
+    [Win]::GetWindowRect([IntPtr]$window.Current.NativeWindowHandle, [ref]$r) | Out-Null
+    return $r
+}
+
+# 화면에 보이는 Windows Installer 대화상자 창(MsiDialogCloseClass / MsiDialogNoCloseClass)을 찾는다.
 function Find-MsiDialog {
     foreach ($w in $root.FindAll($windowScope, [System.Windows.Automation.Condition]::TrueCondition)) {
-        if ($w.Current.ClassName -like 'MsiDialog*') { return $w }
+        if ($w.Current.ClassName -notlike 'MsiDialog*') { continue }
+        if (-not [Win]::IsWindowVisible([IntPtr]$w.Current.NativeWindowHandle)) { continue }
+        $r = Get-Rect $w
+        if ($r.Right - $r.Left -gt 0 -and $r.Bottom - $r.Top -gt 0) { return $w }
     }
     return $null
 }
@@ -38,14 +50,24 @@ function Find-MsiDialog {
 function Save-Shot($window, $name) {
     [Win]::SetForegroundWindow([IntPtr]$window.Current.NativeWindowHandle) | Out-Null
     Start-Sleep -Milliseconds 700
-    $r = $window.Current.BoundingRectangle
-    $bmp = New-Object System.Drawing.Bitmap ([int]$r.Width), ([int]$r.Height)
+    $r = Get-Rect $window
+    $bmp = New-Object System.Drawing.Bitmap ($r.Right - $r.Left), ($r.Bottom - $r.Top)
     $g = [System.Drawing.Graphics]::FromImage($bmp)
-    $g.CopyFromScreen([int]$r.X, [int]$r.Y, 0, 0, $bmp.Size)
+    $g.CopyFromScreen($r.Left, $r.Top, 0, 0, $bmp.Size)
     $path = Join-Path $OutDir "$name.png"
     $bmp.Save($path, [System.Drawing.Imaging.ImageFormat]::Png)
     $g.Dispose(); $bmp.Dispose()
     Write-Host "saved $path"
+}
+
+# 일이 꼬였을 때 원인을 볼 수 있게 화면 전체를 찍는다.
+function Save-Screen($name) {
+    $b = [System.Windows.Forms.Screen]::PrimaryScreen.Bounds
+    $bmp = New-Object System.Drawing.Bitmap $b.Width, $b.Height
+    $g = [System.Drawing.Graphics]::FromImage($bmp)
+    $g.CopyFromScreen($b.Left, $b.Top, 0, 0, $bmp.Size)
+    $bmp.Save((Join-Path $OutDir "$name.png"), [System.Drawing.Imaging.ImageFormat]::Png)
+    $g.Dispose(); $bmp.Dispose()
 }
 
 function Find-Button($window, $patterns) {
@@ -66,45 +88,55 @@ $actions = @(
 )
 
 $process = Start-Process -FilePath $Installer -PassThru
-$deadline = (Get-Date).AddSeconds($TimeoutSeconds)
-$step = 0
-$lastHandle = 0
-$progressSaved = $false
+try {
+    $deadline = (Get-Date).AddSeconds($TimeoutSeconds)
+    $step = 0
+    $lastHandle = 0
+    $savedWaiting = @{}
 
-while ((Get-Date) -lt $deadline) {
-    $window = Find-MsiDialog
-    if ($null -eq $window) {
-        if ($process.HasExited -and $step -gt 0) { break }
-        Start-Sleep -Milliseconds 500
-        continue
-    }
-    $handle = $window.Current.NativeWindowHandle
-    if ($handle -eq $lastHandle) { Start-Sleep -Milliseconds 500; continue }
-
-    $action = $null
-    $button = $null
-    foreach ($a in $actions) {
-        $button = Find-Button $window $a.Patterns
-        if ($null -ne $button) { $action = $a; break }
-    }
-
-    if ($null -eq $action) {
-        # 설치 중 화면처럼 누를 버튼이 없으면 한 번만 찍고 다음 화면을 기다린다.
-        if (-not $progressSaved) {
-            $step++
-            Save-Shot $window ('{0}-{1:D2}-progress' -f $Prefix, $step)
-            $progressSaved = $true
+    while ((Get-Date) -lt $deadline) {
+        $window = Find-MsiDialog
+        if ($null -eq $window) {
+            if ($process.HasExited -and $step -gt 0) { break }
+            Start-Sleep -Milliseconds 500
+            continue
         }
-        Start-Sleep -Milliseconds 500
-        continue
-    }
+        $handle = $window.Current.NativeWindowHandle
+        if ($handle -eq $lastHandle) { Start-Sleep -Milliseconds 500; continue }
 
-    $step++
-    Start-Sleep -Milliseconds 500
-    Save-Shot $window ('{0}-{1:D2}-{2}' -f $Prefix, $step, $action.Kind)
-    $button.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
-    $lastHandle = $handle
-    if ($action.Kind -eq 'finish') { break }
+        $action = $null
+        $button = $null
+        foreach ($a in $actions) {
+            $button = Find-Button $window $a.Patterns
+            if ($null -ne $button) { $action = $a; break }
+        }
+
+        if ($null -eq $action) {
+            # 설치 중 화면처럼 누를 버튼이 없으면 창마다 한 번만 찍고 다음 화면을 기다린다.
+            if (-not $savedWaiting.ContainsKey($handle)) {
+                $step++
+                Start-Sleep -Milliseconds 1500
+                Save-Shot $window ('{0}-{1:D2}-waiting' -f $Prefix, $step)
+                $savedWaiting[$handle] = $true
+            }
+            Start-Sleep -Milliseconds 500
+            continue
+        }
+
+        $step++
+        Start-Sleep -Milliseconds 500
+        Save-Shot $window ('{0}-{1:D2}-{2}' -f $Prefix, $step, $action.Kind)
+        $button.GetCurrentPattern([System.Windows.Automation.InvokePattern]::Pattern).Invoke()
+        $lastHandle = $handle
+        if ($action.Kind -eq 'finish') { break }
+    }
+} catch {
+    Save-Screen "$Prefix-error"
+    throw
+}
+if ((Get-Date) -ge $deadline) {
+    Save-Screen "$Prefix-timeout"
+    throw "설치가 $TimeoutSeconds 초 안에 끝나지 않았다: $Installer"
 }
 
 if (-not $process.WaitForExit(60000)) { throw "설치 파일이 끝나지 않았다: $Installer" }
