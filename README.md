@@ -179,9 +179,10 @@ winget install --id WiXToolset.WiXToolset
 
 `desktop-client/build/distributions/QuickTTS-0.1.0.exe` 가 생깁니다. GitHub Actions 의 **설치 파일** 워크플로도 같은 파일을 만들어 아티팩트(`QuickTTS-installer`)로 올리므로, WiX 없이 거기서 받아도 됩니다. 정식 버전은 [Releases](https://github.com/phs314/discord-quick-tts/releases/latest) 에서 로그인 없이 받을 수 있습니다.
 
-설치 파일을 실행하면 설치 경로(기본 `%LOCALAPPDATA%\QuickTTS`)를 고르고, 바탕화면과 시작 메뉴에 바로가기를 만들지 체크박스로 고릅니다. 사용자 폴더에 설치하므로 관리자 권한은 묻지 않습니다. 설치 화면은 영어입니다 ([ADR 0018](docs/adr/0018-windows-installer.md)).
+설치 파일을 실행하면 설치 경로(기본 `%LOCALAPPDATA%\QuickTTS`)를 고르고, 바탕화면과 시작 메뉴에 바로가기를 만들지 체크박스로 고릅니다. 사용자 폴더에 설치하므로 관리자 권한은 묻지 않습니다 ([ADR 0018](docs/adr/0018-windows-installer.md)). 설치 화면은 앱 아이콘 색의 그림과 한국어 문구로 꾸며져 있습니다 ([ADR 0021](docs/adr/0021-installer-look.md)).
 
 - 새로 만든 설치 파일을 실행하면 이전 설치를 지우고 그 자리에 새로 설치합니다. 실행 중이면 트레이의 Exit 로 먼저 끄세요.
+- 설치 화면의 그림(`desktop-client/packaging/installer/*.bmp`, 원본은 `source/`)이나 문구(`MsiInstallerStrings_ko.wxl`)를 바꾸면, PR 의 **설치 화면 미리보기** 워크플로가 실제 설치 화면을 캡처해 [`ci/installer-screenshots`](https://github.com/phs314/discord-quick-tts/tree/ci/installer-screenshots) 브랜치와 아티팩트(`installer-screenshots`)로 올립니다.
 - 압축 파일로 쓰던 PC 는 트레이의 Exit 로 끄고 풀어 둔 폴더를 지운 뒤 설치하면 됩니다. Start with Windows 는 새로 설치한 QuickTTS 를 처음 켤 때 새 경로로 바뀝니다.
 - 지울 때는 Windows 설정 → 앱 → 설치된 앱 → QuickTTS → 제거 를 씁니다. 설정과 데이터(`~/.discord-quick-tts`)는 남습니다. 트레이의 **Start with Windows** 를 켜 두었다면 제거 전에 끄세요.
 
