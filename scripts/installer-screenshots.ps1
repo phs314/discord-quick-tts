@@ -3,7 +3,7 @@
 #
 #   powershell -File scripts/installer-screenshots.ps1 -Installer QuickTTS-0.0.1.exe -OutDir shots -Prefix 1-fresh
 #
-# 버튼은 글자 대신 단축키로 알아본다. 한국어 "다음(N)" 과 영어 "Next" 를 모두 받는다.
+# 버튼은 글자 대신 단축키로 알아본다. 한국어 "다음(&N)" 과 영어 "&Next" 를 모두 받는다.
 param(
     [Parameter(Mandatory)] [string] $Installer,
     [Parameter(Mandatory)] [string] $OutDir,
@@ -87,10 +87,10 @@ function Find-Button($window, $patterns) {
 }
 
 $actions = @(
-    @{ Kind = 'finish';  Patterns = @('\(F\)$', '^Finish$') },
-    @{ Kind = 'yes';     Patterns = @('\(Y\)$', '^Yes$') },
-    @{ Kind = 'install'; Patterns = @('\(I\)$', '^Install$') },
-    @{ Kind = 'next';    Patterns = @('\(N\)$', '^Next$') }
+    @{ Kind = 'finish';  Patterns = @('\(&?F\)$', '^&?Finish$') },
+    @{ Kind = 'yes';     Patterns = @('\(&?Y\)$', '^&?Yes$') },
+    @{ Kind = 'install'; Patterns = @('\(&?I\)$', '^&?Install$') },
+    @{ Kind = 'next';    Patterns = @('\(&?N\)$', '^&?Next$') }
 )
 
 $process = Start-Process -FilePath $Installer -PassThru
@@ -120,6 +120,9 @@ try {
         if ($null -eq $action) {
             # 설치 중 화면처럼 누를 버튼이 없으면 창마다 한 번만 찍고 다음 화면을 기다린다.
             if (-not $savedWaiting.ContainsKey($handle)) {
+                $names = $window.FindAll([System.Windows.Automation.TreeScope]::Descendants, $buttonCondition) |
+                    ForEach-Object { "$($_.Current.Name) (enabled=$($_.Current.IsEnabled))" }
+                Write-Host "no button to press, buttons: $($names -join ', ')"
                 $step++
                 Start-Sleep -Milliseconds 1500
                 Save-Shot $window ('{0}-{1:D2}-waiting' -f $Prefix, $step)
