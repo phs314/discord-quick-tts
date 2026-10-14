@@ -37,6 +37,12 @@ class QuickChatClientTest {
     }
 
     @Test
+    void 봇이_채널에_들어갈_수_없으면_인원과_권한을_확인하라고_안내한다() {
+        assertThat(client.sendFailure(403, problem(ApiErrorCode.BOT_CANNOT_JOIN_VOICE_CHANNEL, "x")).getMessage())
+                .contains("인원이 꽉 찼거나", "연결 권한");
+    }
+
+    @Test
     void 음성_생성에_실패하면_다시_보내라고_안내한다() {
         assertThat(client.sendFailure(502, problem(ApiErrorCode.SPEECH_SYNTHESIS_FAILED, "x")).getMessage())
                 .contains("음성을 만들지 못했습니다");

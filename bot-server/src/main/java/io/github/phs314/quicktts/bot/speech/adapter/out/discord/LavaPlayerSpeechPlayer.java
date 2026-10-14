@@ -8,6 +8,7 @@ import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
 import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
+import io.github.phs314.quicktts.bot.speech.application.exception.BotCannotJoinVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
@@ -20,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
+import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.managers.AudioManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,7 +57,11 @@ public class LavaPlayerSpeechPlayer implements SpeechPlayerPort {
             audioManager.setSendingHandler(new AudioPlayerSendHandler(queue(channel.guildId()).player()));
         }
         if (!audioChannel.equals(audioManager.getConnectedChannel())) {
-            audioManager.openAudioConnection(audioChannel);
+            try {
+                audioManager.openAudioConnection(audioChannel);
+            } catch (InsufficientPermissionException e) {
+                throw new BotCannotJoinVoiceChannelException(channel, e);
+            }
         }
     }
 
