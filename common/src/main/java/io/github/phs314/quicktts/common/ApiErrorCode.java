@@ -25,6 +25,9 @@ public final class ApiErrorCode {
     /** 봇이 같은 디스코드 서버의 다른 음성 채널에서 쓰이고 있음. 423. */
     public static final String VOICE_CHANNEL_IN_USE = "voice-channel-in-use";
 
+    /** 보낸 사람의 음성 채널에 봇이 들어갈 수 없음 (채널 인원이 꽉 참, 봇에게 연결 권한 없음). 403. */
+    public static final String BOT_CANNOT_JOIN_VOICE_CHANNEL = "bot-cannot-join-voice-channel";
+
     /** TTS 엔진이 음성을 만들지 못함. 502. */
     public static final String SPEECH_SYNTHESIS_FAILED = "speech-synthesis-failed";
 

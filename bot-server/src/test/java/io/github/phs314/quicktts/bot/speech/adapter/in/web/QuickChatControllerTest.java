@@ -9,6 +9,7 @@ import io.github.phs314.quicktts.bot.device.application.port.in.usecase.Authenti
 import io.github.phs314.quicktts.bot.shared.adapter.in.web.DomainExceptionHandler;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
+import io.github.phs314.quicktts.bot.speech.application.exception.BotCannotJoinVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.exception.SpeakerNotInVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.exception.VoiceChannelInUseException;
 import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.SpeakQuickChatUseCase;
@@ -82,6 +83,16 @@ class QuickChatControllerTest {
         sendQuickChat(TOKEN, "안녕")
                 .andExpect(status().isLocked())
                 .andExpect(jsonPath("$.code").value(ApiErrorCode.VOICE_CHANNEL_IN_USE));
+    }
+
+    @Test
+    void 봇이_보낸_사람의_채널에_들어갈_수_없으면_403_과_bot_cannot_join_voice_channel() throws Exception {
+        speak = command -> {
+            throw new BotCannotJoinVoiceChannelException(new VoiceChannel(new GuildId(1L), 2L), null);
+        };
+        sendQuickChat(TOKEN, "안녕")
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.code").value(ApiErrorCode.BOT_CANNOT_JOIN_VOICE_CHANNEL));
     }
 
     @Test

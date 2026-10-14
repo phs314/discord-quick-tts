@@ -1,5 +1,6 @@
 package io.github.phs314.quicktts.bot.speech.adapter.in.web;
 
+import io.github.phs314.quicktts.bot.speech.application.exception.BotCannotJoinVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.exception.SpeakerNotInVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.exception.SpeechSynthesisException;
 import io.github.phs314.quicktts.bot.speech.application.exception.VoiceChannelInUseException;
@@ -33,6 +34,11 @@ public class SpeechExceptionHandler {
     @ExceptionHandler(VoiceChannelInUseException.class)
     public ProblemDetail voiceChannelInUse(VoiceChannelInUseException e) {
         return ApiProblem.of(HttpStatus.LOCKED, ApiErrorCode.VOICE_CHANNEL_IN_USE, e.getMessage());
+    }
+
+    @ExceptionHandler(BotCannotJoinVoiceChannelException.class)
+    public ProblemDetail botCannotJoinVoiceChannel(BotCannotJoinVoiceChannelException e) {
+        return ApiProblem.of(HttpStatus.FORBIDDEN, ApiErrorCode.BOT_CANNOT_JOIN_VOICE_CHANNEL, e.getMessage());
     }
 
     @ExceptionHandler(SpeechSynthesisException.class)

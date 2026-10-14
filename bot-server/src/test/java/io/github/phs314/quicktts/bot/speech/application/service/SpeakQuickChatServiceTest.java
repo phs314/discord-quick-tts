@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import io.github.phs314.quicktts.bot.shared.domain.InvalidDomainValueException;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
+import io.github.phs314.quicktts.bot.speech.application.exception.BotCannotJoinVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.exception.SpeakerNotInVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.exception.VoiceChannelInUseException;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
@@ -134,11 +135,12 @@ class SpeakQuickChatServiceTest {
         SpeakQuickChatService failingToJoin = new SpeakQuickChatService(discord, synthesizer, new RecordingSpeechPlayer() {
             @Override
             public void join(VoiceChannel channel) {
-                throw new IllegalStateException("음성 채널에 들어갈 권한이 없습니다.");
+                throw new BotCannotJoinVoiceChannelException(channel, null);
             }
         }, seats, voices);
 
-        assertThatThrownBy(() -> failingToJoin.speak(command(SPEAKER, "안녕"))).isInstanceOf(IllegalStateException.class);
+        assertThatThrownBy(() -> failingToJoin.speak(command(SPEAKER, "안녕")))
+                .isInstanceOf(BotCannotJoinVoiceChannelException.class);
         assertThat(seats.channelOf(GUILD)).isEmpty();
     }
 

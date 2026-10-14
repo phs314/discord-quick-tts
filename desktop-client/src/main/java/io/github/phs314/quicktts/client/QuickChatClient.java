@@ -102,6 +102,8 @@ class QuickChatClient {
                     new QuickChatException("봇이 있는 서버의 음성 채널에 먼저 들어가 주세요.");
             case ApiErrorCode.VOICE_CHANNEL_IN_USE ->
                     new QuickChatException("봇이 이 서버의 다른 음성 채널에서 쓰이고 있습니다. 그 채널이 비면 쓸 수 있습니다.");
+            case ApiErrorCode.BOT_CANNOT_JOIN_VOICE_CHANNEL ->
+                    new QuickChatException("봇이 이 음성 채널에 들어갈 수 없습니다. 채널 인원이 꽉 찼거나 봇에게 연결 권한이 없습니다.");
             case ApiErrorCode.SPEECH_SYNTHESIS_FAILED ->
                     new QuickChatException("음성을 만들지 못했습니다. 잠시 뒤 다시 보내 주세요.");
             default -> unexpected(status);
