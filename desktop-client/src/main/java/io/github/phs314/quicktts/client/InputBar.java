@@ -3,6 +3,7 @@ package io.github.phs314.quicktts.client;
 import io.github.phs314.quicktts.common.QuickChatApi;
 import io.github.phs314.quicktts.common.VoiceChannelResponse;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import javafx.geometry.Insets;
@@ -16,6 +17,8 @@ import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.InputMethodEvent;
+import javafx.scene.input.InputMethodHighlight;
+import javafx.scene.input.InputMethodTextRun;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
@@ -45,7 +48,7 @@ final class InputBar {
                 + "-fx-prompt-text-fill: #80848e; -fx-padding: 0 4 0 4;" + FONT);
         HBox.setHgrow(input, Priority.ALWAYS);
         input.textProperty().addListener((observable, before, text) -> updateCount(text.length()));
-        input.addEventFilter(InputMethodEvent.INPUT_METHOD_TEXT_CHANGED, this::keepCaretAfterComposingText);
+        input.addEventFilter(InputMethodEvent.INPUT_METHOD_TEXT_CHANGED, this::showComposingTextLikeNotepad);
         updateCount(0);
 
         channelChip.setAlignment(Pos.CENTER_LEFT);
@@ -131,17 +134,29 @@ final class InputBar {
     }
 
     /**
-     * 윈도우 한글 입력기는 조합 중인 글자 안의 커서 위치를 알려 주지 않아(늘 0) JavaFX 가 커서를 조합 글자 왼쪽에 둔다.
-     * 커서 위치를 조합 글자 끝으로 바꾼 같은 이벤트를 다시 보내서, 메모장처럼 커서가 마지막 글자 뒤에 오게 한다.
+     * 한글을 조합하는 동안 메모장처럼 보이게 고친 같은 이벤트를 다시 보낸다.
+     * <ul>
+     *   <li>윈도우 한글 입력기는 조합 글자 안의 커서 위치를 알려 주지 않아(늘 0) JavaFX 가 커서를 조합 글자 왼쪽에 둔다.
+     *       커서를 조합 글자 끝으로 옮긴다.</li>
+     *   <li>JavaFX 는 아직 변환 전인 조합 글자(UNSELECTED_RAW) 밑에 점선을 긋는다. 이 표시를 뺀다.</li>
+     * </ul>
      */
-    private void keepCaretAfterComposingText(InputMethodEvent event) {
-        int composedLength = event.getComposed().stream().mapToInt(run -> run.getText().length()).sum();
-        if (composedLength == 0 || event.getCaretPosition() != 0) {
+    private void showComposingTextLikeNotepad(InputMethodEvent event) {
+        List<InputMethodTextRun> composed = event.getComposed();
+        int composedLength = composed.stream().mapToInt(run -> run.getText().length()).sum();
+        boolean caretAtStart = event.getCaretPosition() == 0;
+        boolean dotted = composed.stream().anyMatch(run -> run.getHighlight() == InputMethodHighlight.UNSELECTED_RAW);
+        if (composedLength == 0 || (!caretAtStart && !dotted)) {
             return;
         }
         event.consume();
+        List<InputMethodTextRun> plain = composed.stream()
+                .map(run -> run.getHighlight() == InputMethodHighlight.UNSELECTED_RAW
+                        ? new InputMethodTextRun(run.getText(), null)
+                        : run)
+                .toList();
         input.fireEvent(new InputMethodEvent(input, input, InputMethodEvent.INPUT_METHOD_TEXT_CHANGED,
-                event.getComposed(), event.getCommitted(), composedLength));
+                plain, event.getCommitted(), caretAtStart ? composedLength : event.getCaretPosition()));
     }
 
     private void updateCount(int length) {
