@@ -1,6 +1,5 @@
 package io.github.phs314.quicktts.bot.speech.adapter.out.tts;
 
-import io.github.phs314.quicktts.bot.config.QuickTtsProperties;
 import io.github.phs314.quicktts.bot.speech.application.exception.SpeechSynthesisException;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
@@ -62,8 +61,8 @@ public class EdgeReadAloudEngine implements TtsEngine {
     private final String chromiumVersion;
     private final Clock clock;
 
-    public EdgeReadAloudEngine(QuickTtsProperties properties, Clock clock) {
-        this.chromiumVersion = properties.tts().edgeChromiumVersion();
+    public EdgeReadAloudEngine(TtsProperties properties, Clock clock) {
+        this.chromiumVersion = properties.edgeChromiumVersion();
         this.clock = clock;
     }
 

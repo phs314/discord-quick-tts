@@ -1,6 +1,5 @@
 package io.github.phs314.quicktts.bot.guild.adapter.out.settings;
 
-import io.github.phs314.quicktts.bot.config.QuickTtsProperties;
 import io.github.phs314.quicktts.bot.guild.application.port.out.GuildAllowlistSettingPort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -12,10 +11,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PropertiesGuildAllowlistSetting implements GuildAllowlistSettingPort {
 
-    private final QuickTtsProperties properties;
+    private final GuildAllowlistProperties properties;
 
     @Override
     public boolean enabled() {
-        return properties.guildAllowlist().enabled();
+        return properties.enabled();
     }
 }

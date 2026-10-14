@@ -14,8 +14,8 @@ import org.springframework.context.annotation.Configuration;
 public class DiscordConfig {
 
     @Bean(destroyMethod = "shutdown")
-    public JDA jda(QuickTtsProperties properties) throws InterruptedException {
-        return JDABuilder.createDefault(properties.discord().token())
+    public JDA jda(DiscordProperties properties) throws InterruptedException {
+        return JDABuilder.createDefault(properties.token())
                 // 사용자가 어느 음성 채널에 있는지 알아야 하므로 음성 상태를 캐시한다.
                 .enableIntents(GatewayIntent.GUILD_VOICE_STATES)
                 .enableCache(CacheFlag.VOICE_STATE)
