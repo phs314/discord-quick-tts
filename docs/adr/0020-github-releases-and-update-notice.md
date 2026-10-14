@@ -4,7 +4,7 @@
 
 ## 결정
 
-- `v1.2.3` 모양의 태그를 푸시하면 **설치 파일** 워크플로가 그 버전으로 `QuickTTS-1.2.3.exe` 와 `QuickTTS-1.2.3-windows.zip` 을 만들고, 태그 이름으로 GitHub Release 를 만들어 두 파일을 올립니다. 본문에는 설치 안내와, 지난 Release 이후 머지된 PR 목록(GitHub 자동 생성)이 들어갑니다.
+- `v1.2.3` 모양의 태그를 푸시하면 **설치 파일** 워크플로가 그 버전으로 `QuickTTS-1.2.3.exe` 와 `QuickTTS-1.2.3-windows.zip` 을 만들고, 태그 이름으로 GitHub Release 를 만들어 두 파일을 올립니다. 본문에는 설치 안내와, 지난 Release 이후 머지된 PR 목록(GitHub 자동 생성)이 들어갑니다. → [ADR 0022](0022-release-notes-by-pr-type.md) 에서 PR 종류별로 나눴습니다.
 - 버전은 태그에서만 정합니다. 워크플로가 `-PappVersion=1.2.3` 으로 넘기고, 태그가 아닌 빌드(PR, main, 개발 PC)는 기본값 0.1.0 을 씁니다. 버전을 올리려고 코드를 고치는 커밋은 만들지 않습니다.
 - exe 를 만들 때 `-Dquicktts.version=버전` 을 넣고, QuickTTS 는 켜질 때 GitHub API 의 최신 Release(`/releases/latest`, 초안과 미리 보기 제외)를 한 번 확인합니다. 태그 버전이 더 높으면 트레이 알림을 띄우고, 알림이나 트레이 메뉴의 **Download v버전...** 을 누르면 Release 페이지를 브라우저로 엽니다.
 - 내려받기와 설치는 사용자가 합니다. 설치 파일은 업그레이드 UUID 가 같아서, 실행하면 이전 설치를 지우고 그 자리에 깔립니다 ([ADR 0018](0018-windows-installer.md)).
