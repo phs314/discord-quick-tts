@@ -98,7 +98,8 @@ public class LavaPlayerSpeechPlayer implements SpeechPlayerPort {
             queue.clear();
         }
         Guild guild = jda.getGuildById(guildId.value());
-        if (guild != null && guild.getAudioManager().isConnected()) {
+        // 아직 들어가는 중이라 isConnected() 가 false 여도 닫아야 들어가기가 취소된다. 연결이 없으면 아무 일도 없다.
+        if (guild != null) {
             guild.getAudioManager().closeAudioConnection();
         }
     }
