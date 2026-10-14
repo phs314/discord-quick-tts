@@ -4,12 +4,14 @@
 
 - `speech` (핵심): 누가 무슨 문장을 어느 음성 채널에서 어떤 목소리로 읽게 하나.
 - `device` (지원): `/연결` 코드 발급, 기기 등록, 기기 인증, 연결 해제.
-- `shared` (공유 커널): 두 컨텍스트가 함께 쓰는 `DiscordUserId` 와 도메인 검증 예외, 공통 예외 처리.
+- ~~`shared` (공유 커널): 두 컨텍스트가 함께 쓰는 `DiscordUserId` 와 도메인 검증 예외, 공통 예외 처리.~~
+- `shared` (공유 커널): 둘 이상의 컨텍스트가 함께 쓰는 것. 도메인에는 `DiscordUserId`, `GuildId`(ADR 0015 로 speech 에서 옮김)와 도메인 검증 예외, 어댑터에는 공통 예외 처리(`DomainExceptionHandler`, `ApiProblem`), 슬래시 명령 묶음(`DiscordSlashCommand`), 어느 컨텍스트의 규칙도 쓰지 않는 `/도움말` 안내가 있습니다.
+- `guild` (지원): 봇이 머물 디스코드 서버 허용 목록. ADR 0015 로 더해졌고, `speech`, `device` 와 서로 모릅니다.
 
 컨텍스트 사이 규칙은 `ArchitectureTest` 가 확인합니다.
 
 - `speech` 는 `device` 를 공개 입구인 `device.application.port.in` 으로만 씁니다. 실제 접점은 quick chat 컨트롤러가 기기 토큰의 주인을 묻는 `AuthenticateDeviceUseCase` 하나입니다.
-- `device` 는 `speech` 를 모르고, `shared` 는 어느 컨텍스트도 모릅니다.
+- `device` 는 `speech` 를 모르고, `guild` 와 다른 두 컨텍스트는 서로 모르며, `shared` 는 어느 컨텍스트도 모릅니다.
 
 ## 결과
 
