@@ -63,7 +63,8 @@ public class LavaPlayerSpeechPlayer implements SpeechPlayerPort {
     public void play(GuildId guildId, Speech speech) {
         GuildSpeechQueue queue = queue(guildId);
         Path audioFile = writeTempFile(speech);
-        playerManager.loadItem(audioFile.toString(), new AudioLoadResultHandler() {
+        // 파일 읽기는 여러 스레드에서 돌므로, 디스코드 서버마다 넣은 순서대로 끝나게 해야 문장 순서가 바뀌지 않는다.
+        playerManager.loadItemOrdered(guildId, audioFile.toString(), new AudioLoadResultHandler() {
             @Override
             public void trackLoaded(AudioTrack track) {
                 track.setUserData(audioFile);
