@@ -99,6 +99,12 @@ class ArchitectureTest {
             .should().dependOnClassesThat().resideInAnyPackage(
                     "..bot.*.application.service..", "..bot.*.application.port.out..");
 
+    /** 설정 값은 그 값을 쓰는 어댑터 패키지에 두고, 어댑터는 config 의 설정이나 빈을 쓰지 않는다 (ADR 0023). */
+    @ArchTest
+    static final ArchRule adaptersDoNotUseConfig = noClasses()
+            .that().resideInAPackage("..bot.*.adapter..")
+            .should().dependOnClassesThat().resideInAPackage("..bot.config..");
+
     /** 출력 포트 패키지에는 인터페이스만 두고 이름은 Port 로 끝낸다 (ADR 0004). */
     @ArchTest
     static final ArchRule outputPortsAreInterfacesNamedPort = classes()

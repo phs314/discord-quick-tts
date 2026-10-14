@@ -92,9 +92,9 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │       ├── in/discord/         /허용목록 슬래시 명령, 초대·시작 때 확인
 │       ├── out/discord/        봇이 들어가 있는 서버 보기·나가기, 봇 주인 알아내기
 │       ├── out/persistence/    허용 목록 저장소 (JdbcClient)
-│       └── out/settings/       허용 목록을 쓸지 설정 값
+│       └── out/settings/       허용 목록을 쓸지 설정 값 (GuildAllowlistProperties)
 ├── shared/                     공유 커널(domain/vo 의 DiscordUserId, GuildId)과 공통 예외 처리
-└── config/                     설정 값, JDA, 시계
+└── config/                     디스코드 토큰, JDA, 시계, 슬래시 명령 등록
 ```
 
 `ArchitectureTest`(ArchUnit)가 빌드 때마다 다음 규칙을 확인합니다.
@@ -105,6 +105,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 - 서비스는 입력 포트(`...UseCase`) 하나만 구현하고 이름은 `...Service` 입니다 ([ADR 0008](docs/adr/0008-one-service-per-use-case.md)).
 - 인바운드 어댑터는 애그리거트(`Device`, `Pairing`, `BotSeat`)를 직접 쓰지 않고, 입력 포트가 돌려주는 `...Dto` 로만 봅니다. `port/in` 에는 `...UseCase`, `...Command`, `...Dto` 만 둡니다 ([ADR 0010](docs/adr/0010-use-cases-return-dtos.md)).
 - `port/in` 은 `usecase` / `command` / `dto` 폴더로 나누고, 애플리케이션 예외는 `application/exception` 에 모읍니다 ([ADR 0012](docs/adr/0012-application-subpackages.md)).
+- 설정 값은 그 값을 쓰는 어댑터 패키지에 두고(`TtsProperties`, `GuildAllowlistProperties`), 어댑터는 `config` 를 쓰지 않습니다 ([ADR 0023](docs/adr/0023-properties-per-adapter.md)).
 
 그 밖에:
 

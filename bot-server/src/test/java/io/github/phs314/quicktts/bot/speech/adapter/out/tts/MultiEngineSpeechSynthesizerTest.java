@@ -3,7 +3,6 @@ package io.github.phs314.quicktts.bot.speech.adapter.out.tts;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import io.github.phs314.quicktts.bot.config.QuickTtsProperties;
 import io.github.phs314.quicktts.bot.speech.application.exception.SpeechSynthesisException;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.SpokenText;
@@ -56,13 +55,13 @@ class MultiEngineSpeechSynthesizerTest {
                 .isInstanceOf(SpeechSynthesisException.class);
     }
 
-    private static MultiEngineSpeechSynthesizer synthesizer(TtsEngine edge, QuickTtsProperties properties) {
+    private static MultiEngineSpeechSynthesizer synthesizer(TtsEngine edge, TtsProperties properties) {
         return new MultiEngineSpeechSynthesizer(
                 List.of(edge, new FakeEngine(GoogleTranslateEngine.VOICE_ID, false)), properties);
     }
 
-    private static QuickTtsProperties defaultVoice(String voice) {
-        return new QuickTtsProperties(new QuickTtsProperties.Discord("token"), new QuickTtsProperties.Tts(voice, null), null);
+    private static TtsProperties defaultVoice(String voice) {
+        return new TtsProperties(voice, null);
     }
 
     private static String text(Speech speech) {

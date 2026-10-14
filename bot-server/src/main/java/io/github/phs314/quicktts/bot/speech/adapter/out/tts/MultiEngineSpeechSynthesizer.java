@@ -1,6 +1,5 @@
 package io.github.phs314.quicktts.bot.speech.adapter.out.tts;
 
-import io.github.phs314.quicktts.bot.config.QuickTtsProperties;
 import io.github.phs314.quicktts.bot.speech.application.exception.SpeechSynthesisException;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizerPort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.SpokenText;
@@ -25,10 +24,10 @@ public class MultiEngineSpeechSynthesizer implements SpeechSynthesizerPort {
     private final List<Voice> voices;
     private final VoiceId defaultVoice;
 
-    MultiEngineSpeechSynthesizer(List<TtsEngine> engines, QuickTtsProperties properties) {
+    MultiEngineSpeechSynthesizer(List<TtsEngine> engines, TtsProperties properties) {
         this.engines = engines;
         this.voices = engines.stream().flatMap(engine -> engine.voices().stream()).toList();
-        VoiceId configured = new VoiceId(properties.tts().defaultVoice());
+        VoiceId configured = new VoiceId(properties.defaultVoice());
         this.defaultVoice = voices.stream().anyMatch(voice -> voice.id().equals(configured))
                 ? configured
                 : voices.getFirst().id();
