@@ -39,10 +39,6 @@ public class Pairing {
         return owner;
     }
 
-    public Instant expiresAt() {
-        return expiresAt;
-    }
-
     @Override
     public boolean equals(Object o) {
         return o instanceof Pairing other && code.equals(other.code);
