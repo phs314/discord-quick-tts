@@ -30,6 +30,8 @@ class QuickChatClient {
             .build();
     private final JsonMapper jsonMapper = JsonMapper.builder().build();
     private final String serverUrl;
+    /** 바로 앞에 보낸 문장. 다음 문장은 이게 끝난 뒤에 보낸다. */
+    private CompletableFuture<Void> previousSend = CompletableFuture.completedFuture(null);
 
     QuickChatClient(String serverUrl) {
         this.serverUrl = serverUrl;
@@ -60,18 +62,23 @@ class QuickChatClient {
     /**
      * 문장을 보낸다. 실패하면 사용자에게 보여 줄 메시지를 담은 예외로 끝난다.
      * 기기 토큰이 더 이상 유효하지 않으면 {@link DeviceUnauthorizedException} 으로 끝난다.
+     * <p>서버는 음성을 다 만든 문장부터 읽으므로, 앞 문장의 응답을 받은 뒤에 보내야 연달아 보내도 순서가 바뀌지 않는다.
      */
-    CompletableFuture<Void> send(String deviceToken, String text) {
+    synchronized CompletableFuture<Void> send(String deviceToken, String text) {
         HttpRequest request = jsonPost(QuickChatApi.PATH, new QuickChatRequest(text))
                 .header("Authorization", QuickChatApi.BEARER_PREFIX + deviceToken)
                 .build();
 
-        return httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+        CompletableFuture<Void> sent = previousSend
+                .handle((ignored, previousFailure) -> null)
+                .thenCompose(ignored -> httpClient.sendAsync(request, HttpResponse.BodyHandlers.ofString()))
                 .thenAccept(response -> {
                     if (response.statusCode() != 202) {
                         throw sendFailure(response.statusCode(), response.body());
                     }
                 });
+        previousSend = sent;
+        return sent;
     }
 
     /** 연결 코드 등록이 실패한 응답을 사용자에게 보여 줄 예외로 바꾼다. */
