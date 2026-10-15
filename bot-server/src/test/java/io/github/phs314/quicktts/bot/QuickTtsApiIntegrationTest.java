@@ -75,13 +75,13 @@ class QuickTtsApiIntegrationTest {
     int port;
 
     @Autowired
-    IssuePairingCodeUseCase issuePairingCode;
+    IssuePairingCodeUseCase issuePairingCodeUseCase;
 
     @Autowired
-    ManageOwnDevicesUseCase manageOwnDevices;
+    ManageOwnDevicesUseCase manageOwnDevicesUseCase;
 
     @Autowired
-    ManageVoiceUseCase manageVoice;
+    ManageVoiceUseCase manageVoiceUseCase;
 
     RestTestClient client;
 
@@ -117,7 +117,7 @@ class QuickTtsApiIntegrationTest {
 
     @Test
     void 한_번_쓴_연결_코드는_400_과_invalid_pairing_code() {
-        String code = issuePairingCode.issue(newUser()).code().display();
+        String code = issuePairingCodeUseCase.issue(newUser()).code().display();
         postDevice(code).expectStatus().isCreated();
 
         postDevice(code)
@@ -154,7 +154,7 @@ class QuickTtsApiIntegrationTest {
         String token = registerDevice(user);
         VoiceChannel channel = newChannel(newGuild());
         VOICE_CHANNELS.enter(user, details(channel, "게임"));
-        manageVoice.changeVoice(user, FakeSpeechSynthesizer.INJOON.id());
+        manageVoiceUseCase.changeVoice(user, FakeSpeechSynthesizer.INJOON.id());
 
         sendQuickChat(token, "안녕").expectStatus().isAccepted();
 
@@ -176,7 +176,7 @@ class QuickTtsApiIntegrationTest {
         DiscordUserId user = newUser();
         String token = registerDevice(user);
         VOICE_CHANNELS.enter(user, details(newChannel(newGuild()), "게임"));
-        manageOwnDevices.unlinkAll(user);
+        manageOwnDevicesUseCase.unlinkAll(user);
 
         sendQuickChat(token, "안녕")
                 .expectStatus().isUnauthorized()
@@ -244,7 +244,7 @@ class QuickTtsApiIntegrationTest {
 
     /** 디스코드 /연결 로 코드를 받아 클라이언트 첫 실행처럼 등록하고 기기 토큰을 돌려준다. */
     private String registerDevice(DiscordUserId owner) {
-        String code = issuePairingCode.issue(owner).code().display();
+        String code = issuePairingCodeUseCase.issue(owner).code().display();
         DeviceRegistrationResponse response = postDevice(code)
                 .expectStatus().isCreated()
                 .expectBody(DeviceRegistrationResponse.class)

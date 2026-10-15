@@ -37,14 +37,14 @@ class EnforceGuildAllowlistTransactionTest {
     private static final Instant NOW = Instant.parse("2026-10-14T00:00:00Z");
 
     @Autowired
-    EnforceGuildAllowlistUseCase enforceGuildAllowlist;
+    EnforceGuildAllowlistUseCase enforceGuildAllowlistUseCase;
 
     @Autowired
     JdbcAllowedGuildRepository repository;
 
     @Test
     void 처음_채우다_실패하면_하나도_넣지_않는다() {
-        assertThatThrownBy(enforceGuildAllowlist::checkAllJoinedGuilds)
+        assertThatThrownBy(enforceGuildAllowlistUseCase::checkAllJoinedGuilds)
                 .isInstanceOf(IllegalStateException.class);
 
         // 일부만 남았다면 다음에 켤 때 목록이 비어 있지 않아서 남은 디스코드 서버에서 나가게 된다.

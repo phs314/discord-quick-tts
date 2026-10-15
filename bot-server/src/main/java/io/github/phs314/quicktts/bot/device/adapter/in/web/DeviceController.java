@@ -21,12 +21,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class DeviceController {
 
-    private final RegisterDeviceUseCase registerDevice;
+    private final RegisterDeviceUseCase registerDeviceUseCase;
 
     @PostMapping(QuickChatApi.DEVICES_PATH)
     @ResponseStatus(HttpStatus.CREATED)
     public DeviceRegistrationResponse register(@RequestBody DeviceRegistrationRequest request) {
-        DeviceToken token = registerDevice.register(
+        DeviceToken token = registerDeviceUseCase.register(
                 new PairingCode(request.pairingCode()), new DeviceName(request.deviceName()));
         return new DeviceRegistrationResponse(token.value());
     }

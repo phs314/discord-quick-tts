@@ -22,8 +22,8 @@ import org.springframework.stereotype.Component;
 public class VoiceStateListener extends ListenerAdapter {
 
     private final JDA jda;
-    private final LeaveEmptyVoiceChannelUseCase leaveEmptyVoiceChannel;
-    private final FollowBotMoveUseCase followBotMove;
+    private final LeaveEmptyVoiceChannelUseCase leaveEmptyVoiceChannelUseCase;
+    private final FollowBotMoveUseCase followBotMoveUseCase;
 
     @PostConstruct
     void register() {
@@ -38,10 +38,10 @@ public class VoiceStateListener extends ListenerAdapter {
         }
         GuildId guildId = new GuildId(event.getGuild().getIdLong());
         if (event.getMember().getIdLong() == event.getJDA().getSelfUser().getIdLong()) {
-            followBotMove.followBotMove(toVoiceChannel(guildId, left),
+            followBotMoveUseCase.followBotMove(toVoiceChannel(guildId, left),
                     Optional.ofNullable(event.getChannelJoined()).map(joined -> toVoiceChannel(guildId, joined)));
         } else {
-            leaveEmptyVoiceChannel.leaveIfEmpty(guildId);
+            leaveEmptyVoiceChannelUseCase.leaveIfEmpty(guildId);
         }
     }
 

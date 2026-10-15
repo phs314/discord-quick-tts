@@ -17,17 +17,17 @@ import org.springframework.stereotype.Component;
 public class GuildJoinListener extends ListenerAdapter {
 
     private final JDA jda;
-    private final EnforceGuildAllowlistUseCase enforceGuildAllowlist;
+    private final EnforceGuildAllowlistUseCase enforceGuildAllowlistUseCase;
 
     @PostConstruct
     void register() {
         jda.addEventListener(this);
         // JDA 는 이미 준비된 상태로 만들어지므로, 꺼져 있는 동안 초대된 디스코드 서버는 여기서 확인한다.
-        enforceGuildAllowlist.checkAllJoinedGuilds();
+        enforceGuildAllowlistUseCase.checkAllJoinedGuilds();
     }
 
     @Override
     public void onGuildJoin(GuildJoinEvent event) {
-        enforceGuildAllowlist.checkJoinedGuild(new GuildId(event.getGuild().getIdLong()));
+        enforceGuildAllowlistUseCase.checkJoinedGuild(new GuildId(event.getGuild().getIdLong()));
     }
 }

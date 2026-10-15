@@ -22,7 +22,7 @@ public class LinkCommandListener extends ListenerAdapter implements DiscordSlash
 
     private static final String COMMAND_NAME = "link";
 
-    private final IssuePairingCodeUseCase issuePairingCode;
+    private final IssuePairingCodeUseCase issuePairingCodeUseCase;
 
     @Override
     public SlashCommandData definition() {
@@ -36,7 +36,7 @@ public class LinkCommandListener extends ListenerAdapter implements DiscordSlash
         if (!COMMAND_NAME.equals(event.getName())) {
             return;
         }
-        IssuedPairingCodeDto issued = issuePairingCode.issue(new DiscordUserId(event.getUser().getIdLong()));
+        IssuedPairingCodeDto issued = issuePairingCodeUseCase.issue(new DiscordUserId(event.getUser().getIdLong()));
         event.reply("""
                         연결 코드: **%s**
                         Quick TTS 데스크톱 앱에 %d분 안에 입력해 주세요. 이 코드는 한 번만 쓸 수 있습니다.

@@ -44,7 +44,7 @@ public class AllowlistCommandListener extends ListenerAdapter implements Discord
             Permission.getRaw(Permission.VIEW_CHANNEL, Permission.VOICE_CONNECT, Permission.VOICE_SPEAK);
 
     private final JDA jda;
-    private final ManageGuildAllowlistUseCase manageAllowlist;
+    private final ManageGuildAllowlistUseCase manageGuildAllowlistUseCase;
 
     @Override
     public SlashCommandData definition() {
@@ -96,7 +96,7 @@ public class AllowlistCommandListener extends ListenerAdapter implements Discord
     }
 
     private String add(DiscordUserId requester, GuildId guild) {
-        String result = manageAllowlist.allow(requester, guild)
+        String result = manageGuildAllowlistUseCase.allow(requester, guild)
                 ? "허용 목록에 넣었어요: **" + guildName(guild) + "**"
                 : "이미 허용 목록에 있어요: **" + guildName(guild) + "**";
         if (jda.getGuildById(guild.value()) != null) {
@@ -107,13 +107,13 @@ public class AllowlistCommandListener extends ListenerAdapter implements Discord
 
     private String remove(DiscordUserId requester, GuildId guild) {
         String name = guildName(guild);
-        return manageAllowlist.disallow(requester, guild)
+        return manageGuildAllowlistUseCase.disallow(requester, guild)
                 ? "허용 목록에서 뺐어요: **" + name + "**\n봇이 그 서버에 있었다면 안내를 남기고 나가요."
                 : "허용 목록에 없는 서버예요: **" + name + "**";
     }
 
     private String list(DiscordUserId requester) {
-        GuildAllowlistDto allowlist = manageAllowlist.allowlist(requester);
+        GuildAllowlistDto allowlist = manageGuildAllowlistUseCase.allowlist(requester);
         String header = allowlist.enabled()
                 ? "허용 목록을 쓰는 중이에요. 여기 없는 서버에 초대되면 봇이 안내를 남기고 나가요."
                 : "허용 목록이 꺼져 있어서 어느 서버에나 들어가요.";

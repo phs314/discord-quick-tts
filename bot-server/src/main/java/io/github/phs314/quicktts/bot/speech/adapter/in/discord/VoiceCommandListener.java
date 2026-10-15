@@ -29,14 +29,14 @@ public class VoiceCommandListener extends ListenerAdapter implements DiscordSlas
     private static final String COMMAND_NAME = "voice";
     private static final String VOICE_OPTION = "voice";
 
-    private final ManageVoiceUseCase manageVoice;
+    private final ManageVoiceUseCase manageVoiceUseCase;
 
     @Override
     public SlashCommandData definition() {
         OptionData voiceOption = new OptionData(OptionType.STRING, VOICE_OPTION, "Voice to read your messages with")
                 .setNameLocalization(DiscordLocale.KOREAN, "목소리")
                 .setDescriptionLocalization(DiscordLocale.KOREAN, "내 문장을 읽어 줄 목소리");
-        manageVoice.voices().forEach(voice -> voiceOption.addChoice(voice.label(), voice.id().value()));
+        manageVoiceUseCase.voices().forEach(voice -> voiceOption.addChoice(voice.label(), voice.id().value()));
 
         return Commands.slash(COMMAND_NAME, "Choose the voice that reads your quick chat messages")
                 .setNameLocalization(DiscordLocale.KOREAN, "목소리")
@@ -57,7 +57,7 @@ public class VoiceCommandListener extends ListenerAdapter implements DiscordSlas
             reply = currentVoiceMessage(user);
         } else {
             try {
-                Voice voice = manageVoice.changeVoice(user, new VoiceId(chosen.getAsString()));
+                Voice voice = manageVoiceUseCase.changeVoice(user, new VoiceId(chosen.getAsString()));
                 reply = "목소리를 **" + voice.label() + "** 로 바꿨어요. 다음에 보내는 문장부터 이 목소리로 읽어요.";
             } catch (UnknownVoiceException e) {
                 reply = "없는 목소리예요. 목록에서 골라 주세요.";
@@ -67,8 +67,8 @@ public class VoiceCommandListener extends ListenerAdapter implements DiscordSlas
     }
 
     private String currentVoiceMessage(DiscordUserId user) {
-        Voice current = manageVoice.currentVoice(user);
-        String choices = manageVoice.voices().stream()
+        Voice current = manageVoiceUseCase.currentVoice(user);
+        String choices = manageVoiceUseCase.voices().stream()
                 .map(voice -> (voice.equals(current) ? "▶ " : "・ ") + voice.label())
                 .collect(Collectors.joining("\n"));
         return "지금 목소리: **" + current.label() + "**\n" + choices

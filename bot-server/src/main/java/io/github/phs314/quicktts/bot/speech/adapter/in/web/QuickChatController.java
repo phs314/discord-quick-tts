@@ -27,16 +27,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class QuickChatController {
 
-    private final AuthenticateDeviceUseCase authenticateDevice;
-    private final SpeakQuickChatUseCase speakQuickChat;
-    private final FindMyVoiceChannelUseCase findMyVoiceChannel;
+    private final AuthenticateDeviceUseCase authenticateDeviceUseCase;
+    private final SpeakQuickChatUseCase speakQuickChatUseCase;
+    private final FindMyVoiceChannelUseCase findMyVoiceChannelUseCase;
 
     @PostMapping(QuickChatApi.PATH)
     public ResponseEntity<Void> quickChat(
             @RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) String authorization,
             @RequestBody QuickChatRequest request) {
         DiscordUserId speaker = authenticatedUser(authorization);
-        speakQuickChat.speak(new SpeakQuickChatCommand(speaker, new QuickChatMessage(request.text())));
+        speakQuickChatUseCase.speak(new SpeakQuickChatCommand(speaker, new QuickChatMessage(request.text())));
         return ResponseEntity.accepted().build();
     }
 
@@ -44,7 +44,7 @@ public class QuickChatController {
     public ResponseEntity<VoiceChannelResponse> myVoiceChannel(
             @RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) String authorization) {
         DiscordUserId user = authenticatedUser(authorization);
-        return findMyVoiceChannel.findMyVoiceChannel(user)
+        return findMyVoiceChannelUseCase.findMyVoiceChannel(user)
                 .map(details -> ResponseEntity.ok(new VoiceChannelResponse(
                         details.serverName(), details.serverIconUrl(), details.channelName())))
                 .orElseGet(() -> ResponseEntity.noContent().build());
@@ -53,7 +53,7 @@ public class QuickChatController {
     /** 기기 토큰의 주인. 토큰이 없거나 해제된 기기면 401 로 끝난다. */
     private DiscordUserId authenticatedUser(String authorization) {
         return bearerToken(authorization)
-                .flatMap(authenticateDevice::authenticate)
+                .flatMap(authenticateDeviceUseCase::authenticate)
                 .orElseThrow(DeviceUnauthorizedException::new);
     }
 
