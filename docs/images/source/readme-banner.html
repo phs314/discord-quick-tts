@@ -29,7 +29,7 @@ p{margin:10px 0 0;font-size:15px;color:#444;line-height:1.55}
 /* 입력창 */
 .bar{gap:12px;padding:0 16px 0 9px;border-radius:10px;background:#383a40;box-shadow:0 10px 26px rgba(10,6,50,.32);color:#dbdee1;font-size:17px}
 .ch{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px 0 4px;border-radius:999px;background:#5865f2;color:#fff;font-weight:700;font-size:13px;flex:none}
-.ch img{width:23px;height:23px;border-radius:50%;background:#fff}
+.ch .ava{width:23px;height:23px}
 .txt{flex:1;white-space:nowrap}
 .caret{display:inline-block;width:2px;height:20px;background:#dbdee1;vertical-align:-3px;margin-left:1px}
 .ph{color:#6d6f78}
@@ -38,7 +38,9 @@ p{margin:10px 0 0;font-size:15px;color:#444;line-height:1.55}
 /* 말하기 */
 .speak{gap:14px;padding:0 18px 0 12px;border-radius:10px;background:#2b2d31;box-shadow:0 10px 26px rgba(10,6,50,.32)}
 .av{position:relative;width:34px;height:34px;flex:none}
-.av img{width:34px;height:34px;border-radius:50%;background:#fff;display:block}
+.av .ava{width:34px;height:34px}
+/* 디스코드 원형 아바타: 아이콘 가장자리의 투명한 부분이 원 밖으로 나가게 키워 원을 보라로 채운다 */
+.ava{display:block;flex:none;border-radius:50%;background:#3f37d0 url("../../../desktop-client/src/main/resources/io/github/phs314/quicktts/client/app-icon.png") center/116% no-repeat}
 .av .ring{position:absolute;inset:-4px;border-radius:50%;border:2.5px solid #23a55a}
 .who{color:#fff;font-weight:700;font-size:14px;flex:none}
 .bot{font-size:10px;font-weight:700;color:#fff;background:#5865f2;border-radius:4px;padding:1px 5px;margin-left:5px;vertical-align:1px}
@@ -60,8 +62,8 @@ p{margin:10px 0 0;font-size:15px;color:#444;line-height:1.55}
 </div>
 <div class="stage" id="stage" style="left:310px;top:164px">
  <div class="keys" id="keys"><div class="key" id="k1">Ctrl</div>+<div class="key" id="k2">Shift</div>+<div class="key space" id="k3">Space</div></div>
- <div class="bar" id="bar"><span class="ch"><img src="../../../desktop-client/src/main/resources/io/github/phs314/quicktts/client/app-icon.png">일반</span><span class="txt" id="txt"></span><span class="hint" id="hint">Enter 보내기 · Esc 닫기</span><div class="key ent" id="ent">Enter</div></div>
- <div class="speak" id="speak"><div class="av"><img src="../../../desktop-client/src/main/resources/io/github/phs314/quicktts/client/app-icon.png"><div class="ring" id="ring"></div></div><div class="who">QuickTTS<span class="bot">봇</span></div>
+ <div class="bar" id="bar"><span class="ch"><span class="ava"></span>일반</span><span class="txt" id="txt"></span><span class="hint" id="hint">Enter 보내기 · Esc 닫기</span><div class="key ent" id="ent">Enter</div></div>
+ <div class="speak" id="speak"><div class="av"><span class="ava"></span><div class="ring" id="ring"></div></div><div class="who">QuickTTS<span class="bot">봇</span></div>
   <div class="bubble"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M4 9h3.5L12 5v14l-4.5-4H4z" fill="#fff"/><path id="a1" d="M15 9.2a4 4 0 0 1 0 5.6" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/><path id="a2" d="M17.6 6.6a7.6 7.6 0 0 1 0 10.8" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span class="say" id="say"></span></div>
   <div class="eq" id="eq"><b></b><b></b><b></b><b></b><b></b></div></div>
 </div>
