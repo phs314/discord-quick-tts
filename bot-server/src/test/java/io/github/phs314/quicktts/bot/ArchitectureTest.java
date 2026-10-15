@@ -162,6 +162,12 @@ class ArchitectureTest {
             .that().resideInAPackage("..bot.*.application.service..").and().areTopLevelClasses()
             .should(implementExactlyOneUseCaseNamedAfterIt());
 
+    /** 서비스는 다른 서비스의 입력 포트를 부르지 않는다. 같이 쓰는 규칙은 도메인에 둔다 (ADR 0008). */
+    @ArchTest
+    static final ArchRule servicesDoNotUseOtherUseCases = fields()
+            .that().areDeclaredInClassesThat().resideInAPackage("..bot.*.application.service..")
+            .should().notHaveRawType(resideInAPackage("..bot.*.application.port.in.usecase.."));
+
     @ArchTest
     static final ArchRule domainIsFrameworkFree = noClasses()
             .that().resideInAPackage("..bot.*.domain..")
