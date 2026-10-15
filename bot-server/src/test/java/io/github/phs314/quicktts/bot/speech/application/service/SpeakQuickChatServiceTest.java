@@ -31,9 +31,11 @@ class SpeakQuickChatServiceTest {
     private final RecordingSpeechPlayer player = new RecordingSpeechPlayer();
     private final FakeBotSeatPort seats = new FakeBotSeatPort();
     private final ManageVoiceServiceTest.FakeSynthesizer synthesizer = new ManageVoiceServiceTest.FakeSynthesizer();
-    private final ManageVoiceService voices =
-            new ManageVoiceService(synthesizer, new ManageVoiceServiceTest.InMemoryVoicePreferences());
-    private final SpeakQuickChatService service = new SpeakQuickChatService(discord, synthesizer, player, seats, voices);
+    private final ManageVoiceServiceTest.InMemoryVoicePreferences preferences =
+            new ManageVoiceServiceTest.InMemoryVoicePreferences();
+    private final ManageVoiceService voices = new ManageVoiceService(synthesizer, preferences);
+    private final SpeakQuickChatService service =
+            new SpeakQuickChatService(discord, synthesizer, player, seats, preferences);
 
     @Test
     void 보낸_사람이_있는_음성_채널에_들어가서_그_사람이_고른_목소리로_읽어_준다() {
@@ -137,7 +139,7 @@ class SpeakQuickChatServiceTest {
             public void join(VoiceChannel channel) {
                 throw new BotCannotJoinVoiceChannelException(channel, null);
             }
-        }, seats, voices);
+        }, seats, preferences);
 
         assertThatThrownBy(() -> failingToJoin.speak(command(SPEAKER, "안녕")))
                 .isInstanceOf(BotCannotJoinVoiceChannelException.class);

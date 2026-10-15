@@ -3,15 +3,16 @@ package io.github.phs314.quicktts.bot.speech.application.service;
 import io.github.phs314.quicktts.bot.speech.application.exception.SpeakerNotInVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.exception.VoiceChannelInUseException;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
-import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.ManageVoiceUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.SpeakQuickChatUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.out.BotSeatPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocatorPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.VoicePreferencePort;
 import io.github.phs314.quicktts.bot.speech.domain.BotSeat;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.SpokenText;
+import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceCatalog;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
@@ -26,7 +27,7 @@ public class SpeakQuickChatService implements SpeakQuickChatUseCase {
     private final SpeechSynthesizerPort speechSynthesizerPort;
     private final SpeechPlayerPort speechPlayerPort;
     private final BotSeatPort botSeatPort;
-    private final ManageVoiceUseCase voices;
+    private final VoicePreferencePort voicePreferencePort;
 
     @Override
     public void speak(SpeakQuickChatCommand command) {
@@ -35,7 +36,8 @@ public class SpeakQuickChatService implements SpeakQuickChatUseCase {
                 .map(VoiceChannelDetails::channel)
                 .orElseThrow(() -> new SpeakerNotInVoiceChannelException(command.speaker()));
 
-        VoiceId voice = voices.currentVoice(command.speaker()).id();
+        VoiceCatalog catalog = new VoiceCatalog(speechSynthesizerPort.voices(), speechSynthesizerPort.defaultVoice());
+        VoiceId voice = catalog.voiceFor(voicePreferencePort.find(command.speaker())).id();
         Speech speech = speechSynthesizerPort.synthesize(text, voice);
 
         // 같은 디스코드 서버에서는 자리 잡기와 재생 순서 넣기가 한 번에 하나씩 일어나서 다른 채널의 요청이 끼어들지 못한다.
