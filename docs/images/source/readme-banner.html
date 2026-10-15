@@ -1,34 +1,108 @@
 <!doctype html>
-<!-- README 맨 위 배너 ../readme-banner.png 의 원본. 설치 마법사 dialog.bmp 왼쪽 보라 그림과 같은 모양을 가로로 펼쳤다.
-     Chromium 에서 880x240 화면, 2배율, 배경 투명으로 캡처해 1760x480 PNG 로 덮어쓴다. --><html><head><meta charset="utf-8"><style>
+<!-- README 맨 위 움직이는 배너 ../readme-banner.png(APNG) 의 원본. 설치 마법사 첫 화면과 같은 모양이다.
+     render(t) 가 t 밀리초 때 장면을 그린다: 단축키 누르기 → 입력창에 "안녕하세요" 치기 → 봇이 읽기, 7초마다 되풀이.
+     브라우저에서 ?t=2400 처럼 열면 그 순간을 볼 수 있고, 다시 만들 땐 render-readme-banner.js 를 돌린다. --><html><head><meta charset="utf-8"><style>
 html,body{margin:0;padding:0;font-family:Inter,"Noto Sans CJK KR",sans-serif;-webkit-font-smoothing:antialiased}
+body{width:880px;height:300px;overflow:hidden;position:relative;background:transparent}
 .panelbg{background:radial-gradient(120% 70% at 22% 18%,#6f63ff 0%,rgba(111,99,255,0) 60%),linear-gradient(165deg,#5b4ef0 0%,#4536d6 45%,#2e2391 100%)}
 .wave{position:absolute;border-radius:50%;border:1.5px solid rgba(255,255,255,.10)}
 .pill{display:inline-flex;align-items:center;gap:7px;padding:6px 14px 6px 11px;border-radius:999px;background:rgba(0,0,0,.22);color:rgba(255,255,255,.88);font-size:13px;font-weight:600;white-space:nowrap}
 .pill i{display:block;width:8px;height:8px;border-radius:50%;background:#23a55a;box-shadow:0 0 0 3px rgba(35,165,90,.25)}
-.bar{display:flex;align-items:center;gap:12px;height:46px;padding:0 16px 0 9px;border-radius:10px;background:#383a40;box-shadow:0 10px 30px rgba(10,6,50,.45);color:#dbdee1;font-size:16px}
-.bar .ch{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 11px 0 4px;border-radius:999px;background:#5865f2;color:#fff;font-weight:700;font-size:13px}
-.bar .ch img{width:21px;height:21px;border-radius:50%;background:#fff}
-.bar .txt{flex:1;white-space:nowrap}
-.bar .caret{display:inline-block;width:2px;height:19px;background:#dbdee1;vertical-align:-3px;margin-left:2px}
-.bar .hint{color:#80848e;font-size:12px;white-space:nowrap}
-
-body{width:880px;height:240px;overflow:hidden;position:relative;background:transparent}
-.wrap{position:absolute;inset:0;overflow:hidden}
-.wrap::after{content:"";position:absolute;inset:0;background:radial-gradient(60% 90% at 95% 110%,rgba(196,170,255,.35),rgba(196,170,255,0) 70%)}
-.icon{position:absolute;left:52px;top:56px;width:128px;height:128px;border-radius:30px;box-shadow:0 12px 32px rgba(18,10,80,.55),0 0 0 1px rgba(255,255,255,.18);z-index:2}
-.t{position:absolute;left:212px;top:58px;z-index:2;color:#fff}
-.name{font-size:46px;font-weight:800;letter-spacing:-.8px;line-height:1}
-.tag{margin-top:12px;font-size:17px;color:rgba(255,255,255,.78);font-weight:500}
-.t .pill{margin-top:20px}
-.demo{position:absolute;right:40px;top:92px;width:330px;z-index:2;transform:rotate(-2deg)}
-.edge{position:absolute;left:0;bottom:0;width:880px;height:4px;background:linear-gradient(90deg,#8b7fff,#c9a8ff);z-index:3;border-radius:0 0 16px 16px}
-</style></head><body><div class="wrap panelbg" style="border-radius:16px">
-<div class="wave" style="width:420px;height:420px;left:-90px;top:-90px"></div>
-<div class="wave" style="width:560px;height:560px;left:-160px;top:-160px"></div>
-<div class="wave" style="width:700px;height:700px;left:-230px;top:-230px"></div>
-<div class="wave" style="width:840px;height:840px;left:-300px;top:-300px"></div>
-<img class="icon" src="../../../desktop-client/src/main/resources/io/github/phs314/quicktts/client/app-icon.png">
-<div class="t"><div class="name">QuickTTS</div><div class="tag">단축키로 말하는 디스코드 TTS</div><div class="pill"><i></i>단축키 &rarr; 입력 &rarr; 읽기</div></div>
-<div class="demo"><div class="bar"><span class="ch"><img src="../../../desktop-client/src/main/resources/io/github/phs314/quicktts/client/app-icon.png">일반</span><span class="txt">잠깐 화장실 다녀올게요<span class="caret"></span></span></div></div>
-<div class="edge"></div></div></body></html>
+.win{position:absolute;left:20px;top:14px;width:840px;height:262px;border-radius:14px;overflow:hidden;background:#fff;box-shadow:0 10px 28px rgba(30,20,90,.28),0 0 0 1px rgba(60,40,160,.12)}
+.left{position:absolute;left:0;top:0;width:250px;height:262px;overflow:hidden}
+.left::after{content:"";position:absolute;inset:0;background:radial-gradient(90% 50% at 90% 100%,rgba(196,170,255,.35),rgba(196,170,255,0) 70%)}
+.icon{position:absolute;left:83px;top:34px;width:84px;height:84px;border-radius:20px;box-shadow:0 10px 24px rgba(18,10,80,.55),0 0 0 1px rgba(255,255,255,.18);z-index:2}
+.name{position:absolute;left:0;width:250px;top:134px;text-align:center;color:#fff;font-weight:800;font-size:26px;letter-spacing:-.3px;z-index:2}
+.tag{position:absolute;left:0;width:250px;top:172px;text-align:center;color:rgba(255,255,255,.75);font-size:12.5px;font-weight:500;z-index:2}
+.left .pill{position:absolute;left:50%;transform:translateX(-50%);top:206px;z-index:2;font-size:11.5px}
+.edge{position:absolute;left:250px;top:0;width:4px;height:262px;background:linear-gradient(#8b7fff,#c9a8ff)}
+.right{position:absolute;left:290px;top:30px;width:514px}
+h1{margin:0;font-size:27px;font-weight:800;color:#4536d6;letter-spacing:-.5px}
+p{margin:10px 0 0;font-size:15px;color:#444;line-height:1.55}
+.stage{position:absolute;left:290px;top:150px;width:514px;height:80px}
+.stage>div{position:absolute;left:0;right:0;top:12px;height:56px;display:flex;align-items:center;opacity:0}
+/* 키 */
+.keys{justify-content:center;gap:10px;color:#8b84c9;font-size:18px;font-weight:700}
+.key{height:40px;min-width:58px;padding:0 14px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;border-radius:9px;background:#fff;border:1.5px solid #d9d3ff;box-shadow:0 4px 0 #cfc7ff,0 6px 14px rgba(69,54,214,.12);color:#4536d6;font-size:15px;font-weight:700;letter-spacing:.2px}
+.key.space{min-width:150px}
+.key.down{transform:translateY(4px);box-shadow:0 0 0 #cfc7ff,0 0 0 3px rgba(91,78,240,.18);background:#efebff;border-color:#8b7fff}
+/* 입력창 */
+.bar{gap:12px;padding:0 16px 0 9px;border-radius:10px;background:#383a40;box-shadow:0 10px 26px rgba(10,6,50,.32);color:#dbdee1;font-size:17px}
+.ch{display:inline-flex;align-items:center;gap:6px;height:30px;padding:0 12px 0 4px;border-radius:999px;background:#5865f2;color:#fff;font-weight:700;font-size:13px;flex:none}
+.ch img{width:23px;height:23px;border-radius:50%;background:#fff}
+.txt{flex:1;white-space:nowrap}
+.caret{display:inline-block;width:2px;height:20px;background:#dbdee1;vertical-align:-3px;margin-left:1px}
+.ph{color:#6d6f78}
+.hint{color:#80848e;font-size:12px;white-space:nowrap}
+.ent{position:absolute;right:12px;top:10px;height:34px;min-width:72px;font-size:13px;opacity:0}
+/* 말하기 */
+.speak{gap:14px;padding:0 18px 0 12px;border-radius:10px;background:#2b2d31;box-shadow:0 10px 26px rgba(10,6,50,.32)}
+.av{position:relative;width:34px;height:34px;flex:none}
+.av img{width:34px;height:34px;border-radius:50%;background:#fff;display:block}
+.av .ring{position:absolute;inset:-4px;border-radius:50%;border:2.5px solid #23a55a}
+.who{color:#fff;font-weight:700;font-size:14px;flex:none}
+.bot{font-size:10px;font-weight:700;color:#fff;background:#5865f2;border-radius:4px;padding:1px 5px;margin-left:5px;vertical-align:1px}
+.bubble{display:flex;align-items:center;gap:10px;height:38px;padding:0 16px 0 12px;border-radius:19px;background:#5b4ef0;color:#fff;font-size:17px;font-weight:600}
+.bubble svg{flex:none}
+.say span{transition:none}
+.eq{display:flex;align-items:center;gap:3px;height:22px;margin-left:auto}
+.eq b{display:block;width:4px;border-radius:2px;background:#23a55a}
+</style></head><body>
+<div class="win">
+<div class="left panelbg">
+<div class="wave" style="width:300px;height:300px;left:-60px;top:-50px"></div>
+<div class="wave" style="width:400px;height:400px;left:-110px;top:-100px"></div>
+<div class="wave" style="width:500px;height:500px;left:-160px;top:-150px"></div>
+<img class="icon" src="../../../desktop-client/src/main/resources/io/github/phs314/quicktts/client/app-icon.png"><div class="name">QuickTTS</div><div class="tag">단축키로 말하는 디스코드 TTS</div><div class="pill"><i></i>단축키 &rarr; 입력 &rarr; 읽기</div></div>
+<div class="edge"></div>
+<div class="right"><h1>화면 전환 없이, TTS로 대화해요</h1>
+<p>게임 중에도 단축키를 누르고 할 말을 쓰면,<br>디스코드 봇이 내가 있는 음성 채널에서 대신 읽어 줘요.</p></div>
+</div>
+<div class="stage" id="stage" style="left:310px;top:164px">
+ <div class="keys" id="keys"><div class="key" id="k1">Ctrl</div>+<div class="key" id="k2">Shift</div>+<div class="key space" id="k3">Space</div></div>
+ <div class="bar" id="bar"><span class="ch"><img src="../../../desktop-client/src/main/resources/io/github/phs314/quicktts/client/app-icon.png">일반</span><span class="txt" id="txt"></span><span class="hint" id="hint">Enter 보내기 · Esc 닫기</span><div class="key ent" id="ent">Enter</div></div>
+ <div class="speak" id="speak"><div class="av"><img src="../../../desktop-client/src/main/resources/io/github/phs314/quicktts/client/app-icon.png"><div class="ring" id="ring"></div></div><div class="who">QuickTTS<span class="bot">봇</span></div>
+  <div class="bubble"><svg width="22" height="22" viewBox="0 0 24 24"><path d="M4 9h3.5L12 5v14l-4.5-4H4z" fill="#fff"/><path id="a1" d="M15 9.2a4 4 0 0 1 0 5.6" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/><path id="a2" d="M17.6 6.6a7.6 7.6 0 0 1 0 10.8" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg><span class="say" id="say"></span></div>
+  <div class="eq" id="eq"><b></b><b></b><b></b><b></b><b></b></div></div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const clamp=x=>Math.max(0,Math.min(1,x));
+const ease=x=>{x=clamp(x);return x<.5?2*x*x:1-Math.pow(-2*x+2,2)/2};
+const prog=(t,a,b)=>ease((t-a)/(b-a));
+const fade=(t,inA,inB,outA,outB)=>Math.min(prog(t,inA,inB),1-prog(t,outA,outB));
+const steps=['ㅇ','아','안','안ㄴ','안녀','안녕','안녕ㅎ','안녕하','안녕핫','안녕하세','안녕하셍','안녕하세요'];
+const WORD='안녕하세요';
+window.render=function(t){
+  // 1. 단축키
+  const kf=fade(t,0,300,1350,1600);
+  $('keys').style.opacity=kf; $('keys').style.transform=`translateY(${(1-kf)*-6}px)`;
+  [[ 'k1',500],['k2',700],['k3',900]].forEach(([id,d])=>$(id).classList.toggle('down',t>=d&&t<1250));
+  // 2. 입력창
+  const bf=fade(t,1500,1800,3900,4150);
+  $('bar').style.opacity=bf; $('bar').style.transform=`scale(${.96+.04*prog(t,1500,1800)}) translateY(${-6*prog(t,3900,4150)}px)`;
+  const T0=1950, DT=105;
+  const n=Math.floor((t-T0)/DT);
+  const typed=n<0?'':steps[Math.min(n,steps.length-1)];
+  const blink=(Math.floor(t/400)%2===0)||(n>=0&&n<steps.length);
+  $('txt').innerHTML=(typed?typed:'<span class="ph">읽어 줄 문장을 입력하세요</span>').replace(/^/,'')+(typed&&blink?'<span class="caret"></span>':'');
+  if(!typed) $('txt').innerHTML='<span class="caret" style="opacity:'+(blink?1:0)+'"></span><span class="ph">읽어 줄 문장을 입력하세요</span>';
+  const ef=prog(t,3350,3500);
+  $('hint').style.opacity=1-ef; $('ent').style.opacity=ef;
+  $('ent').classList.toggle('down',t>=3600&&t<3800);
+  // 3. 말하기
+  const sf=fade(t,4100,4400,6450,6800);
+  $('speak').style.opacity=sf; $('speak').style.transform=`translateY(${6*(1-prog(t,4100,4400))}px)`;
+  const S0=4500,S1=5900, speaking=t>=S0&&t<S1+150;
+  const k=Math.floor(clamp((t-S0)/(S1-S0))*WORD.length+ (t>=S0?1:0));
+  $('say').innerHTML=[...WORD].map((c,i)=>`<span style="color:${i<k?'#fff':'rgba(255,255,255,.45)'}">${c}</span>`).join('');
+  const ph=t/1000*2*Math.PI;
+  $('ring').style.opacity=speaking?.75+.25*Math.sin(ph*3):0;
+  $('ring').style.transform=`scale(${speaking?1+.04*Math.sin(ph*3):1})`;
+  $('a1').style.opacity=speaking?.45+.55*Math.max(0,Math.sin(ph*2.5)):.35;
+  $('a2').style.opacity=speaking?.45+.55*Math.max(0,Math.sin(ph*2.5-1.2)):.35;
+  [...$('eq').children].forEach((b,i)=>{const h=speaking?6+16*Math.abs(Math.sin(ph*(1.7+i*.37)+i*1.3)):4;b.style.height=h+'px';b.style.opacity=speaking?1:.4});
+};
+window.render(+(new URLSearchParams(location.search).get('t')||0));
+</script>
+</body></html>

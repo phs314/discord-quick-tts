@@ -1,4 +1,4 @@
-<img src="docs/images/readme-banner.png" alt="QuickTTS, 단축키로 말하는 디스코드 TTS" width="100%">
+<img src="docs/images/readme-banner.png" alt="QuickTTS: 단축키를 누르고 할 말을 쓰면 디스코드 봇이 음성 채널에서 읽어 줘요" width="100%">
 
 # discord-quick-tts
 
