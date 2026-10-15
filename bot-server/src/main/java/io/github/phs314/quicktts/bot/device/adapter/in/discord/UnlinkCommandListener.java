@@ -35,7 +35,7 @@ public class UnlinkCommandListener extends ListenerAdapter implements DiscordSla
     private static final DateTimeFormatter REGISTERED_AT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm 등록").withZone(ZoneId.of("Asia/Seoul"));
 
-    private final ManageOwnDevicesUseCase manageOwnDevices;
+    private final ManageOwnDevicesUseCase manageOwnDevicesUseCase;
 
     @Override
     public SlashCommandData definition() {
@@ -49,7 +49,7 @@ public class UnlinkCommandListener extends ListenerAdapter implements DiscordSla
         if (!COMMAND_NAME.equals(event.getName())) {
             return;
         }
-        List<DeviceDto> devices = manageOwnDevices.listDevices(ownerOf(event.getUser().getIdLong()));
+        List<DeviceDto> devices = manageOwnDevicesUseCase.listDevices(ownerOf(event.getUser().getIdLong()));
         if (devices.isEmpty()) {
             event.reply("연결된 PC 가 없습니다.").setEphemeral(true).queue();
             return;
@@ -77,8 +77,8 @@ public class UnlinkCommandListener extends ListenerAdapter implements DiscordSla
 
         String result;
         if (ALL_DEVICES.equals(selected)) {
-            result = "PC " + manageOwnDevices.unlinkAll(owner) + "대의 연결을 끊었습니다.";
-        } else if (manageOwnDevices.unlink(owner, new DeviceId(selected))) {
+            result = "PC " + manageOwnDevicesUseCase.unlinkAll(owner) + "대의 연결을 끊었습니다.";
+        } else if (manageOwnDevicesUseCase.unlink(owner, new DeviceId(selected))) {
             result = "연결을 끊었습니다. 그 PC 에서 다시 쓰려면 `/연결` 로 코드를 받으세요.";
         } else {
             result = "이미 끊긴 PC 입니다.";

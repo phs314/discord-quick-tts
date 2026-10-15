@@ -185,10 +185,14 @@ class ArchitectureTest {
                     .and(resideOutsideOfPackages(
                             "org.springframework.stereotype..", "org.springframework.transaction.annotation..")));
 
-    /** 출력 포트를 담는 필드 이름은 타입 이름 그대로다. 예: {@code BotOwnerPort botOwnerPort} (ADR 0004). */
+    /**
+     * 포트를 담는 필드 이름은 타입 이름 그대로다 (ADR 0004).
+     * 예: {@code BotOwnerPort botOwnerPort}, {@code SpeakQuickChatUseCase speakQuickChatUseCase}
+     */
     @ArchTest
-    static final ArchRule outputPortFieldsAreNamedAfterTheirType = fields()
-            .that().haveRawType(resideInAPackage("..bot.*.application.port.out"))
+    static final ArchRule portFieldsAreNamedAfterTheirType = fields()
+            .that().haveRawType(resideInAnyPackage(
+                    "..bot.*.application.port.out", "..bot.*.application.port.in.usecase"))
             .should(beNamedAfterTheirType());
 
     private static ArchCondition<JavaField> beNamedAfterTheirType() {
