@@ -12,15 +12,15 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class LeaveEmptyVoiceChannelService implements LeaveEmptyVoiceChannelUseCase {
 
-    private final BotSeatPort botSeats;
-    private final VoiceChannelLocatorPort voiceChannelLocator;
-    private final SpeechPlayerPort speechPlayer;
+    private final BotSeatPort botSeatPort;
+    private final VoiceChannelLocatorPort voiceChannelLocatorPort;
+    private final SpeechPlayerPort speechPlayerPort;
 
     @Override
     public void leaveIfEmpty(GuildId guildId) {
-        botSeats.withSeat(guildId, seat -> {
-            if (seat.vacateIfEmpty(voiceChannelLocator::hasPeople)) {
-                speechPlayer.leave(guildId);
+        botSeatPort.withSeat(guildId, seat -> {
+            if (seat.vacateIfEmpty(voiceChannelLocatorPort::hasPeople)) {
+                speechPlayerPort.leave(guildId);
             }
         });
     }

@@ -16,15 +16,15 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class EnforceGuildAllowlistService implements EnforceGuildAllowlistUseCase {
 
-    private final AllowedGuildPort allowedGuilds;
-    private final JoinedGuildPort joinedGuilds;
-    private final GuildAllowlistSettingPort setting;
+    private final AllowedGuildPort allowedGuildPort;
+    private final JoinedGuildPort joinedGuildPort;
+    private final GuildAllowlistSettingPort guildAllowlistSettingPort;
     private final Clock clock;
 
     @Override
     public void checkJoinedGuild(GuildId guild) {
-        if (setting.enabled() && !allowedGuilds.exists(guild)) {
-            joinedGuilds.leaveNotAllowed(guild);
+        if (guildAllowlistSettingPort.enabled() && !allowedGuildPort.exists(guild)) {
+            joinedGuildPort.leaveNotAllowed(guild);
         }
     }
 
@@ -35,13 +35,13 @@ public class EnforceGuildAllowlistService implements EnforceGuildAllowlistUseCas
     @Override
     @Transactional
     public void checkAllJoinedGuilds() {
-        if (!setting.enabled()) {
+        if (!guildAllowlistSettingPort.enabled()) {
             return;
         }
-        List<GuildId> joined = joinedGuilds.joinedGuilds();
-        if (allowedGuilds.findAll().isEmpty()) {
+        List<GuildId> joined = joinedGuildPort.joinedGuilds();
+        if (allowedGuildPort.findAll().isEmpty()) {
             // 허용 목록을 처음 켰을 때 봇 주인이 이미 쓰던 디스코드 서버에서 쫓겨나지 않게 한다.
-            joined.forEach(guild -> allowedGuilds.add(AllowedGuild.allow(guild, clock.instant())));
+            joined.forEach(guild -> allowedGuildPort.add(AllowedGuild.allow(guild, clock.instant())));
             return;
         }
         joined.forEach(this::checkJoinedGuild);

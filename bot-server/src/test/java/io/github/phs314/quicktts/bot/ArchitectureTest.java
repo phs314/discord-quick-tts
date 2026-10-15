@@ -8,10 +8,12 @@ import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyP
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideOutsideOfPackage;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideOutsideOfPackages;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.fields;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.library.Architectures.onionArchitecture;
 
 import com.tngtech.archunit.core.domain.JavaClass;
+import com.tngtech.archunit.core.domain.JavaField;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
@@ -176,6 +178,26 @@ class ArchitectureTest {
                             "..bot.config..")
                     .and(resideOutsideOfPackages(
                             "org.springframework.stereotype..", "org.springframework.transaction.annotation..")));
+
+    /** 출력 포트를 담는 필드 이름은 타입 이름 그대로다. 예: {@code BotOwnerPort botOwnerPort} (ADR 0004). */
+    @ArchTest
+    static final ArchRule outputPortFieldsAreNamedAfterTheirType = fields()
+            .that().haveRawType(resideInAPackage("..bot.*.application.port.out"))
+            .should(beNamedAfterTheirType());
+
+    private static ArchCondition<JavaField> beNamedAfterTheirType() {
+        return new ArchCondition<>("be named after their type") {
+            @Override
+            public void check(JavaField field, ConditionEvents events) {
+                String type = field.getRawType().getSimpleName();
+                String expected = Character.toLowerCase(type.charAt(0)) + type.substring(1);
+                if (!field.getName().equals(expected)) {
+                    events.add(SimpleConditionEvent.violated(field, field.getOwner().getSimpleName() + "."
+                            + field.getName() + " 의 이름은 " + expected + " 이어야 합니다."));
+                }
+            }
+        };
+    }
 
     private static ArchCondition<JavaClass> implementExactlyOneUseCaseNamedAfterIt() {
         return new ArchCondition<>("implement exactly one UseCase and be named after it") {
