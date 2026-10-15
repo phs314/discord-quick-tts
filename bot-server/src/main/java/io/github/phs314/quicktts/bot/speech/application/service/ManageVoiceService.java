@@ -6,9 +6,9 @@ import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.ManageVo
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoicePreferencePort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
+import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceCatalog;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -26,20 +26,17 @@ public class ManageVoiceService implements ManageVoiceUseCase {
 
     @Override
     public Voice currentVoice(DiscordUserId user) {
-        return voicePreferencePort.find(user)
-                .flatMap(this::findVoice)
-                .or(() -> findVoice(speechSynthesizerPort.defaultVoice()))
-                .orElseThrow(() -> new IllegalStateException("기본 목소리가 목소리 목록에 없습니다."));
+        return catalog().voiceFor(voicePreferencePort.find(user));
     }
 
     @Override
     public Voice changeVoice(DiscordUserId user, VoiceId voiceId) {
-        Voice voice = findVoice(voiceId).orElseThrow(() -> new UnknownVoiceException(voiceId));
+        Voice voice = catalog().find(voiceId).orElseThrow(() -> new UnknownVoiceException(voiceId));
         voicePreferencePort.save(user, voice.id());
         return voice;
     }
 
-    private Optional<Voice> findVoice(VoiceId id) {
-        return speechSynthesizerPort.voices().stream().filter(voice -> voice.id().equals(id)).findFirst();
+    private VoiceCatalog catalog() {
+        return new VoiceCatalog(speechSynthesizerPort.voices(), speechSynthesizerPort.defaultVoice());
     }
 }
