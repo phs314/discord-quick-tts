@@ -12,15 +12,15 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class FollowBotMoveService implements FollowBotMoveUseCase {
 
-    private final BotSeatPort botSeats;
-    private final SpeechPlayerPort speechPlayer;
+    private final BotSeatPort botSeatPort;
+    private final SpeechPlayerPort speechPlayerPort;
 
     @Override
     public void followBotMove(VoiceChannel from, Optional<VoiceChannel> to) {
-        botSeats.withSeat(from.guildId(), seat -> {
+        botSeatPort.withSeat(from.guildId(), seat -> {
             // 끊겼으면 남은 문장이 다음에 들어가는 채널에서 읽히지 않게 버린다.
             if (seat.followBotMove(from, to)) {
-                speechPlayer.leave(from.guildId());
+                speechPlayerPort.leave(from.guildId());
             }
         });
     }

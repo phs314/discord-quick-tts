@@ -12,10 +12,10 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class FindMyVoiceChannelService implements FindMyVoiceChannelUseCase {
 
-    private final VoiceChannelLocatorPort voiceChannelLocator;
+    private final VoiceChannelLocatorPort voiceChannelLocatorPort;
 
     @Override
     public Optional<VoiceChannelDetails> findMyVoiceChannel(DiscordUserId user) {
-        return voiceChannelLocator.findCurrentChannel(user);
+        return voiceChannelLocatorPort.findCurrentChannel(user);
     }
 }

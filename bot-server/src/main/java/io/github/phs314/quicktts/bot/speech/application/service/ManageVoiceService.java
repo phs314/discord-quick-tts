@@ -16,30 +16,30 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ManageVoiceService implements ManageVoiceUseCase {
 
-    private final SpeechSynthesizerPort speechSynthesizer;
-    private final VoicePreferencePort voicePreferences;
+    private final SpeechSynthesizerPort speechSynthesizerPort;
+    private final VoicePreferencePort voicePreferencePort;
 
     @Override
     public List<Voice> voices() {
-        return speechSynthesizer.voices();
+        return speechSynthesizerPort.voices();
     }
 
     @Override
     public Voice currentVoice(DiscordUserId user) {
-        return voicePreferences.find(user)
+        return voicePreferencePort.find(user)
                 .flatMap(this::findVoice)
-                .or(() -> findVoice(speechSynthesizer.defaultVoice()))
+                .or(() -> findVoice(speechSynthesizerPort.defaultVoice()))
                 .orElseThrow(() -> new IllegalStateException("기본 목소리가 목소리 목록에 없습니다."));
     }
 
     @Override
     public Voice changeVoice(DiscordUserId user, VoiceId voiceId) {
         Voice voice = findVoice(voiceId).orElseThrow(() -> new UnknownVoiceException(voiceId));
-        voicePreferences.save(user, voice.id());
+        voicePreferencePort.save(user, voice.id());
         return voice;
     }
 
     private Optional<Voice> findVoice(VoiceId id) {
-        return speechSynthesizer.voices().stream().filter(voice -> voice.id().equals(id)).findFirst();
+        return speechSynthesizerPort.voices().stream().filter(voice -> voice.id().equals(id)).findFirst();
     }
 }

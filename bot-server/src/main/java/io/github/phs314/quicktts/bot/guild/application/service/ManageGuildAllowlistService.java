@@ -19,37 +19,37 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class ManageGuildAllowlistService implements ManageGuildAllowlistUseCase {
 
-    private final BotOwnerPort botOwner;
-    private final AllowedGuildPort allowedGuilds;
-    private final JoinedGuildPort joinedGuilds;
-    private final GuildAllowlistSettingPort setting;
+    private final BotOwnerPort botOwnerPort;
+    private final AllowedGuildPort allowedGuildPort;
+    private final JoinedGuildPort joinedGuildPort;
+    private final GuildAllowlistSettingPort guildAllowlistSettingPort;
     private final Clock clock;
 
     @Override
     public GuildAllowlistDto allowlist(DiscordUserId requester) {
         requireOwner(requester);
-        return new GuildAllowlistDto(setting.enabled(),
-                allowedGuilds.findAll().stream().map(AllowedGuildDto::from).toList());
+        return new GuildAllowlistDto(guildAllowlistSettingPort.enabled(),
+                allowedGuildPort.findAll().stream().map(AllowedGuildDto::from).toList());
     }
 
     @Override
     public boolean allow(DiscordUserId requester, GuildId guild) {
         requireOwner(requester);
-        return allowedGuilds.add(AllowedGuild.allow(guild, clock.instant()));
+        return allowedGuildPort.add(AllowedGuild.allow(guild, clock.instant()));
     }
 
     @Override
     public boolean disallow(DiscordUserId requester, GuildId guild) {
         requireOwner(requester);
-        boolean removed = allowedGuilds.delete(guild);
-        if (setting.enabled() && joinedGuilds.joinedGuilds().contains(guild)) {
-            joinedGuilds.leaveNotAllowed(guild);
+        boolean removed = allowedGuildPort.delete(guild);
+        if (guildAllowlistSettingPort.enabled() && joinedGuildPort.joinedGuilds().contains(guild)) {
+            joinedGuildPort.leaveNotAllowed(guild);
         }
         return removed;
     }
 
     private void requireOwner(DiscordUserId requester) {
-        if (!botOwner.owner().equals(requester)) {
+        if (!botOwnerPort.owner().equals(requester)) {
             throw new NotBotOwnerException(requester);
         }
     }

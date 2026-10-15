@@ -13,3 +13,4 @@ DDD 책을 본 사람은 `DeviceRepository` 같은 이름을 먼저 떠올립니
 - 어댑터 이름에는 `Repository` 를 그대로 써도 됩니다. 기술 이름이 앞에 붙어 있어 포트와 헷갈리지 않습니다.
 - 포트가 던지는 예외(`SpeechSynthesisException`)는 포트가 아니므로 `port/out` 이 아니라 다른 예외들과 같은 `application/exception` 패키지에 둡니다 ([ADR 0012](0012-application-subpackages.md)). 어댑터 안에서만 쓰는 인터페이스(`TtsEngine`)도 포트가 아니므로 `Port` 를 붙이지 않습니다.
 - 이 이름 규칙은 `ArchitectureTest` 가 확인합니다. `port/out` 에는 이름이 `Port` 로 끝나는 인터페이스만 둘 수 있고, `port/in/usecase` 에는 이름이 `UseCase` 로 끝나는 인터페이스만 둘 수 있습니다. 처음에는 리뷰로 지켰지만, 여러 작업이 동시에 코드를 쓰다 보니 테스트로 막기로 했습니다.
+- 출력 포트를 담는 필드 이름도 타입 이름을 그대로 씁니다(`BotOwnerPort botOwnerPort`, `DevicePort devicePort`). 처음에는 `botOwner`, `allowedGuilds`, `setting` 처럼 하는 일로 지었는데, 서비스 안에서 포트를 부르는 줄인지 바로 보이지 않고 같은 포트가 서비스마다 다른 이름이 되었습니다(2026-10-15 현수 요청). 이것도 `ArchitectureTest` 가 확인합니다.
