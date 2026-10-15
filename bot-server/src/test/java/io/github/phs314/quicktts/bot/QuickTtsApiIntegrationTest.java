@@ -63,13 +63,13 @@ class QuickTtsApiIntegrationTest {
     private static final AtomicLong IDS = new AtomicLong(1_000);
 
     @TestBean(methodName = "voiceChannels")
-    VoiceChannelLocatorPort voiceChannelLocator;
+    VoiceChannelLocatorPort voiceChannelLocatorPort;
 
     @TestBean(methodName = "player")
-    SpeechPlayerPort speechPlayer;
+    SpeechPlayerPort speechPlayerPort;
 
     @TestBean(methodName = "tts")
-    SpeechSynthesizerPort speechSynthesizer;
+    SpeechSynthesizerPort speechSynthesizerPort;
 
     @LocalServerPort
     int port;
