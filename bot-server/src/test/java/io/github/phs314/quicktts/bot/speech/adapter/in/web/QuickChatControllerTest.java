@@ -6,7 +6,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.github.phs314.quicktts.bot.device.application.port.in.usecase.AuthenticateDeviceUseCase;
-import io.github.phs314.quicktts.bot.shared.adapter.in.web.DomainExceptionHandler;
+import io.github.phs314.quicktts.bot.shared.adapter.in.web.ApiExceptionHandler;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.application.exception.BotCannotJoinVoiceChannelException;
@@ -115,7 +115,7 @@ class QuickChatControllerTest {
     private MockMvc mockMvc() {
         QuickChatController controller = new QuickChatController(AUTHENTICATE, speak, user -> Optional.empty());
         return MockMvcBuilders.standaloneSetup(controller)
-                .setControllerAdvice(new SpeechExceptionHandler(), new DomainExceptionHandler())
+                .setControllerAdvice(new ApiExceptionHandler())
                 .build();
     }
 }
