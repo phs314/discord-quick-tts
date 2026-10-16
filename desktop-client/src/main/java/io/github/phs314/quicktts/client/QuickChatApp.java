@@ -159,8 +159,13 @@ public class QuickChatApp extends Application {
     private void refreshVoiceChannel() {
         inputBar.showChecking();
         client.myVoiceChannel(config.deviceToken()).whenComplete((channel, failure) -> Platform.runLater(() -> {
+            Throwable cause = failure instanceof CompletionException ? failure.getCause() : failure;
             if (failure == null) {
                 inputBar.showChannel(channel);
+            } else if (cause instanceof QuickChatClient.DeviceUnauthorizedException) {
+                hide();
+                trayMenu.showError(cause.getMessage());
+                forgetDeviceAndPairAgain();
             } else {
                 inputBar.showServerUnreachable();
             }

@@ -19,6 +19,14 @@ class QuickChatClientTest {
     }
 
     @Test
+    void 내_음성_채널을_물을_때도_해제된_기기면_다시_연결하라는_예외() {
+        assertThat(client.voiceChannelFailure(401, problem(ApiErrorCode.DEVICE_UNAUTHORIZED, "기기 토큰이 없습니다.")))
+                .isInstanceOf(QuickChatClient.DeviceUnauthorizedException.class);
+        assertThat(client.voiceChannelFailure(500, problem(ApiErrorCode.UNEXPECTED_FAILURE, "x")))
+                .isNotInstanceOf(QuickChatClient.DeviceUnauthorizedException.class);
+    }
+
+    @Test
     void 문장이_규칙에_안_맞으면_서버가_준_이유를_보여_준다() {
         assertThat(client.sendFailure(400, problem(ApiErrorCode.INVALID_VALUE, "문장이 비어 있습니다.")))
                 .hasMessage("문장이 비어 있습니다.");

@@ -110,6 +110,14 @@ class QuickChatClient {
         };
     }
 
+    /** 내 음성 채널 묻기가 실패한 응답을 예외로 바꾼다. 기기 연결이 끊겼으면 다시 연결하도록 따로 알린다. */
+    QuickChatException voiceChannelFailure(int status, String body) {
+        if (ApiErrorCode.DEVICE_UNAUTHORIZED.equals(serverError(body).code())) {
+            return new DeviceUnauthorizedException();
+        }
+        return new QuickChatException("음성 채널을 확인하지 못했습니다. (HTTP " + status + ")");
+    }
+
     private static QuickChatException unexpected(int status) {
         return new QuickChatException("봇 서버 오류가 났습니다. (HTTP " + status + ")");
     }
@@ -161,7 +169,7 @@ class QuickChatClient {
                 .thenApply(response -> switch (response.statusCode()) {
                     case 200 -> Optional.of(jsonMapper.readValue(response.body(), VoiceChannelResponse.class));
                     case 204 -> Optional.<VoiceChannelResponse>empty();
-                    default -> throw new QuickChatException("음성 채널을 확인하지 못했습니다. (HTTP " + response.statusCode() + ")");
+                    default -> throw voiceChannelFailure(response.statusCode(), response.body());
                 });
     }
 
