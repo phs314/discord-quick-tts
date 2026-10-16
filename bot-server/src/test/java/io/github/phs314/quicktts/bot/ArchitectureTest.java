@@ -5,7 +5,6 @@ import static com.tngtech.archunit.base.DescribedPredicate.not;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.assignableTo;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyPackage;
-import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideOutsideOfPackage;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideOutsideOfPackages;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.fields;
@@ -23,6 +22,8 @@ import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
 import io.github.phs314.quicktts.bot.shared.domain.BusinessException;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
@@ -31,8 +32,23 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @AnalyzeClasses(packages = "io.github.phs314.quicktts.bot", importOptions = ImportOption.DoNotIncludeTests.class)
 class ArchitectureTest {
 
-    /** 다른 컨텍스트가 device 를 쓸 때 거쳐야 하는 공개 입구. */
-    private static final String DEVICE_PUBLIC_API = "..bot.device.application.port.in..";
+    private static final String BOT_PACKAGE = "io.github.phs314.quicktts.bot";
+
+    /**
+     * 컨텍스트 지도. 왼쪽 컨텍스트가 오른쪽 컨텍스트의 공개 입구(application.port.in)를 부를 수 있다 (ADR 0026).
+     * 컨텍스트를 새로 만들면 여기에 넣어야 빌드가 통과한다.
+     */
+    private static final Map<String, Set<String>> CONTEXT_MAP = Map.of(
+            "speech", Set.of("device"),
+            "device", Set.of(),
+            "guild", Set.of());
+
+    /** 컨텍스트가 아닌 맨 위 패키지. shared 는 공유 커널, config 는 조립 코드다. */
+    private static final Set<String> NON_CONTEXT_PACKAGES = Set.of("shared", "config");
+
+    /** 다른 컨텍스트를 부르는 어댑터(인바운드 어댑터와 adapter.out.상대)가 그 컨텍스트의 공개 입구를 쓰는 의존. 계층 규칙에서는 빼고 아래 컨텍스트 규칙이 따로 본다. */
+    private static final String ADAPTERS = "..bot.*.adapter..";
+    private static final String PUBLIC_ENTRANCES = "..bot.*.application.port.in..";
 
     @ArchTest
     static final ArchRule speechIsHexagonal = onionArchitecture()
@@ -45,7 +61,8 @@ class ArchitectureTest {
             .adapter("persistence", "..bot.speech.adapter.out.persistence..")
             .withOptionalLayers(true)
             // config 는 포트와 어댑터를 이어 붙이는 조립 코드라서 계층 규칙에서 뺀다.
-            .ignoreDependency(resideInAPackage("..bot.config.."), alwaysTrue());
+            .ignoreDependency(resideInAPackage("..bot.config.."), alwaysTrue())
+            .ignoreDependency(resideInAPackage(ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES));
 
     @ArchTest
     static final ArchRule deviceIsHexagonal = onionArchitecture()
@@ -56,8 +73,7 @@ class ArchitectureTest {
             .adapter("persistence", "..bot.device.adapter.out.persistence..")
             .withOptionalLayers(true)
             .ignoreDependency(resideInAPackage("..bot.config.."), alwaysTrue())
-            // speech 의 웹 어댑터는 공개 입구로 기기 토큰의 주인을 묻는다.
-            .ignoreDependency(resideInAPackage("..bot.speech.adapter.in.web.."), resideInAPackage(DEVICE_PUBLIC_API));
+            .ignoreDependency(resideInAPackage(ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES));
 
     @ArchTest
     static final ArchRule guildIsHexagonal = onionArchitecture()
@@ -68,28 +84,56 @@ class ArchitectureTest {
             .adapter("persistence", "..bot.guild.adapter.out.persistence..")
             .adapter("settings", "..bot.guild.adapter.out.settings..")
             .withOptionalLayers(true)
-            .ignoreDependency(resideInAPackage("..bot.config.."), alwaysTrue());
+            .ignoreDependency(resideInAPackage("..bot.config.."), alwaysTrue())
+            .ignoreDependency(resideInAPackage(ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES));
 
-    /** guild 는 봇이 머물 디스코드 서버만 다룬다. speech, device 와 서로 모른다 (ADR 0015). */
+    /** bot 바로 아래 패키지는 컨텍스트 지도에 있는 컨텍스트이거나 shared, config 다. 지도에 없는 컨텍스트는 아래 규칙을 빠져나가기 때문이다. */
     @ArchTest
-    static final ArchRule guildIsIndependentOfOtherContexts = noClasses()
-            .that().resideInAPackage("..bot.guild..")
-            .should().dependOnClassesThat().resideInAnyPackage("..bot.speech..", "..bot.device..");
+    static final ArchRule everyContextIsOnTheContextMap = classes()
+            .that().resideInAPackage("..bot.*..")
+            .should(new ArchCondition<>("be in a context on the context map, shared or config") {
+                @Override
+                public void check(JavaClass javaClass, ConditionEvents events) {
+                    String top = topPackage(javaClass);
+                    if (!CONTEXT_MAP.containsKey(top) && !NON_CONTEXT_PACKAGES.contains(top)) {
+                        events.add(SimpleConditionEvent.violated(javaClass,
+                                javaClass.getName() + " 의 컨텍스트 " + top + " 가 ArchitectureTest.CONTEXT_MAP 에 없습니다."));
+                    }
+                }
+            });
 
+    /**
+     * 다른 컨텍스트는 컨텍스트 지도에 있을 때만, 그 공개 입구(application.port.in)로만 부른다.
+     * 부르는 쪽은 인바운드 어댑터이거나, 서비스가 내 출력 포트로 부탁한 일을 하는 adapter.out.상대 다 (ADR 0026).
+     * 서비스와 도메인은 다른 컨텍스트를 모른다. guild 처럼 지도에 상대가 없는 컨텍스트는 다른 컨텍스트와 서로 모른다 (ADR 0015).
+     */
     @ArchTest
-    static final ArchRule otherContextsDoNotKnowGuild = noClasses()
-            .that().resideInAnyPackage("..bot.speech..", "..bot.device..")
-            .should().dependOnClassesThat().resideInAPackage("..bot.guild..");
-
-    @ArchTest
-    static final ArchRule speechUsesDeviceOnlyThroughItsPublicApi = noClasses()
-            .that().resideInAPackage("..bot.speech..")
-            .should().dependOnClassesThat(resideInAPackage("..bot.device..").and(resideOutsideOfPackage(DEVICE_PUBLIC_API)));
-
-    @ArchTest
-    static final ArchRule deviceDoesNotKnowSpeech = noClasses()
-            .that().resideInAPackage("..bot.device..")
-            .should().dependOnClassesThat().resideInAPackage("..bot.speech..");
+    static final ArchRule contextsMeetOnlyAtPublicEntrances = classes()
+            .that().resideInAPackage("..bot.*..")
+            .should(new ArchCondition<>("call other contexts only through their input ports, from an adapter, as the context map allows") {
+                @Override
+                public void check(JavaClass javaClass, ConditionEvents events) {
+                    String from = topPackage(javaClass);
+                    if (!CONTEXT_MAP.containsKey(from)) {
+                        return;
+                    }
+                    javaClass.getDirectDependenciesFromSelf().forEach(dependency -> {
+                        JavaClass target = dependency.getTargetClass().getBaseComponentType();
+                        String to = topPackage(target);
+                        if (to.equals(from) || !CONTEXT_MAP.containsKey(to)) {
+                            return;
+                        }
+                        String caller = javaClass.getPackageName();
+                        boolean allowed = CONTEXT_MAP.get(from).contains(to)
+                                && (caller.startsWith(contextPackage(from) + ".adapter.in")
+                                        || caller.startsWith(contextPackage(from) + ".adapter.out." + to))
+                                && target.getPackageName().startsWith(contextPackage(to) + ".application.port.in");
+                        if (!allowed) {
+                            events.add(SimpleConditionEvent.violated(javaClass, dependency.getDescription()));
+                        }
+                    });
+                }
+            });
 
     @ArchTest
     static final ArchRule sharedKernelDependsOnNoContext = noClasses()
@@ -253,5 +297,20 @@ class ArchitectureTest {
                 }
             }
         };
+    }
+
+    /** bot 바로 아래 패키지 이름. bot 패키지에 바로 있는 클래스는 빈 문자열. */
+    private static String topPackage(JavaClass javaClass) {
+        String name = javaClass.getPackageName();
+        if (!name.startsWith(BOT_PACKAGE + ".")) {
+            return "";
+        }
+        String rest = name.substring(BOT_PACKAGE.length() + 1);
+        int dot = rest.indexOf('.');
+        return dot < 0 ? rest : rest.substring(0, dot);
+    }
+
+    private static String contextPackage(String context) {
+        return BOT_PACKAGE + "." + context;
     }
 }

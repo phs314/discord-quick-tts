@@ -102,8 +102,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 `ArchitectureTest`(ArchUnit)가 빌드 때마다 다음 규칙을 확인합니다.
 
 - 각 컨텍스트의 `domain` 은 스프링, JDA, LavaPlayer 를 모르고, `application` 은 스프링 중 `@Service`, `@Transactional` 만 씁니다 ([ADR 0009](docs/adr/0009-spring-annotations-on-services.md)). 어댑터끼리는 서로 모릅니다.
-- `speech` 는 `device` 를 공개 입구(`device.application.port.in`)로만 씁니다. quick chat 요청의 기기 토큰 주인을 물을 때가 유일한 접점입니다.
-- `device` 는 `speech` 를 모르고, `guild` 와 다른 컨텍스트는 서로 모르며, `shared` 는 어느 컨텍스트도 모릅니다.
+- 컨텍스트끼리는 컨텍스트 지도(`ArchitectureTest.CONTEXT_MAP`)에 적힌 대로만, 상대의 공개 입구(`application.port.in`)로만 부릅니다. 부르는 자리는 인바운드 어댑터나 `adapter/out/<상대>` 이고, 서비스와 도메인은 다른 컨텍스트를 모릅니다. 지금은 `speech` 가 quick chat 요청의 기기 토큰 주인을 `device` 에 묻는 것이 유일한 접점이고, `guild` 는 다른 컨텍스트와 서로 모르며, `shared` 는 어느 컨텍스트도 모릅니다 ([ADR 0026](docs/adr/0026-calls-between-contexts.md)).
 - 서비스는 입력 포트(`...UseCase`) 하나만 구현하고 이름은 `...Service` 입니다 ([ADR 0008](docs/adr/0008-one-service-per-use-case.md)).
 - 인바운드 어댑터는 애그리거트(`Device`, `Pairing`, `BotSeat`)를 직접 쓰지 않고, 입력 포트가 돌려주는 `...Dto` 로만 봅니다. `port/in` 에는 `...UseCase`, `...Command`, `...Dto` 만 둡니다 ([ADR 0010](docs/adr/0010-use-cases-return-dtos.md)).
 - `port/in` 은 `usecase` / `command` / `dto` 폴더로 나누고, 애플리케이션 예외는 `application/exception` 에 모읍니다 ([ADR 0012](docs/adr/0012-application-subpackages.md)).
