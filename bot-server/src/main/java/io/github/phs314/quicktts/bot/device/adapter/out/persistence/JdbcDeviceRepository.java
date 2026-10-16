@@ -56,10 +56,17 @@ public class JdbcDeviceRepository implements DevicePort {
     }
 
     @Override
-    public boolean deleteByIdAndOwner(DeviceId id, DiscordUserId owner) {
-        return jdbcClient.sql("delete from device where id = :id and discord_user_id = :owner")
+    public Optional<Device> findById(DeviceId id) {
+        return jdbcClient.sql("select " + COLUMNS + " from device where id = :id")
                 .param("id", id.value())
-                .param("owner", owner.value())
+                .query(JdbcDeviceRepository::toDevice)
+                .optional();
+    }
+
+    @Override
+    public boolean delete(DeviceId id) {
+        return jdbcClient.sql("delete from device where id = :id")
+                .param("id", id.value())
                 .update() > 0;
     }
 

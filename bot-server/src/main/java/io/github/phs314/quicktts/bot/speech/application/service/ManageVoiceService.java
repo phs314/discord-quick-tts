@@ -1,7 +1,6 @@
 package io.github.phs314.quicktts.bot.speech.application.service;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
-import io.github.phs314.quicktts.bot.speech.application.exception.UnknownVoiceException;
 import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.ManageVoiceUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoicePreferencePort;
@@ -31,7 +30,7 @@ public class ManageVoiceService implements ManageVoiceUseCase {
 
     @Override
     public Voice changeVoice(DiscordUserId user, VoiceId voiceId) {
-        Voice voice = catalog().find(voiceId).orElseThrow(() -> new UnknownVoiceException(voiceId));
+        Voice voice = catalog().choose(voiceId);
         voicePreferencePort.save(user, voice.id());
         return voice;
     }

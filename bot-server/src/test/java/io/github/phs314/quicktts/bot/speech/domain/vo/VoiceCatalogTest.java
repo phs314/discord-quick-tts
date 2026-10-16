@@ -3,6 +3,7 @@ package io.github.phs314.quicktts.bot.speech.domain.vo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import io.github.phs314.quicktts.bot.speech.domain.UnknownVoiceException;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -26,6 +27,13 @@ class VoiceCatalogTest {
     @Test
     void 골랐던_목소리가_목록에서_사라졌으면_기본_목소리로_읽는다() {
         assertThat(catalog.voiceFor(Optional.of(new VoiceId("edge:사라진-목소리")))).isEqualTo(SUNHI);
+    }
+
+    @Test
+    void 목록에_있는_목소리만_고를_수_있다() {
+        assertThat(catalog.choose(INJOON.id())).isEqualTo(INJOON);
+        assertThatThrownBy(() -> catalog.choose(new VoiceId("edge:없는-목소리")))
+                .isInstanceOf(UnknownVoiceException.class);
     }
 
     @Test

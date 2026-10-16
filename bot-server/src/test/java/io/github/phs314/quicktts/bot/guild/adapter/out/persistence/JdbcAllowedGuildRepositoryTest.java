@@ -42,7 +42,6 @@ class JdbcAllowedGuildRepositoryTest {
                 .containsExactly(
                         tuple(FIRST, EARLIER),
                         tuple(SECOND, LATER));
-        assertThat(repository.exists(FIRST)).isTrue();
     }
 
     @Test
@@ -59,6 +58,6 @@ class JdbcAllowedGuildRepositoryTest {
 
         assertThat(repository.delete(FIRST)).isTrue();
         assertThat(repository.delete(FIRST)).isFalse();
-        assertThat(repository.exists(FIRST)).isFalse();
+        assertThat(repository.findAll()).isEmpty();
     }
 }

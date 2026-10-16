@@ -9,9 +9,11 @@ import io.github.phs314.quicktts.bot.guild.application.port.out.BotOwnerPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.GuildAllowlistSettingPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.JoinedGuildPort;
 import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
+import io.github.phs314.quicktts.bot.guild.domain.vo.GuildAllowlist;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import java.time.Clock;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -42,10 +44,15 @@ public class ManageGuildAllowlistService implements ManageGuildAllowlistUseCase 
     public boolean disallow(DiscordUserId requester, GuildId guild) {
         requireOwner(requester);
         boolean removed = allowedGuildPort.delete(guild);
-        if (guildAllowlistSettingPort.enabled() && joinedGuildPort.joinedGuilds().contains(guild)) {
+        if (!currentAllowlist().permits(guild)) {
             joinedGuildPort.leaveNotAllowed(guild);
         }
         return removed;
+    }
+
+    private GuildAllowlist currentAllowlist() {
+        return new GuildAllowlist(guildAllowlistSettingPort.enabled(),
+                allowedGuildPort.findAll().stream().map(AllowedGuild::guildId).collect(Collectors.toSet()));
     }
 
     private void requireOwner(DiscordUserId requester) {

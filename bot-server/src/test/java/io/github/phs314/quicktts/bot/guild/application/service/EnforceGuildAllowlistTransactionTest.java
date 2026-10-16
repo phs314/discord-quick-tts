@@ -84,11 +84,6 @@ class EnforceGuildAllowlistTransactionTest {
             AtomicInteger adds = new AtomicInteger();
             return new AllowedGuildPort() {
                 @Override
-                public boolean exists(GuildId guild) {
-                    return delegate.exists(guild);
-                }
-
-                @Override
                 public List<AllowedGuild> findAll() {
                     return delegate.findAll();
                 }

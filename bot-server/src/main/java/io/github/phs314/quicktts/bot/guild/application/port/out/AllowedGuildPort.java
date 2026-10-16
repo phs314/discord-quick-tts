@@ -9,8 +9,6 @@ import java.util.List;
  */
 public interface AllowedGuildPort {
 
-    boolean exists(GuildId guild);
-
     /** 넣은 순서대로 */
     List<AllowedGuild> findAll();
 

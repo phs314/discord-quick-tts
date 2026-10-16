@@ -1,6 +1,6 @@
 package io.github.phs314.quicktts.bot.device.adapter.in.web;
 
-import io.github.phs314.quicktts.bot.device.application.exception.InvalidPairingCodeException;
+import io.github.phs314.quicktts.bot.device.domain.InvalidPairingCodeException;
 import io.github.phs314.quicktts.bot.shared.adapter.in.web.ApiProblem;
 import io.github.phs314.quicktts.common.ApiErrorCode;
 import org.springframework.http.HttpStatus;

@@ -1,4 +1,4 @@
-package io.github.phs314.quicktts.bot.speech.application.exception;
+package io.github.phs314.quicktts.bot.speech.domain;
 
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
 

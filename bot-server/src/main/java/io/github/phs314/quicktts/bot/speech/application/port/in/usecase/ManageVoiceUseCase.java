@@ -16,7 +16,7 @@ public interface ManageVoiceUseCase {
     Voice currentVoice(DiscordUserId user);
 
     /**
-     * @throws io.github.phs314.quicktts.bot.speech.application.exception.UnknownVoiceException 없는 목소리일 때
+     * @throws io.github.phs314.quicktts.bot.speech.domain.UnknownVoiceException 없는 목소리일 때
      */
     Voice changeVoice(DiscordUserId user, VoiceId voice);
 }

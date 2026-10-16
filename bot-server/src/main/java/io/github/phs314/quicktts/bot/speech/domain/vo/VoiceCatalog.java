@@ -1,5 +1,6 @@
 package io.github.phs314.quicktts.bot.speech.domain.vo;
 
+import io.github.phs314.quicktts.bot.speech.domain.UnknownVoiceException;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +21,15 @@ public record VoiceCatalog(List<Voice> voices, VoiceId defaultVoice) {
 
     public Optional<Voice> find(VoiceId id) {
         return voices.stream().filter(voice -> voice.id().equals(id)).findFirst();
+    }
+
+    /**
+     * 사용자가 새로 고를 목소리. 목록에 있는 목소리만 고를 수 있다.
+     *
+     * @throws UnknownVoiceException 목록에 없는 목소리일 때
+     */
+    public Voice choose(VoiceId id) {
+        return find(id).orElseThrow(() -> new UnknownVoiceException(id));
     }
 
     /** 사용자가 고른 목소리로 읽을 목소리를 정한다. 고른 적이 없거나 목록에 없는 목소리면 기본 목소리. */

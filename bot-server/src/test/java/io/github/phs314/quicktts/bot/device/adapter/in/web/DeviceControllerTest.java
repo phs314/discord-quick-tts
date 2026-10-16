@@ -4,7 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import io.github.phs314.quicktts.bot.device.application.exception.InvalidPairingCodeException;
+import io.github.phs314.quicktts.bot.device.domain.InvalidPairingCodeException;
 import io.github.phs314.quicktts.bot.shared.adapter.in.web.DomainExceptionHandler;
 import io.github.phs314.quicktts.common.ApiErrorCode;
 import io.github.phs314.quicktts.common.QuickChatApi;

@@ -60,13 +60,14 @@ class JdbcDeviceRepositoryTest {
     }
 
     @Test
-    void 주인이_맞을_때만_지운다() {
+    void ID_로_찾고_지운다() {
         Device device = device(OWNER, "a", "현수-PC", NOW);
         repository.save(device);
 
-        assertThat(repository.deleteByIdAndOwner(device.id(), OTHER)).isFalse();
-        assertThat(repository.deleteByIdAndOwner(device.id(), OWNER)).isTrue();
-        assertThat(repository.findByOwner(OWNER)).isEmpty();
+        assertThat(repository.findById(device.id())).get().usingRecursiveComparison().isEqualTo(device);
+        assertThat(repository.delete(device.id())).isTrue();
+        assertThat(repository.delete(device.id())).isFalse();
+        assertThat(repository.findById(device.id())).isEmpty();
     }
 
     @Test
