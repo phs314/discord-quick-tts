@@ -18,7 +18,7 @@ application/
 
 - 폴더는 각 컨텍스트 안에 둡니다. 컨텍스트를 가로지르는 최상위 `exception` 패키지는 두지 않습니다(ADR 0002).
 - 예외는 `port/in` 이 아니라 `application/exception` 에 둡니다. 서비스뿐 아니라 TTS 출력 어댑터도 `SpeechSynthesisException` 을 던지기 때문입니다.
-- 도메인이 던지는 예외(`InvalidPairingCodeException`, `UnknownVoiceException`)는 ADR 0024 로 `application/exception` 이 아니라 각 컨텍스트의 `domain` 에 둡니다. device 에는 `application/exception` 폴더가 없어졌습니다.
+- 도메인이 던지는 예외(`InvalidPairingCodeException`, `UnknownVoiceException`)는 ADR 0024 로 `application/exception` 이 아니라 각 컨텍스트의 `domain` 에 둡니다. device 에는 `application/exception` 폴더가 없어졌습니다. 어느 자리의 예외든 `BusinessException` 을 상속합니다 (ADR 0025).
 - 지금 파일이 없는 폴더(speech 의 `dto`, device 와 guild 의 `command`)는 만들지 않고, 처음 필요할 때 만듭니다.
 - `device` 의 공개 입구는 여전히 `device.application.port.in` 과 그 하위 폴더 전체입니다.
 - `ArchitectureTest` 가 폴더 규칙을 확인합니다. `port.in` 바로 아래에는 클래스를 둘 수 없고, `usecase` 에는 `UseCase` 로 끝나는 인터페이스만, `command` 에는 `Command`, `dto` 에는 `Dto` 로 끝나는 클래스만 둡니다. `application` 의 예외는 `exception` 에만 있어야 하고, `exception` 에는 예외만 둡니다.

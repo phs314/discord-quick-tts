@@ -31,6 +31,12 @@ public final class ApiErrorCode {
     /** TTS 엔진이 음성을 만들지 못함. 502. */
     public static final String SPEECH_SYNTHESIS_FAILED = "speech-synthesis-failed";
 
+    /** 고를 수 있는 목소리 목록에 없는 목소리. 400. 지금은 디스코드 {@code /목소리} 에서만 생긴다. */
+    public static final String UNKNOWN_VOICE = "unknown-voice";
+
+    /** 봇 주인만 할 수 있는 일. 403. 지금은 디스코드 {@code /허용목록} 에서만 생긴다. */
+    public static final String NOT_BOT_OWNER = "not-bot-owner";
+
     private ApiErrorCode() {
     }
 }

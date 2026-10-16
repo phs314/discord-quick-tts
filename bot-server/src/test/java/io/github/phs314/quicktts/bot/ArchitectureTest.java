@@ -21,7 +21,9 @@ import com.tngtech.archunit.lang.ArchCondition;
 import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.lang.ConditionEvents;
 import com.tngtech.archunit.lang.SimpleConditionEvent;
+import io.github.phs314.quicktts.bot.shared.domain.BusinessException;
 import java.util.List;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
  * 바운디드 컨텍스트(speech, device, guild)와 각 컨텍스트 안의 헥사고날 의존 방향, 포트 이름 규칙을 지킨다.
@@ -144,6 +146,18 @@ class ArchitectureTest {
             .that().resideInAPackage("..bot.*.application..").and().areAssignableTo(Throwable.class)
             .should().resideInAPackage("..bot.*.application.exception..");
 
+    /** 우리가 만드는 예외는 모두 예상한 실패({@code BusinessException})이고, 인바운드 어댑터는 그 종류로 응답을 정한다 (ADR 0025). */
+    @ArchTest
+    static final ArchRule exceptionsAreBusinessExceptions = classes()
+            .that().resideInAPackage("..bot..").and().areAssignableTo(Throwable.class)
+            .should().beAssignableTo(BusinessException.class);
+
+    /** 웹 예외 처리는 한 곳뿐이다. 컨텍스트마다 예외 처리기를 두지 않는다 (ADR 0025). */
+    @ArchTest
+    static final ArchRule onlyOneWebExceptionHandler = classes()
+            .that().areAnnotatedWith(RestControllerAdvice.class)
+            .should().haveSimpleName("ApiExceptionHandler");
+
     /** 도메인 규칙을 어겼을 때 던지는 예외는 애그리거트 옆, 각 컨텍스트의 domain 패키지 바로 아래에 둔다 (ADR 0024). */
     @ArchTest
     static final ArchRule domainExceptionsLiveNextToAggregates = classes()
@@ -156,11 +170,16 @@ class ArchitectureTest {
             .that().resideInAPackage("..bot.*.application.exception..")
             .should().beAssignableTo(Throwable.class);
 
-    /** 인바운드 어댑터는 애그리거트(domain 패키지 바로 아래 클래스)를 쓰지 않고 입력 포트의 Dto 로만 본다 (ADR 0010). */
+    /**
+     * 인바운드 어댑터는 애그리거트(domain 패키지 바로 아래 클래스. 예외와 오류 종류 enum 은 빼고)를 쓰지 않고
+     * 입력 포트의 Dto 로만 본다 (ADR 0010).
+     */
     @ArchTest
     static final ArchRule inboundAdaptersDoNotUseAggregates = noClasses()
             .that().resideInAPackage("..bot.*.adapter.in..")
-            .should().dependOnClassesThat(resideInAPackage("..bot.*.domain").and(not(assignableTo(Throwable.class))));
+            .should().dependOnClassesThat(resideInAPackage("..bot.*.domain")
+                    .and(not(assignableTo(Throwable.class)))
+                    .and(not(JavaClass.Predicates.ENUMS)));
 
     /** 서비스는 입력 포트 하나만 구현하고, 이름은 그 입력 포트 이름의 UseCase 를 Service 로 바꾼 것이다 (ADR 0008). */
     @ArchTest
