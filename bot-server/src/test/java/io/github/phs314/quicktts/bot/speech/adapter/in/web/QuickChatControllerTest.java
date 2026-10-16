@@ -1,5 +1,7 @@
 package io.github.phs314.quicktts.bot.speech.adapter.in.web;
 
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -93,6 +95,27 @@ class QuickChatControllerTest {
         sendQuickChat(TOKEN, "안녕")
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value(ApiErrorCode.BOT_CANNOT_JOIN_VOICE_CHANNEL));
+    }
+
+    @Test
+    void JSON_이_깨졌으면_400_과_invalid_request() throws Exception {
+        mockMvc().perform(post(QuickChatApi.PATH)
+                        .header(HttpHeaders.AUTHORIZATION, QuickChatApi.BEARER_PREFIX + TOKEN)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{\"text\":"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.code").value(ApiErrorCode.INVALID_REQUEST));
+    }
+
+    @Test
+    void 예상하지_못한_실패면_500_과_unexpected_failure_이고_원인은_싣지_않는다() throws Exception {
+        speak = command -> {
+            throw new IllegalStateException("내부 사정");
+        };
+        sendQuickChat(TOKEN, "안녕")
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.code").value(ApiErrorCode.UNEXPECTED_FAILURE))
+                .andExpect(jsonPath("$.detail").value(not(containsString("내부 사정"))));
     }
 
     @Test
