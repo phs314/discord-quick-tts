@@ -144,6 +144,12 @@ class ArchitectureTest {
             .that().resideInAPackage("..bot.*.application..").and().areAssignableTo(Throwable.class)
             .should().resideInAPackage("..bot.*.application.exception..");
 
+    /** 도메인 규칙을 어겼을 때 던지는 예외는 애그리거트 옆, 각 컨텍스트의 domain 패키지 바로 아래에 둔다 (ADR 0024). */
+    @ArchTest
+    static final ArchRule domainExceptionsLiveNextToAggregates = classes()
+            .that().resideInAPackage("..bot.*.domain..").and().areAssignableTo(Throwable.class)
+            .should().resideInAPackage("..bot.*.domain");
+
     /** exception 폴더에는 예외만 둔다 (ADR 0012). */
     @ArchTest
     static final ArchRule exceptionPackageHoldsOnlyExceptions = classes()

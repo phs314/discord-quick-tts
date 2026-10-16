@@ -27,6 +27,18 @@ public class Pairing {
         return new Pairing(PairingCode.generate(), owner, now.plus(VALID_FOR));
     }
 
+    /**
+     * 연결 코드를 써서 이 코드를 받은 사용자를 돌려준다.
+     *
+     * @throws InvalidPairingCodeException 코드가 만료됐을 때
+     */
+    public DiscordUserId redeem(Instant now) {
+        if (isExpired(now)) {
+            throw new InvalidPairingCodeException();
+        }
+        return owner;
+    }
+
     public boolean isExpired(Instant now) {
         return !now.isBefore(expiresAt);
     }

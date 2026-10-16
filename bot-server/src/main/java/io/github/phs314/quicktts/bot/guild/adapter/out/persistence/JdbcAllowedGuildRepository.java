@@ -20,14 +20,6 @@ public class JdbcAllowedGuildRepository implements AllowedGuildPort {
     private final JdbcClient jdbcClient;
 
     @Override
-    public boolean exists(GuildId guild) {
-        return jdbcClient.sql("select count(*) from allowed_guild where guild_id = :guild")
-                .param("guild", guild.value())
-                .query(Long.class)
-                .single() > 0;
-    }
-
-    @Override
     public List<AllowedGuild> findAll() {
         return jdbcClient.sql("select guild_id, allowed_at from allowed_guild order by allowed_at, guild_id")
                 .query((rs, rowNum) -> new AllowedGuild(

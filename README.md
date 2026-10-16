@@ -55,10 +55,10 @@
 ```
 bot-server/src/main/java/io/github/phs314/quicktts/bot/
 ├── speech/
-│   ├── domain/                 BotSeat (디스코드 서버별 봇 자리, 애그리거트)
-│   │   └── vo/                 QuickChatMessage, VoiceChannel, Speech, Voice (값 객체)
+│   ├── domain/                 BotSeat (디스코드 서버별 봇 자리, 애그리거트), UnknownVoiceException
+│   │   └── vo/                 QuickChatMessage, VoiceChannel, Speech, Voice, VoiceCatalog (값 객체)
 │   ├── application/
-│   │   ├── exception/          SpeakerNotInVoiceChannel, VoiceChannelInUse, UnknownVoice, SpeechSynthesis 예외
+│   │   ├── exception/          SpeakerNotInVoiceChannel, VoiceChannelInUse, BotCannotJoinVoiceChannel, SpeechSynthesis 예외
 │   │   ├── port/in/usecase/    SpeakQuickChat, FindMyVoiceChannel, ManageVoice, LeaveEmptyVoiceChannel, FollowBotMove
 │   │   ├── port/in/command/    SpeakQuickChatCommand
 │   │   ├── port/out/           SpeechSynthesizerPort, VoiceChannelLocatorPort, SpeechPlayerPort, VoicePreferencePort, BotSeatPort
@@ -70,10 +70,9 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │       ├── out/discord/        JDA + LavaPlayer 로 채널 찾기, 들어가기·재생·나가기
 │       └── out/persistence/    사용자별 목소리 저장소 (JdbcClient), 메모리 봇 자리 저장소
 ├── device/
-│   ├── domain/                 Pairing, Device (엔티티)
+│   ├── domain/                 Pairing, Device (엔티티), InvalidPairingCodeException
 │   │   └── vo/                 PairingCode, DeviceToken, DeviceId, DeviceName (값 객체)
 │   ├── application/
-│   │   ├── exception/          InvalidPairingCodeException
 │   │   ├── port/in/usecase/    IssuePairingCode, RegisterDevice, AuthenticateDevice, ManageOwnDevices (port/in 전체가 공개 입구)
 │   │   ├── port/in/dto/        DeviceDto, IssuedPairingCodeDto
 │   │   ├── port/out/           PairingPort, DevicePort
@@ -84,6 +83,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │       └── out/persistence/    기기 저장소 (JdbcClient), 메모리 연결 코드 저장소
 ├── guild/
 │   ├── domain/                 AllowedGuild (허용한 디스코드 서버)
+│   │   └── vo/                 GuildAllowlist (허용 목록으로 머물 곳 정하기)
 │   ├── application/
 │   │   ├── exception/          NotBotOwnerException
 │   │   ├── port/in/usecase/    ManageGuildAllowlist, EnforceGuildAllowlist
@@ -107,6 +107,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 - 서비스는 입력 포트(`...UseCase`) 하나만 구현하고 이름은 `...Service` 입니다 ([ADR 0008](docs/adr/0008-one-service-per-use-case.md)).
 - 인바운드 어댑터는 애그리거트(`Device`, `Pairing`, `BotSeat`)를 직접 쓰지 않고, 입력 포트가 돌려주는 `...Dto` 로만 봅니다. `port/in` 에는 `...UseCase`, `...Command`, `...Dto` 만 둡니다 ([ADR 0010](docs/adr/0010-use-cases-return-dtos.md)).
 - `port/in` 은 `usecase` / `command` / `dto` 폴더로 나누고, 애플리케이션 예외는 `application/exception` 에 모읍니다 ([ADR 0012](docs/adr/0012-application-subpackages.md)).
+- 도메인 규칙을 어겼을 때 던지는 예외는 각 컨텍스트의 `domain` 바로 아래에 둡니다. 데이터 상태로 정하는 규칙은 애그리거트와 값 객체에, 누가 부르는지로 정하는 권한은 서비스에 둡니다 ([ADR 0024](docs/adr/0024-rules-live-in-the-domain.md)).
 - 설정 값은 그 값을 쓰는 어댑터 패키지에 두고(`TtsProperties`, `GuildAllowlistProperties`), 어댑터는 `config` 를 쓰지 않습니다 ([ADR 0023](docs/adr/0023-properties-per-adapter.md)).
 
 그 밖에:

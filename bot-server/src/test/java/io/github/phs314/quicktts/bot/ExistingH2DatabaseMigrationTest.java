@@ -38,7 +38,7 @@ class ExistingH2DatabaseMigrationTest {
         assertKeepsDeviceAndVoice(jdbc);
         var allowlist = new JdbcAllowedGuildRepository(jdbc);
         allowlist.add(AllowedGuild.allow(GUILD, Instant.parse("2026-10-11T00:00:00Z")));
-        assertThat(allowlist.exists(GUILD)).isTrue();
+        assertThat(allowlist.findAll()).extracting(AllowedGuild::guildId).containsExactly(GUILD);
     }
 
     @Test
@@ -59,7 +59,9 @@ class ExistingH2DatabaseMigrationTest {
         TestDatabase.migrate(dataSource);
 
         assertKeepsDeviceAndVoice(jdbc);
-        assertThat(new JdbcAllowedGuildRepository(jdbc).exists(GUILD)).isTrue();
+        assertThat(new JdbcAllowedGuildRepository(jdbc).findAll())
+                .extracting(AllowedGuild::guildId)
+                .containsExactly(GUILD);
     }
 
     private static void insertDeviceAndVoice(JdbcClient jdbc) {

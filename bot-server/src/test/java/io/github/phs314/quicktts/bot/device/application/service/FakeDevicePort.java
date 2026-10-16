@@ -44,8 +44,13 @@ class FakeDevicePort implements DevicePort {
     }
 
     @Override
-    public boolean deleteByIdAndOwner(DeviceId id, DiscordUserId owner) {
-        return byHash.values().removeIf(device -> device.id().equals(id) && device.owner().equals(owner));
+    public Optional<Device> findById(DeviceId id) {
+        return byHash.values().stream().filter(device -> device.id().equals(id)).findFirst();
+    }
+
+    @Override
+    public boolean delete(DeviceId id) {
+        return byHash.values().removeIf(device -> device.id().equals(id));
     }
 
     @Override

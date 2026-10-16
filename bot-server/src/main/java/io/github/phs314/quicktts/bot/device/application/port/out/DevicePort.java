@@ -16,8 +16,10 @@ public interface DevicePort {
     /** 등록한 순서대로 돌려준다. */
     List<Device> findByOwner(DiscordUserId owner);
 
-    /** 그 사용자의 기기일 때만 지운다. 지웠으면 true. */
-    boolean deleteByIdAndOwner(DeviceId id, DiscordUserId owner);
+    Optional<Device> findById(DeviceId id);
+
+    /** 지웠으면 true, 이미 없었으면 false. */
+    boolean delete(DeviceId id);
 
     /** 지운 기기 수를 돌려준다. */
     int deleteAllByOwner(DiscordUserId owner);

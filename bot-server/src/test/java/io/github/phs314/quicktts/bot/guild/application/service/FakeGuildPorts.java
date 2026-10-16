@@ -21,11 +21,6 @@ final class FakeGuildPorts {
         final Map<GuildId, AllowedGuild> byGuild = new LinkedHashMap<>();
 
         @Override
-        public boolean exists(GuildId guild) {
-            return byGuild.containsKey(guild);
-        }
-
-        @Override
         public List<AllowedGuild> findAll() {
             return List.copyOf(byGuild.values());
         }

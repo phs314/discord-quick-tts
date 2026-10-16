@@ -5,9 +5,11 @@ import io.github.phs314.quicktts.bot.guild.application.port.out.AllowedGuildPort
 import io.github.phs314.quicktts.bot.guild.application.port.out.GuildAllowlistSettingPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.JoinedGuildPort;
 import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
+import io.github.phs314.quicktts.bot.guild.domain.vo.GuildAllowlist;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import java.time.Clock;
 import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,7 +25,7 @@ public class EnforceGuildAllowlistService implements EnforceGuildAllowlistUseCas
 
     @Override
     public void checkJoinedGuild(GuildId guild) {
-        if (guildAllowlistSettingPort.enabled() && !allowedGuildPort.exists(guild)) {
+        if (!currentAllowlist().permits(guild)) {
             joinedGuildPort.leaveNotAllowed(guild);
         }
     }
@@ -35,15 +37,17 @@ public class EnforceGuildAllowlistService implements EnforceGuildAllowlistUseCas
     @Override
     @Transactional
     public void checkAllJoinedGuilds() {
-        if (!guildAllowlistSettingPort.enabled()) {
-            return;
-        }
+        GuildAllowlist allowlist = currentAllowlist();
         List<GuildId> joined = joinedGuildPort.joinedGuilds();
-        if (allowedGuildPort.findAll().isEmpty()) {
-            // 허용 목록을 처음 켰을 때 봇 주인이 이미 쓰던 디스코드 서버에서 쫓겨나지 않게 한다.
+        if (allowlist.needsFirstFill()) {
             joined.forEach(guild -> allowedGuildPort.add(AllowedGuild.allow(guild, clock.instant())));
             return;
         }
-        joined.forEach(this::checkJoinedGuild);
+        allowlist.notPermitted(joined).forEach(joinedGuildPort::leaveNotAllowed);
+    }
+
+    private GuildAllowlist currentAllowlist() {
+        return new GuildAllowlist(guildAllowlistSettingPort.enabled(),
+                allowedGuildPort.findAll().stream().map(AllowedGuild::guildId).collect(Collectors.toSet()));
     }
 }

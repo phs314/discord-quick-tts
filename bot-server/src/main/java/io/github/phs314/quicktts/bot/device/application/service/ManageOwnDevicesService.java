@@ -22,7 +22,11 @@ public class ManageOwnDevicesService implements ManageOwnDevicesUseCase {
 
     @Override
     public boolean unlink(DiscordUserId owner, DeviceId id) {
-        return devicePort.deleteByIdAndOwner(id, owner);
+        // 다른 사람의 기기는 있는지도 알려 주지 않고 없는 기기처럼 다룬다.
+        return devicePort.findById(id)
+                .filter(device -> device.isOwnedBy(owner))
+                .map(device -> devicePort.delete(device.id()))
+                .orElse(false);
     }
 
     @Override

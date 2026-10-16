@@ -37,6 +37,11 @@ public class Device {
         return new Device(DeviceId.generate(), token.hash(), owner, name, now);
     }
 
+    /** 그 사용자의 기기인지. 기기를 보거나 해제할 수 있는 사람은 주인뿐이다. */
+    public boolean isOwnedBy(DiscordUserId user) {
+        return owner.equals(user);
+    }
+
     public DeviceId id() {
         return id;
     }
