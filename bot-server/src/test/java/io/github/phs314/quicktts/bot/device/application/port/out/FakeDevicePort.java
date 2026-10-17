@@ -1,6 +1,5 @@
-package io.github.phs314.quicktts.bot.device.application.service;
+package io.github.phs314.quicktts.bot.device.application.port.out;
 
-import io.github.phs314.quicktts.bot.device.application.port.out.DevicePort;
 import io.github.phs314.quicktts.bot.device.domain.Device;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceId;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
@@ -14,15 +13,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-class FakeDevicePort implements DevicePort {
+/** 기기 저장소 대신 쓰는 메모리 대역. */
+public class FakeDevicePort implements DevicePort {
 
-    final Map<DeviceTokenHash, Device> byHash = new HashMap<>();
+    private final Map<DeviceTokenHash, Device> byHash = new HashMap<>();
 
     /** 연결 코드를 거치지 않고 기기를 바로 등록해 두고, 그 기기 토큰을 돌려준다. */
-    DeviceToken registered(DiscordUserId owner, DeviceName name, Instant now) {
+    public DeviceToken registered(DiscordUserId owner, DeviceName name, Instant now) {
         DeviceToken token = DeviceToken.generate();
         save(Device.register(token, owner, name, now));
         return token;
+    }
+
+    /** 지금 저장된 기기들(토큰 해시별). */
+    public Map<DeviceTokenHash, Device> saved() {
+        return Map.copyOf(byHash);
     }
 
     @Override

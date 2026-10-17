@@ -1,7 +1,6 @@
-package io.github.phs314.quicktts.bot.support;
+package io.github.phs314.quicktts.bot.speech.application.port.out;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
-import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import java.nio.charset.StandardCharsets;
@@ -9,10 +8,10 @@ import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
- * API 통합 테스트에서 디스코드 음성 연결 대신 쓰는 대역. 소리는 내지 않고 봇이 들어가고 읽고 나간 순서만 글로 남긴다.
- * 예: {@code join:2}, {@code play:fake:sunhi:안녕}, {@code leave:1}.
+ * 디스코드 음성 연결 대신 쓰는 대역. 소리는 내지 않고 봇이 들어가고 읽고 나간 순서만 글로 남긴다.
+ * 예: {@code join:2}, {@code play:fake:sunhi:안녕}, {@code leave:1}. 통합 테스트에서는 웹 서버 스레드가 쓰므로 여러 스레드에서 써도 된다.
  */
-public class RecordingSpeechPlayer implements SpeechPlayerPort {
+public class FakeSpeechPlayerPort implements SpeechPlayerPort {
 
     private final List<String> actions = new CopyOnWriteArrayList<>();
 

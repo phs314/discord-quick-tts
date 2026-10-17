@@ -6,8 +6,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import io.github.phs314.quicktts.bot.guild.adapter.out.persistence.JdbcAllowedGuildRepository;
 import io.github.phs314.quicktts.bot.guild.application.port.in.usecase.EnforceGuildAllowlistUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.out.AllowedGuildPort;
-import io.github.phs314.quicktts.bot.guild.application.service.FakeGuildPorts.FixedSetting;
-import io.github.phs314.quicktts.bot.guild.application.service.FakeGuildPorts.RecordingJoinedGuilds;
+import io.github.phs314.quicktts.bot.guild.application.port.out.FakeGuildAllowlistSettingPort;
+import io.github.phs314.quicktts.bot.guild.application.port.out.FakeJoinedGuildPort;
 import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.support.TestDatabase;
@@ -74,8 +74,8 @@ class EnforceGuildAllowlistTransactionTest {
         EnforceGuildAllowlistService enforceGuildAllowlistService(JdbcAllowedGuildRepository repository) {
             return new EnforceGuildAllowlistService(
                     failingOnSecondAdd(repository),
-                    new RecordingJoinedGuilds(new GuildId(1L), new GuildId(2L)),
-                    new FixedSetting(),
+                    new FakeJoinedGuildPort(new GuildId(1L), new GuildId(2L)),
+                    new FakeGuildAllowlistSettingPort(),
                     Clock.fixed(NOW, ZoneOffset.UTC));
         }
 

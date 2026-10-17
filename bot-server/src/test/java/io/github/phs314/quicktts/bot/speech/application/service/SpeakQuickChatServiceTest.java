@@ -10,6 +10,11 @@ import io.github.phs314.quicktts.bot.speech.application.exception.BotCannotJoinV
 import io.github.phs314.quicktts.bot.speech.application.exception.SpeakerNotInVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.exception.VoiceChannelInUseException;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
+import io.github.phs314.quicktts.bot.speech.application.port.out.FakeBotSeatPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechPlayerPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechSynthesizerPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.FakeVoiceChannelLocatorPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.FakeVoicePreferencePort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
@@ -27,24 +32,23 @@ class SpeakQuickChatServiceTest {
     private static final VoiceChannelDetails OTHER_SERVER =
             new VoiceChannelDetails(new VoiceChannel(new GuildId(9L), 4L), "다른 서버", null, "일반");
 
-    private final FakeVoiceChannelLocator discord = new FakeVoiceChannelLocator();
-    private final RecordingSpeechPlayer player = new RecordingSpeechPlayer();
+    private final FakeVoiceChannelLocatorPort discord = new FakeVoiceChannelLocatorPort();
+    private final FakeSpeechPlayerPort player = new FakeSpeechPlayerPort();
     private final FakeBotSeatPort seats = new FakeBotSeatPort();
-    private final ManageVoiceServiceTest.FakeSynthesizer synthesizer = new ManageVoiceServiceTest.FakeSynthesizer();
-    private final ManageVoiceServiceTest.InMemoryVoicePreferences preferences =
-            new ManageVoiceServiceTest.InMemoryVoicePreferences();
+    private final FakeSpeechSynthesizerPort synthesizer = new FakeSpeechSynthesizerPort();
+    private final FakeVoicePreferencePort preferences = new FakeVoicePreferencePort();
     private final ManageVoiceService voices = new ManageVoiceService(synthesizer, preferences);
     private final SpeakQuickChatService service =
             new SpeakQuickChatService(discord, synthesizer, player, seats, preferences);
 
     @Test
     void 보낸_사람이_있는_음성_채널에_들어가서_그_사람이_고른_목소리로_읽어_준다() {
-        voices.changeVoice(SPEAKER, ManageVoiceServiceTest.INJOON.id());
+        voices.changeVoice(SPEAKER, FakeSpeechSynthesizerPort.INJOON.id());
         discord.enter(SPEAKER, GENERAL);
 
         speak(SPEAKER, "안녕");
 
-        assertThat(player.actions).containsExactly("join:2", "play:" + ManageVoiceServiceTest.INJOON.id().value() + ":안녕");
+        assertThat(player.actions()).containsExactly("join:2", "play:fake:injoon:안녕");
         assertThat(seats.channelOf(GUILD)).contains(GENERAL.channel());
     }
 
@@ -54,7 +58,7 @@ class SpeakQuickChatServiceTest {
 
         speak(SPEAKER, "ㅋㅋ 좋아👍");
 
-        assertThat(player.actions).containsExactly("join:2", "play:edge:sunhi:키키 좋아");
+        assertThat(player.actions()).containsExactly("join:2", "play:fake:sunhi:키키 좋아");
     }
 
     @Test
@@ -62,14 +66,14 @@ class SpeakQuickChatServiceTest {
         discord.enter(SPEAKER, GENERAL);
 
         assertThatThrownBy(() -> speak(SPEAKER, "👍")).isInstanceOf(InvalidDomainValueException.class);
-        assertThat(player.actions).isEmpty();
+        assertThat(player.actions()).isEmpty();
         assertThat(seats.channelOf(GUILD)).isEmpty();
     }
 
     @Test
     void 보낸_사람이_음성_채널에_없으면_읽지_않는다() {
         assertThatThrownBy(() -> speak(SPEAKER, "안녕")).isInstanceOf(SpeakerNotInVoiceChannelException.class);
-        assertThat(player.actions).isEmpty();
+        assertThat(player.actions()).isEmpty();
     }
 
     @Test
@@ -81,7 +85,7 @@ class SpeakQuickChatServiceTest {
         assertThatThrownBy(() -> speak(SPEAKER, "안녕"))
                 .isInstanceOf(VoiceChannelInUseException.class)
                 .hasMessageContaining("게임");
-        assertThat(player.actions).containsExactly("join:3", "play:edge:sunhi:먼저");
+        assertThat(player.actions()).containsExactly("join:3", "play:fake:sunhi:먼저");
         assertThat(seats.channelOf(GUILD)).contains(GAME.channel());
     }
 
@@ -103,7 +107,7 @@ class SpeakQuickChatServiceTest {
 
         speak(SPEAKER, "안녕");
 
-        assertThat(player.actions).containsExactly("join:2", "play:edge:sunhi:먼저", "join:2", "play:edge:sunhi:안녕");
+        assertThat(player.actions()).containsExactly("join:2", "play:fake:sunhi:먼저", "join:2", "play:fake:sunhi:안녕");
     }
 
     @Test
@@ -115,7 +119,7 @@ class SpeakQuickChatServiceTest {
 
         speak(SPEAKER, "안녕");
 
-        assertThat(player.actions).endsWith("join:2", "play:edge:sunhi:안녕");
+        assertThat(player.actions()).endsWith("join:2", "play:fake:sunhi:안녕");
         assertThat(seats.channelOf(GUILD)).contains(GENERAL.channel());
     }
 
@@ -134,7 +138,7 @@ class SpeakQuickChatServiceTest {
     @Test
     void 채널에_들어가지_못하면_자리를_잡지_않는다() {
         discord.enter(SPEAKER, GENERAL);
-        SpeakQuickChatService failingToJoin = new SpeakQuickChatService(discord, synthesizer, new RecordingSpeechPlayer() {
+        SpeakQuickChatService failingToJoin = new SpeakQuickChatService(discord, synthesizer, new FakeSpeechPlayerPort() {
             @Override
             public void join(VoiceChannel channel) {
                 throw new BotCannotJoinVoiceChannelException(channel, null);

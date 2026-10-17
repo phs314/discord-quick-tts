@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
+import io.github.phs314.quicktts.bot.speech.application.port.out.FakeVoiceChannelLocatorPort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,7 @@ class FindMyVoiceChannelServiceTest {
 
     @Test
     void 보내기_전에_어느_음성_채널에서_읽힐지_알려_준다() {
-        FakeVoiceChannelLocator discord = new FakeVoiceChannelLocator();
+        FakeVoiceChannelLocatorPort discord = new FakeVoiceChannelLocatorPort();
         discord.enter(SPEAKER, DETAILS);
         FindMyVoiceChannelService service = new FindMyVoiceChannelService(discord);
 

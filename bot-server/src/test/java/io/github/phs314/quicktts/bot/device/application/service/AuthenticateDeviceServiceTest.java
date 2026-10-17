@@ -2,6 +2,7 @@ package io.github.phs314.quicktts.bot.device.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.github.phs314.quicktts.bot.device.application.port.out.FakeDevicePort;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceToken;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;

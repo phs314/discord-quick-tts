@@ -5,9 +5,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.phs314.quicktts.bot.guild.application.exception.NotBotOwnerException;
 import io.github.phs314.quicktts.bot.guild.application.port.in.dto.AllowedGuildDto;
-import io.github.phs314.quicktts.bot.guild.application.service.FakeGuildPorts.FixedSetting;
-import io.github.phs314.quicktts.bot.guild.application.service.FakeGuildPorts.InMemoryAllowedGuilds;
-import io.github.phs314.quicktts.bot.guild.application.service.FakeGuildPorts.RecordingJoinedGuilds;
+import io.github.phs314.quicktts.bot.guild.application.port.out.FakeAllowedGuildPort;
+import io.github.phs314.quicktts.bot.guild.application.port.out.FakeGuildAllowlistSettingPort;
+import io.github.phs314.quicktts.bot.guild.application.port.out.FakeJoinedGuildPort;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import java.time.Clock;
@@ -23,9 +23,9 @@ class ManageGuildAllowlistServiceTest {
     private static final GuildId MINE = new GuildId(1L);
     private static final GuildId FRIEND = new GuildId(2L);
 
-    private final InMemoryAllowedGuilds allowedGuilds = new InMemoryAllowedGuilds();
-    private final RecordingJoinedGuilds joinedGuilds = new RecordingJoinedGuilds(MINE);
-    private final FixedSetting setting = new FixedSetting();
+    private final FakeAllowedGuildPort allowedGuilds = new FakeAllowedGuildPort();
+    private final FakeJoinedGuildPort joinedGuilds = new FakeJoinedGuildPort(MINE);
+    private final FakeGuildAllowlistSettingPort setting = new FakeGuildAllowlistSettingPort();
     private final ManageGuildAllowlistService service = new ManageGuildAllowlistService(
             () -> OWNER, allowedGuilds, joinedGuilds, setting, Clock.fixed(NOW, ZoneOffset.UTC));
 
@@ -44,8 +44,8 @@ class ManageGuildAllowlistServiceTest {
         assertThatThrownBy(() -> service.allow(SOMEONE, FRIEND)).isInstanceOf(NotBotOwnerException.class);
         assertThatThrownBy(() -> service.disallow(SOMEONE, MINE)).isInstanceOf(NotBotOwnerException.class);
         assertThatThrownBy(() -> service.getAllowlist(SOMEONE)).isInstanceOf(NotBotOwnerException.class);
-        assertThat(allowedGuilds.byGuild).isEmpty();
-        assertThat(joinedGuilds.left).isEmpty();
+        assertThat(allowedGuilds.findAll()).isEmpty();
+        assertThat(joinedGuilds.left()).isEmpty();
     }
 
     @Test
@@ -54,8 +54,8 @@ class ManageGuildAllowlistServiceTest {
 
         assertThat(service.disallow(OWNER, MINE)).isTrue();
 
-        assertThat(allowedGuilds.byGuild).isEmpty();
-        assertThat(joinedGuilds.left).containsExactly(MINE);
+        assertThat(allowedGuilds.findAll()).isEmpty();
+        assertThat(joinedGuilds.left()).containsExactly(MINE);
     }
 
     @Test
@@ -65,17 +65,17 @@ class ManageGuildAllowlistServiceTest {
         assertThat(service.disallow(OWNER, FRIEND)).isTrue();
         assertThat(service.disallow(OWNER, FRIEND)).isFalse();
 
-        assertThat(joinedGuilds.left).isEmpty();
+        assertThat(joinedGuilds.left()).isEmpty();
     }
 
     @Test
     void 허용_목록이_꺼져_있으면_빼도_나가지_않는다() {
-        setting.enabled = false;
+        setting.setEnabled(false);
         service.allow(OWNER, MINE);
 
         service.disallow(OWNER, MINE);
 
-        assertThat(joinedGuilds.left).isEmpty();
+        assertThat(joinedGuilds.left()).isEmpty();
         assertThat(service.getAllowlist(OWNER).enabled()).isFalse();
     }
 }

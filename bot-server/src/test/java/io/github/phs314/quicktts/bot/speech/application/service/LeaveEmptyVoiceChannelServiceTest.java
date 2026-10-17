@@ -4,6 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
+import io.github.phs314.quicktts.bot.speech.application.port.out.FakeBotSeatPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechPlayerPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.FakeVoiceChannelLocatorPort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import org.junit.jupiter.api.Test;
@@ -15,8 +18,8 @@ class LeaveEmptyVoiceChannelServiceTest {
     private static final VoiceChannelDetails GENERAL =
             new VoiceChannelDetails(new VoiceChannel(GUILD, 2L), "우리 서버", null, "일반");
 
-    private final FakeVoiceChannelLocator discord = new FakeVoiceChannelLocator();
-    private final RecordingSpeechPlayer player = new RecordingSpeechPlayer();
+    private final FakeVoiceChannelLocatorPort discord = new FakeVoiceChannelLocatorPort();
+    private final FakeSpeechPlayerPort player = new FakeSpeechPlayerPort();
     private final FakeBotSeatPort seats = new FakeBotSeatPort();
     private final LeaveEmptyVoiceChannelService service = new LeaveEmptyVoiceChannelService(seats, discord, player);
 
@@ -27,7 +30,7 @@ class LeaveEmptyVoiceChannelServiceTest {
 
         service.leaveIfEmpty(GUILD);
 
-        assertThat(player.actions).containsExactly("leave");
+        assertThat(player.actions()).containsExactly("leave:1");
         assertThat(seats.channelOf(GUILD)).isEmpty();
     }
 
@@ -37,7 +40,7 @@ class LeaveEmptyVoiceChannelServiceTest {
 
         service.leaveIfEmpty(GUILD);
 
-        assertThat(player.actions).isEmpty();
+        assertThat(player.actions()).isEmpty();
         assertThat(seats.channelOf(GUILD)).contains(GENERAL.channel());
     }
 
@@ -45,7 +48,7 @@ class LeaveEmptyVoiceChannelServiceTest {
     void 봇이_어느_채널에도_없으면_아무것도_하지_않는다() {
         service.leaveIfEmpty(GUILD);
 
-        assertThat(player.actions).isEmpty();
+        assertThat(player.actions()).isEmpty();
     }
 
     private void sitIn(VoiceChannelDetails details) {
