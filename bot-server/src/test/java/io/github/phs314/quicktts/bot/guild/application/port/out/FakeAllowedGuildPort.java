@@ -17,8 +17,16 @@ public class FakeAllowedGuildPort implements AllowedGuildPort {
     }
 
     @Override
-    public boolean add(AllowedGuild allowedGuild) {
+    public boolean saveIfAbsent(AllowedGuild allowedGuild) {
         return byGuild.putIfAbsent(allowedGuild.guildId(), allowedGuild) == null;
+    }
+
+    @Override
+    public void saveAll(List<AllowedGuild> allowedGuilds) {
+        if (allowedGuilds.stream().anyMatch(allowedGuild -> byGuild.containsKey(allowedGuild.guildId()))) {
+            throw new IllegalStateException("이미 있는 디스코드 서버");
+        }
+        allowedGuilds.forEach(allowedGuild -> byGuild.put(allowedGuild.guildId(), allowedGuild));
     }
 
     @Override

@@ -1,17 +1,20 @@
 package io.github.phs314.quicktts.bot.guild.adapter.out.persistence;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.groups.Tuple.tuple;
 
 import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.support.TestDatabase;
 import java.time.Instant;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.Parameter;
 import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
 @ParameterizedClass
@@ -35,8 +38,8 @@ class JdbcAllowedGuildRepositoryTest {
 
     @Test
     void 넣은_순서대로_돌려준다() {
-        repository.add(AllowedGuild.allow(SECOND, LATER));
-        repository.add(AllowedGuild.allow(FIRST, EARLIER));
+        repository.saveIfAbsent(AllowedGuild.allow(SECOND, LATER));
+        repository.saveIfAbsent(AllowedGuild.allow(FIRST, EARLIER));
 
         assertThat(repository.findAll()).extracting(AllowedGuild::guildId, AllowedGuild::allowedAt)
                 .containsExactly(
@@ -46,15 +49,34 @@ class JdbcAllowedGuildRepositoryTest {
 
     @Test
     void 이미_있는_서버는_다시_넣지_않는다() {
-        assertThat(repository.add(AllowedGuild.allow(FIRST, EARLIER))).isTrue();
-        assertThat(repository.add(AllowedGuild.allow(FIRST, LATER))).isFalse();
+        assertThat(repository.saveIfAbsent(AllowedGuild.allow(FIRST, EARLIER))).isTrue();
+        assertThat(repository.saveIfAbsent(AllowedGuild.allow(FIRST, LATER))).isFalse();
 
         assertThat(repository.findAll()).extracting(AllowedGuild::allowedAt).containsExactly(EARLIER);
     }
 
     @Test
+    void 한꺼번에_넣는다() {
+        repository.saveAll(List.of(AllowedGuild.allow(FIRST, EARLIER), AllowedGuild.allow(SECOND, EARLIER)));
+
+        assertThat(repository.findAll()).extracting(AllowedGuild::guildId).containsExactlyInAnyOrder(FIRST, SECOND);
+    }
+
+    @Test
+    void 한꺼번에_넣다가_하나라도_실패하면_하나도_넣지_않는다() {
+        repository.saveIfAbsent(AllowedGuild.allow(SECOND, EARLIER));
+
+        assertThatThrownBy(() -> repository.saveAll(
+                List.of(AllowedGuild.allow(FIRST, LATER), AllowedGuild.allow(SECOND, LATER))))
+                .isInstanceOf(DuplicateKeyException.class);
+
+        // 일부만 남으면 다음에 켤 때 목록이 비어 있지 않아서 남은 디스코드 서버에서 나가게 된다.
+        assertThat(repository.findAll()).extracting(AllowedGuild::guildId).containsExactly(SECOND);
+    }
+
+    @Test
     void 지우면_없다() {
-        repository.add(AllowedGuild.allow(FIRST, EARLIER));
+        repository.saveIfAbsent(AllowedGuild.allow(FIRST, EARLIER));
 
         assertThat(repository.delete(FIRST)).isTrue();
         assertThat(repository.delete(FIRST)).isFalse();
