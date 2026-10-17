@@ -9,7 +9,7 @@ import java.util.Optional;
  */
 public interface VoicePreferencePort {
 
-    Optional<VoiceId> find(DiscordUserId user);
+    Optional<VoiceId> findVoice(DiscordUserId user);
 
-    void save(DiscordUserId user, VoiceId voice);
+    void saveVoice(DiscordUserId user, VoiceId voiceId);
 }

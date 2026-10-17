@@ -21,14 +21,14 @@ import org.junit.jupiter.api.Test;
 /**
  * 연달아 보낸 문장이 보낸 순서대로 서버에 닿는지 확인한다. 이 PC 안에 작은 가짜 서버를 띄운다.
  */
-class QuickChatClientSendOrderTest {
+class QuickTtsClientSendOrderTest {
 
     private final List<String> received = new CopyOnWriteArrayList<>();
     /** 첫 문장에 응답하기 시작했는지. 다음 문장이 닿았을 때 이미 true 여야 한다. */
     private final AtomicBoolean firstAnswered = new AtomicBoolean();
     private volatile boolean firstAnsweredWhenSecondArrived;
     private HttpServer server;
-    private QuickChatClient client;
+    private QuickTtsClient client;
 
     @BeforeEach
     void startServer() throws IOException {
@@ -52,7 +52,7 @@ class QuickChatClientSendOrderTest {
             exchange.close();
         });
         server.start();
-        client = new QuickChatClient("http://127.0.0.1:" + server.getAddress().getPort());
+        client = new QuickTtsClient("http://127.0.0.1:" + server.getAddress().getPort());
     }
 
     @AfterEach
@@ -79,7 +79,7 @@ class QuickChatClientSendOrderTest {
 
         next.get(5, TimeUnit.SECONDS);
 
-        assertThatThrownBy(() -> failed.get(5, TimeUnit.SECONDS)).hasCauseInstanceOf(QuickChatClient.QuickChatException.class);
+        assertThatThrownBy(() -> failed.get(5, TimeUnit.SECONDS)).hasCauseInstanceOf(QuickTtsClient.QuickTtsClientException.class);
         assertThat(received).hasSize(2);
     }
 

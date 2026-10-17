@@ -51,11 +51,11 @@ public record QuickChatMessage(String text) {
     public SpokenText toSpokenText() {
         String spoken = LINK.matcher(text).replaceAll(Matcher.quoteReplacement(LINK_SPOKEN));
         spoken = EMOJI.matcher(spoken).replaceAll("");
-        spoken = readConsonants(spoken);
+        spoken = spellOutConsonants(spoken);
         return new SpokenText(SPACES.matcher(spoken).replaceAll(" ").strip());
     }
 
-    private static String readConsonants(String text) {
+    private static String spellOutConsonants(String text) {
         StringBuilder spoken = new StringBuilder(text.length());
         text.chars().forEach(c -> spoken.append(CONSONANT_SOUNDS.getOrDefault((char) c, String.valueOf((char) c))));
         return spoken.toString();

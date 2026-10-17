@@ -17,7 +17,7 @@ public class FollowBotMoveService implements FollowBotMoveUseCase {
 
     @Override
     public void followBotMove(VoiceChannel from, Optional<VoiceChannel> to) {
-        botSeatPort.withSeat(from.guildId(), seat -> {
+        botSeatPort.withLockedSeat(from.guildId(), seat -> {
             // 끊겼으면 남은 문장이 다음에 들어가는 채널에서 읽히지 않게 버린다.
             if (seat.followBotMove(from, to)) {
                 speechPlayerPort.leave(from.guildId());

@@ -39,10 +39,10 @@ public class FakeSpeechSynthesizer implements SpeechSynthesizerPort {
     }
 
     @Override
-    public Speech synthesize(SpokenText text, VoiceId voice) {
+    public Speech synthesize(SpokenText text, VoiceId voiceId) {
         if (failing) {
             throw new SpeechSynthesisException("테스트용 TTS 엔진이 고장 났습니다.");
         }
-        return new Speech((voice.value() + ":" + text.text()).getBytes(StandardCharsets.UTF_8), "mp3");
+        return new Speech((voiceId.value() + ":" + text.text()).getBytes(StandardCharsets.UTF_8), "mp3");
     }
 }

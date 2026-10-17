@@ -54,7 +54,7 @@ public class LavaPlayerSpeechPlayer implements SpeechPlayerPort {
         }
         AudioManager audioManager = guild.getAudioManager();
         if (audioManager.getSendingHandler() == null) {
-            audioManager.setSendingHandler(new AudioPlayerSendHandler(queue(channel.guildId()).player()));
+            audioManager.setSendingHandler(new AudioPlayerSendHandler(queueOf(channel.guildId()).player()));
         }
         if (!audioChannel.equals(audioManager.getConnectedChannel())) {
             try {
@@ -67,7 +67,7 @@ public class LavaPlayerSpeechPlayer implements SpeechPlayerPort {
 
     @Override
     public void play(GuildId guildId, Speech speech) {
-        GuildSpeechQueue queue = queue(guildId);
+        GuildSpeechQueue queue = queueOf(guildId);
         Path audioFile = writeTempFile(speech);
         // 파일 읽기는 여러 스레드에서 돌므로, 디스코드 서버마다 넣은 순서대로 끝나게 해야 문장 순서가 바뀌지 않는다.
         playerManager.loadItemOrdered(guildId, audioFile.toString(), new AudioLoadResultHandler() {
@@ -110,7 +110,7 @@ public class LavaPlayerSpeechPlayer implements SpeechPlayerPort {
         }
     }
 
-    private GuildSpeechQueue queue(GuildId guildId) {
+    private GuildSpeechQueue queueOf(GuildId guildId) {
         return queues.computeIfAbsent(guildId, id -> new GuildSpeechQueue(playerManager.createPlayer()));
     }
 

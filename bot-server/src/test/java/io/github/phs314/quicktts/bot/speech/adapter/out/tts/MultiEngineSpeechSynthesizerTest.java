@@ -69,11 +69,11 @@ class MultiEngineSpeechSynthesizerTest {
     }
 
     /** 목소리 하나만 내는 가짜 엔진. 음성 대신 "목소리:문장" 을 돌려준다. */
-    private record FakeEngine(VoiceId voice, boolean fails) implements TtsEngine {
+    private record FakeEngine(VoiceId voiceId, boolean fails) implements TtsEngine {
 
         @Override
         public List<Voice> voices() {
-            return List.of(new Voice(voice, voice.value()));
+            return List.of(new Voice(voiceId, voiceId.value()));
         }
 
         @Override

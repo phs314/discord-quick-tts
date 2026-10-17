@@ -18,7 +18,7 @@ import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.SpeakQui
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import io.github.phs314.quicktts.common.ApiErrorCode;
-import io.github.phs314.quicktts.common.QuickChatApi;
+import io.github.phs314.quicktts.common.QuickTtsApi;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
@@ -99,8 +99,8 @@ class QuickChatControllerTest {
 
     @Test
     void JSON_이_깨졌으면_400_과_invalid_request() throws Exception {
-        mockMvc().perform(post(QuickChatApi.PATH)
-                        .header(HttpHeaders.AUTHORIZATION, QuickChatApi.BEARER_PREFIX + TOKEN)
+        mockMvc().perform(post(QuickTtsApi.QUICK_CHAT_PATH)
+                        .header(HttpHeaders.AUTHORIZATION, QuickTtsApi.BEARER_PREFIX + TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"text\":"))
                 .andExpect(status().isBadRequest())
@@ -120,17 +120,17 @@ class QuickChatControllerTest {
 
     @Test
     void 내_음성_채널을_물을_때도_토큰이_없으면_401_과_device_unauthorized() throws Exception {
-        mockMvc().perform(get(QuickChatApi.MY_VOICE_CHANNEL_PATH))
+        mockMvc().perform(get(QuickTtsApi.MY_VOICE_CHANNEL_PATH))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value(ApiErrorCode.DEVICE_UNAUTHORIZED));
     }
 
     private ResultActions sendQuickChat(String token, String text) throws Exception {
-        var request = post(QuickChatApi.PATH)
+        var request = post(QuickTtsApi.QUICK_CHAT_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"text\":\"" + text + "\"}");
         if (token != null) {
-            request.header(HttpHeaders.AUTHORIZATION, QuickChatApi.BEARER_PREFIX + token);
+            request.header(HttpHeaders.AUTHORIZATION, QuickTtsApi.BEARER_PREFIX + token);
         }
         return mockMvc().perform(request);
     }

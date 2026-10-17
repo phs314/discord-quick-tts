@@ -10,7 +10,7 @@
 
 - `speech/domain/BotSeat` 를 만듭니다. 디스코드 서버 하나에서 봇이 앉은 음성 채널을 기억하고, 식별자는 `GuildId` 입니다. "이 채널에서 읽으러 가도 되나"(`isFreeFor`, `sitIn`), "이제 나가야 하나"(`vacateIfEmpty`), "관리자가 봇을 옮기거나 끊었다"(`followBotMove`) 를 이 객체가 판단합니다.
 - 봇 서버가 들어가기로 정한 순간 자리를 잡습니다. 디스코드 연결이 끝났는지는 보지 않으므로 1초 틈이 없어집니다. 채널에 사람이 있는지는 매번 `VoiceChannelLocatorPort.hasPeople` 로 디스코드에 물어 넘겨줍니다. 사람 수까지 자리에 담으면 디스코드 이벤트를 모두 따라가야 해서 그러지 않았습니다.
-- 잠금은 디스코드 서버마다 따로입니다. `BotSeatPort.withSeat(guildId, work)` 가 그 디스코드 서버의 자리를 잠그고 꺼내 주며, 메모리 저장소(`InMemoryBotSeatRepository`)는 자리 객체 자체를 잠금으로 씁니다. 봇 서버가 다시 켜지면 봇도 음성 채널에서 나가 있으므로 자리를 DB 에 둘 필요는 없습니다.
+- 잠금은 디스코드 서버마다 따로입니다. `BotSeatPort.withLockedSeat(guildId, work)` 가 그 디스코드 서버의 자리를 잠그고 꺼내 주며, 메모리 저장소(`InMemoryBotSeatRepository`)는 자리 객체 자체를 잠금으로 씁니다. 봇 서버가 다시 켜지면 봇도 음성 채널에서 나가 있으므로 자리를 DB 에 둘 필요는 없습니다.
 - `SpeechPlayerPort` 를 `join` / `play` / `leave` 로 나눕니다. 어느 채널로 갈지와 언제 나갈지는 애플리케이션이 정하고, 어댑터는 시키는 대로만 합니다.
 - 자동 퇴장도 유스케이스로 옮깁니다(보고서 G2). 인바운드 어댑터 `VoiceStateListener` 가 디스코드 음성 상태 소식을 받아, 사람이 나갔으면 `LeaveEmptyVoiceChannelUseCase`, 봇 자신이 옮겨지거나 끊겼으면 `FollowBotMoveUseCase` 를 부릅니다.
 

@@ -3,8 +3,8 @@ package io.github.phs314.quicktts.client;
 import io.github.phs314.quicktts.common.ApiErrorCode;
 import io.github.phs314.quicktts.common.DeviceRegistrationRequest;
 import io.github.phs314.quicktts.common.DeviceRegistrationResponse;
-import io.github.phs314.quicktts.common.QuickChatApi;
 import io.github.phs314.quicktts.common.QuickChatRequest;
+import io.github.phs314.quicktts.common.QuickTtsApi;
 import io.github.phs314.quicktts.common.VoiceChannelResponse;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -21,9 +21,9 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * 봇 서버와 이야기한다. 기기 등록과 quick chat 전송을 맡는다.
+ * 봇 서버 API 를 부른다. 기기 등록, quick chat 전송, 지금 음성 채널 확인을 맡는다.
  */
-class QuickChatClient {
+class QuickTtsClient {
 
     private final HttpClient httpClient = HttpClient.newBuilder()
             .connectTimeout(Duration.ofSeconds(3))
@@ -33,17 +33,17 @@ class QuickChatClient {
     /** 바로 앞에 보낸 문장. 다음 문장은 이게 끝난 뒤에 보낸다. */
     private CompletableFuture<Void> previousSend = CompletableFuture.completedFuture(null);
 
-    QuickChatClient(String serverUrl) {
+    QuickTtsClient(String serverUrl) {
         this.serverUrl = serverUrl;
     }
 
     /**
      * 연결 코드로 이 PC 를 등록하고 기기 토큰을 받는다. 디스코드 {@code /연결해제} 목록에는 컴퓨터 이름으로 보인다.
      *
-     * @throws QuickChatException 코드가 틀렸거나 서버에 닿지 못했을 때
+     * @throws QuickTtsClientException 코드가 틀렸거나 서버에 닿지 못했을 때
      */
-    String register(String pairingCode) {
-        HttpRequest request = jsonPost(QuickChatApi.DEVICES_PATH,
+    String registerDevice(String pairingCode) {
+        HttpRequest request = jsonPost(QuickTtsApi.DEVICES_PATH,
                 new DeviceRegistrationRequest(pairingCode, computerName())).build();
         try {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
@@ -52,10 +52,10 @@ class QuickChatClient {
             }
             throw registerFailure(response.statusCode(), response.body());
         } catch (IOException e) {
-            throw new QuickChatException("봇 서버에 연결하지 못했습니다: " + serverUrl);
+            throw new QuickTtsClientException("봇 서버에 연결하지 못했습니다: " + serverUrl);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new QuickChatException("등록이 중단되었습니다.");
+            throw new QuickTtsClientException("등록이 중단되었습니다.");
         }
     }
 
@@ -65,8 +65,8 @@ class QuickChatClient {
      * <p>서버는 음성을 다 만든 문장부터 읽으므로, 앞 문장의 응답을 받은 뒤에 보내야 연달아 보내도 순서가 바뀌지 않는다.
      */
     synchronized CompletableFuture<Void> send(String deviceToken, String text) {
-        HttpRequest request = jsonPost(QuickChatApi.PATH, new QuickChatRequest(text))
-                .header("Authorization", QuickChatApi.BEARER_PREFIX + deviceToken)
+        HttpRequest request = jsonPost(QuickTtsApi.QUICK_CHAT_PATH, new QuickChatRequest(text))
+                .header("Authorization", QuickTtsApi.BEARER_PREFIX + deviceToken)
                 .build();
 
         CompletableFuture<Void> sent = previousSend
@@ -82,44 +82,44 @@ class QuickChatClient {
     }
 
     /** 연결 코드 등록이 실패한 응답을 사용자에게 보여 줄 예외로 바꾼다. */
-    QuickChatException registerFailure(int status, String body) {
+    QuickTtsClientException registerFailure(int status, String body) {
         ServerError error = serverError(body);
         return switch (error.code()) {
             case ApiErrorCode.INVALID_PAIRING_CODE, ApiErrorCode.INVALID_VALUE ->
-                    new QuickChatException("연결 코드가 틀렸거나 만료되었습니다. 디스코드에서 /연결 을 다시 입력해 주세요.");
-            default -> unexpected(status);
+                    new QuickTtsClientException("연결 코드가 틀렸거나 만료되었습니다. 디스코드에서 /연결 을 다시 입력해 주세요.");
+            default -> unexpectedFailure(status);
         };
     }
 
     /** 문장 전송이 실패한 응답을 사용자에게 보여 줄 예외로 바꾼다. 안내 문구는 응답의 오류 코드로 고른다. */
-    QuickChatException sendFailure(int status, String body) {
+    QuickTtsClientException sendFailure(int status, String body) {
         ServerError error = serverError(body);
         return switch (error.code()) {
             case ApiErrorCode.DEVICE_UNAUTHORIZED -> new DeviceUnauthorizedException();
-            case ApiErrorCode.INVALID_VALUE -> new QuickChatException(error.detailOr(
-                    "문장이 비어 있거나 너무 깁니다. (최대 " + QuickChatApi.MAX_TEXT_LENGTH + "자)"));
+            case ApiErrorCode.INVALID_VALUE -> new QuickTtsClientException(error.detailOr(
+                    "문장이 비어 있거나 너무 깁니다. (최대 " + QuickTtsApi.MAX_TEXT_LENGTH + "자)"));
             case ApiErrorCode.SPEAKER_NOT_IN_VOICE_CHANNEL ->
-                    new QuickChatException("봇이 있는 서버의 음성 채널에 먼저 들어가 주세요.");
+                    new QuickTtsClientException("봇이 있는 서버의 음성 채널에 먼저 들어가 주세요.");
             case ApiErrorCode.VOICE_CHANNEL_IN_USE ->
-                    new QuickChatException("봇이 이 서버의 다른 음성 채널에서 쓰이고 있습니다. 그 채널이 비면 쓸 수 있습니다.");
+                    new QuickTtsClientException("봇이 이 서버의 다른 음성 채널에서 쓰이고 있습니다. 그 채널이 비면 쓸 수 있습니다.");
             case ApiErrorCode.BOT_CANNOT_JOIN_VOICE_CHANNEL ->
-                    new QuickChatException("봇이 이 음성 채널에 들어갈 수 없습니다. 채널 인원이 꽉 찼거나 봇에게 연결 권한이 없습니다.");
+                    new QuickTtsClientException("봇이 이 음성 채널에 들어갈 수 없습니다. 채널 인원이 꽉 찼거나 봇에게 연결 권한이 없습니다.");
             case ApiErrorCode.SPEECH_SYNTHESIS_FAILED ->
-                    new QuickChatException("음성을 만들지 못했습니다. 잠시 뒤 다시 보내 주세요.");
-            default -> unexpected(status);
+                    new QuickTtsClientException("음성을 만들지 못했습니다. 잠시 뒤 다시 보내 주세요.");
+            default -> unexpectedFailure(status);
         };
     }
 
     /** 내 음성 채널 묻기가 실패한 응답을 예외로 바꾼다. 기기 연결이 끊겼으면 다시 연결하도록 따로 알린다. */
-    QuickChatException voiceChannelFailure(int status, String body) {
+    QuickTtsClientException voiceChannelFailure(int status, String body) {
         if (ApiErrorCode.DEVICE_UNAUTHORIZED.equals(serverError(body).code())) {
             return new DeviceUnauthorizedException();
         }
-        return new QuickChatException("음성 채널을 확인하지 못했습니다. (HTTP " + status + ")");
+        return new QuickTtsClientException("음성 채널을 확인하지 못했습니다. (HTTP " + status + ")");
     }
 
-    private static QuickChatException unexpected(int status) {
-        return new QuickChatException("봇 서버 오류가 났습니다. (HTTP " + status + ")");
+    private static QuickTtsClientException unexpectedFailure(int status) {
+        return new QuickTtsClientException("봇 서버 오류가 났습니다. (HTTP " + status + ")");
     }
 
     /** 오류 응답 본문에서 오류 코드와 설명을 꺼낸다. 본문이 오류 응답 모양이 아니면 둘 다 비어 있다. */
@@ -159,9 +159,9 @@ class QuickChatClient {
     /**
      * 지금 보내면 어느 음성 채널에서 읽힐지 묻는다. 음성 채널에 없으면 빈 값으로 끝난다.
      */
-    CompletableFuture<Optional<VoiceChannelResponse>> myVoiceChannel(String deviceToken) {
-        HttpRequest request = HttpRequest.newBuilder(URI.create(serverUrl + QuickChatApi.MY_VOICE_CHANNEL_PATH))
-                .header("Authorization", QuickChatApi.BEARER_PREFIX + deviceToken)
+    CompletableFuture<Optional<VoiceChannelResponse>> findMyVoiceChannel(String deviceToken) {
+        HttpRequest request = HttpRequest.newBuilder(URI.create(serverUrl + QuickTtsApi.MY_VOICE_CHANNEL_PATH))
+                .header("Authorization", QuickTtsApi.BEARER_PREFIX + deviceToken)
                 .timeout(Duration.ofSeconds(3))
                 .GET()
                 .build();
@@ -180,14 +180,14 @@ class QuickChatClient {
                 .POST(HttpRequest.BodyPublishers.ofString(jsonMapper.writeValueAsString(body)));
     }
 
-    static class QuickChatException extends RuntimeException {
+    static class QuickTtsClientException extends RuntimeException {
 
-        QuickChatException(String message) {
+        QuickTtsClientException(String message) {
             super(message);
         }
     }
 
-    static class DeviceUnauthorizedException extends QuickChatException {
+    static class DeviceUnauthorizedException extends QuickTtsClientException {
 
         DeviceUnauthorizedException() {
             super("이 PC 의 연결이 해제되었습니다. 디스코드에서 /연결 로 다시 연결해 주세요.");

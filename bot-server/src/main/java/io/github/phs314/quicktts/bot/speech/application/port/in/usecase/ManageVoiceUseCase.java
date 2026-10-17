@@ -10,13 +10,13 @@ import java.util.List;
  */
 public interface ManageVoiceUseCase {
 
-    List<Voice> voices();
+    List<Voice> getVoices();
 
     /** 고른 목소리. 고른 적이 없거나 더 이상 없는 목소리면 기본 목소리. */
-    Voice currentVoice(DiscordUserId user);
+    Voice getCurrentVoice(DiscordUserId user);
 
     /**
      * @throws io.github.phs314.quicktts.bot.speech.domain.UnknownVoiceException 없는 목소리일 때
      */
-    Voice changeVoice(DiscordUserId user, VoiceId voice);
+    Voice changeVoice(DiscordUserId user, VoiceId voiceId);
 }

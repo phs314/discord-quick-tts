@@ -15,7 +15,7 @@ import javafx.scene.layout.VBox;
 
 /**
  * 트레이 메뉴의 Change Shortcut... 으로 여는 창. 새 단축키를 직접 눌러서 정한다.
- * 키 입력은 {@link GlobalHotkey} 가 받아 {@link #pressed(Hotkey)} 로 넘겨 준다.
+ * 키 입력은 {@link GlobalHotkey} 가 받아 {@link #onPressed(Hotkey)} 로 넘겨 준다.
  */
 final class HotkeyDialog extends Dialog<Hotkey> {
 
@@ -51,7 +51,7 @@ final class HotkeyDialog extends Dialog<Hotkey> {
         Button resetButton = (Button) getDialogPane().lookupButton(RESET);
         resetButton.addEventFilter(ActionEvent.ACTION, event -> {
             event.consume();
-            pressed(Hotkey.DEFAULT);
+            onPressed(Hotkey.DEFAULT);
         });
 
         // 누른 키는 GlobalHotkey 로 받으니, 창 안에서는 Space 로 버튼이 눌리는 일 없게 키 입력을 막는다. Esc 만 닫기로 둔다.
@@ -68,10 +68,10 @@ final class HotkeyDialog extends Dialog<Hotkey> {
     }
 
     /** 누른 키 조합을 보여 준다. 어느 스레드에서 불러도 된다. */
-    void pressed(Hotkey hotkey) {
+    void onPressed(Hotkey hotkey) {
         Platform.runLater(() -> {
-            if (hotkey.problem().isPresent()) {
-                display(hotkey, hotkey.problem().get(), false);
+            if (hotkey.validationProblem().isPresent()) {
+                display(hotkey, hotkey.validationProblem().get(), false);
             } else {
                 chosen = hotkey;
                 display(hotkey, hotkey.win()

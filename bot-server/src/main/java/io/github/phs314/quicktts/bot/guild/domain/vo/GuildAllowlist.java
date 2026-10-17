@@ -17,13 +17,13 @@ public record GuildAllowlist(boolean enabled, Set<GuildId> guilds) {
     }
 
     /** 봇이 이 디스코드 서버에 머물러도 되는지. */
-    public boolean permits(GuildId guild) {
-        return !enabled || guilds.contains(guild);
+    public boolean permits(GuildId guildId) {
+        return !enabled || guilds.contains(guildId);
     }
 
     /** 봇이 들어가 있는 디스코드 서버 중 나가야 하는 곳. */
     public List<GuildId> notPermitted(List<GuildId> joined) {
-        return joined.stream().filter(guild -> !permits(guild)).toList();
+        return joined.stream().filter(guildId -> !permits(guildId)).toList();
     }
 
     /**

@@ -11,15 +11,15 @@ import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
  */
 public interface ManageGuildAllowlistUseCase {
 
-    GuildAllowlistDto allowlist(DiscordUserId requester);
+    GuildAllowlistDto getAllowlist(DiscordUserId requester);
 
     /** @return 새로 넣었으면 true, 이미 있었으면 false */
-    boolean allow(DiscordUserId requester, GuildId guild);
+    boolean allow(DiscordUserId requester, GuildId guildId);
 
     /**
      * 허용 목록에서 뺀다. 허용 목록을 쓰는 중이고 봇이 그 디스코드 서버에 있으면 안내를 남기고 나간다.
      *
      * @return 목록에서 뺐으면 true, 원래 없었으면 false
      */
-    boolean disallow(DiscordUserId requester, GuildId guild);
+    boolean disallow(DiscordUserId requester, GuildId guildId);
 }

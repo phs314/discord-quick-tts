@@ -16,5 +16,5 @@ public interface AllowedGuildPort {
     boolean add(AllowedGuild allowedGuild);
 
     /** @return 지웠으면 true, 원래 없었으면 false */
-    boolean delete(GuildId guild);
+    boolean delete(GuildId guildId);
 }

@@ -16,17 +16,17 @@ class VoiceCatalogTest {
 
     @Test
     void 고른_목소리가_목록에_있으면_그_목소리로_읽는다() {
-        assertThat(catalog.voiceFor(Optional.of(INJOON.id()))).isEqualTo(INJOON);
+        assertThat(catalog.chosenOrDefault(Optional.of(INJOON.id()))).isEqualTo(INJOON);
     }
 
     @Test
     void 고른_적이_없으면_기본_목소리로_읽는다() {
-        assertThat(catalog.voiceFor(Optional.empty())).isEqualTo(SUNHI);
+        assertThat(catalog.chosenOrDefault(Optional.empty())).isEqualTo(SUNHI);
     }
 
     @Test
     void 골랐던_목소리가_목록에서_사라졌으면_기본_목소리로_읽는다() {
-        assertThat(catalog.voiceFor(Optional.of(new VoiceId("edge:사라진-목소리")))).isEqualTo(SUNHI);
+        assertThat(catalog.chosenOrDefault(Optional.of(new VoiceId("edge:사라진-목소리")))).isEqualTo(SUNHI);
     }
 
     @Test

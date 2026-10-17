@@ -50,6 +50,6 @@ class LeaveEmptyVoiceChannelServiceTest {
 
     private void sitIn(VoiceChannelDetails details) {
         discord.enter(SPEAKER, details);
-        seats.withSeat(GUILD, seat -> seat.sitIn(details.channel(), discord::hasPeople));
+        seats.withLockedSeat(GUILD, seat -> seat.sitIn(details.channel(), discord::hasPeople));
     }
 }

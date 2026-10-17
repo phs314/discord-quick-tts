@@ -6,8 +6,8 @@ import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQui
 import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.FindMyVoiceChannelUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.SpeakQuickChatUseCase;
 import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
-import io.github.phs314.quicktts.common.QuickChatApi;
 import io.github.phs314.quicktts.common.QuickChatRequest;
+import io.github.phs314.quicktts.common.QuickTtsApi;
 import io.github.phs314.quicktts.common.VoiceChannelResponse;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +31,7 @@ public class QuickChatController {
     private final SpeakQuickChatUseCase speakQuickChatUseCase;
     private final FindMyVoiceChannelUseCase findMyVoiceChannelUseCase;
 
-    @PostMapping(QuickChatApi.PATH)
+    @PostMapping(QuickTtsApi.QUICK_CHAT_PATH)
     public ResponseEntity<Void> quickChat(
             @RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) String authorization,
             @RequestBody QuickChatRequest request) {
@@ -40,13 +40,13 @@ public class QuickChatController {
         return ResponseEntity.accepted().build();
     }
 
-    @GetMapping(QuickChatApi.MY_VOICE_CHANNEL_PATH)
+    @GetMapping(QuickTtsApi.MY_VOICE_CHANNEL_PATH)
     public ResponseEntity<VoiceChannelResponse> myVoiceChannel(
             @RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) String authorization) {
         DiscordUserId user = authenticatedUser(authorization);
         return findMyVoiceChannelUseCase.findMyVoiceChannel(user)
                 .map(details -> ResponseEntity.ok(new VoiceChannelResponse(
-                        details.serverName(), details.serverIconUrl(), details.channelName())))
+                        details.guildName(), details.guildIconUrl(), details.channelName())))
                 .orElseGet(() -> ResponseEntity.noContent().build());
     }
 
@@ -58,10 +58,10 @@ public class QuickChatController {
     }
 
     private static Optional<String> bearerToken(String authorization) {
-        if (authorization == null || !authorization.startsWith(QuickChatApi.BEARER_PREFIX)) {
+        if (authorization == null || !authorization.startsWith(QuickTtsApi.BEARER_PREFIX)) {
             return Optional.empty();
         }
-        String token = authorization.substring(QuickChatApi.BEARER_PREFIX.length()).strip();
+        String token = authorization.substring(QuickTtsApi.BEARER_PREFIX.length()).strip();
         return token.isEmpty() ? Optional.empty() : Optional.of(token);
     }
 }

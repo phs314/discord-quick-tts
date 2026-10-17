@@ -8,22 +8,22 @@ import org.junit.jupiter.api.Test;
 /**
  * 서버 오류 응답의 오류 코드로 안내 문구를 고르는지 확인한다. 서버에 요청은 보내지 않는다.
  */
-class QuickChatClientTest {
+class QuickTtsClientTest {
 
-    private final QuickChatClient client = new QuickChatClient("http://localhost:0");
+    private final QuickTtsClient client = new QuickTtsClient("http://localhost:0");
 
     @Test
     void 해제된_기기면_다시_연결하라는_예외() {
         assertThat(client.sendFailure(401, problem(ApiErrorCode.DEVICE_UNAUTHORIZED, "기기 토큰이 없습니다.")))
-                .isInstanceOf(QuickChatClient.DeviceUnauthorizedException.class);
+                .isInstanceOf(QuickTtsClient.DeviceUnauthorizedException.class);
     }
 
     @Test
     void 내_음성_채널을_물을_때도_해제된_기기면_다시_연결하라는_예외() {
         assertThat(client.voiceChannelFailure(401, problem(ApiErrorCode.DEVICE_UNAUTHORIZED, "기기 토큰이 없습니다.")))
-                .isInstanceOf(QuickChatClient.DeviceUnauthorizedException.class);
+                .isInstanceOf(QuickTtsClient.DeviceUnauthorizedException.class);
         assertThat(client.voiceChannelFailure(500, problem(ApiErrorCode.UNEXPECTED_FAILURE, "x")))
-                .isNotInstanceOf(QuickChatClient.DeviceUnauthorizedException.class);
+                .isNotInstanceOf(QuickTtsClient.DeviceUnauthorizedException.class);
     }
 
     @Test

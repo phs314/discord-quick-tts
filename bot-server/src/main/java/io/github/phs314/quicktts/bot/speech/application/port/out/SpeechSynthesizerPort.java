@@ -20,5 +20,5 @@ public interface SpeechSynthesizerPort {
     /**
      * @throws io.github.phs314.quicktts.bot.speech.application.exception.SpeechSynthesisException 음성 생성에 실패했을 때
      */
-    Speech synthesize(SpokenText text, VoiceId voice);
+    Speech synthesize(SpokenText text, VoiceId voiceId);
 }

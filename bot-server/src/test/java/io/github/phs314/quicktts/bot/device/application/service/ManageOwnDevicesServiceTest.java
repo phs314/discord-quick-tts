@@ -25,13 +25,13 @@ class ManageOwnDevicesServiceTest {
         devices.registered(OWNER, PC, NOW);
         devices.registered(OTHER, new DeviceName("남의-PC"), NOW);
 
-        assertThat(service.listDevices(OWNER)).extracting(DeviceDto::name).containsExactly(PC);
+        assertThat(service.getDevices(OWNER)).extracting(DeviceDto::name).containsExactly(PC);
     }
 
     @Test
     void 해제한_PC_의_토큰은_더_이상_인증되지_않는다() {
         DeviceToken token = devices.registered(OWNER, PC, NOW);
-        DeviceId id = service.listDevices(OWNER).getFirst().id();
+        DeviceId id = service.getDevices(OWNER).getFirst().id();
 
         assertThat(service.unlink(OWNER, id)).isTrue();
         assertThat(new AuthenticateDeviceService(devices).authenticate(token.value())).isEmpty();
@@ -40,10 +40,10 @@ class ManageOwnDevicesServiceTest {
     @Test
     void 다른_사람의_PC_는_해제할_수_없다() {
         devices.registered(OTHER, PC, NOW);
-        DeviceId othersId = service.listDevices(OTHER).getFirst().id();
+        DeviceId othersId = service.getDevices(OTHER).getFirst().id();
 
         assertThat(service.unlink(OWNER, othersId)).isFalse();
-        assertThat(service.listDevices(OTHER)).hasSize(1);
+        assertThat(service.getDevices(OTHER)).hasSize(1);
     }
 
     @Test
@@ -53,7 +53,7 @@ class ManageOwnDevicesServiceTest {
         devices.registered(OTHER, PC, NOW);
 
         assertThat(service.unlinkAll(OWNER)).isEqualTo(2);
-        assertThat(service.listDevices(OWNER)).isEmpty();
-        assertThat(service.listDevices(OTHER)).hasSize(1);
+        assertThat(service.getDevices(OWNER)).isEmpty();
+        assertThat(service.getDevices(OTHER)).hasSize(1);
     }
 }

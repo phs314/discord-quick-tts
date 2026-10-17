@@ -30,14 +30,14 @@ class JdbcVoicePreferenceRepositoryTest {
 
     @Test
     void 고른_적이_없으면_비어_있다() {
-        assertThat(repository.find(USER)).isEmpty();
+        assertThat(repository.findVoice(USER)).isEmpty();
     }
 
     @Test
     void 다시_고르면_마지막_목소리로_바뀐다() {
-        repository.save(USER, new VoiceId("edge:ko-KR-SunHiNeural"));
-        repository.save(USER, new VoiceId("edge:ko-KR-InJoonNeural"));
+        repository.saveVoice(USER, new VoiceId("edge:ko-KR-SunHiNeural"));
+        repository.saveVoice(USER, new VoiceId("edge:ko-KR-InJoonNeural"));
 
-        assertThat(repository.find(USER)).contains(new VoiceId("edge:ko-KR-InJoonNeural"));
+        assertThat(repository.findVoice(USER)).contains(new VoiceId("edge:ko-KR-InJoonNeural"));
     }
 }

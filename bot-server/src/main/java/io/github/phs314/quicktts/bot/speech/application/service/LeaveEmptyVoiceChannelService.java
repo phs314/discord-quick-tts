@@ -18,7 +18,7 @@ public class LeaveEmptyVoiceChannelService implements LeaveEmptyVoiceChannelUseC
 
     @Override
     public void leaveIfEmpty(GuildId guildId) {
-        botSeatPort.withSeat(guildId, seat -> {
+        botSeatPort.withLockedSeat(guildId, seat -> {
             if (seat.vacateIfEmpty(voiceChannelLocatorPort::hasPeople)) {
                 speechPlayerPort.leave(guildId);
             }

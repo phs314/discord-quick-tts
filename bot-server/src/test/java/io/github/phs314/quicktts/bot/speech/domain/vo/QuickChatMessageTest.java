@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.phs314.quicktts.bot.shared.domain.InvalidDomainValueException;
-import io.github.phs314.quicktts.common.QuickChatApi;
+import io.github.phs314.quicktts.common.QuickTtsApi;
 import org.junit.jupiter.api.Test;
 
 class QuickChatMessageTest {
@@ -30,7 +30,7 @@ class QuickChatMessageTest {
 
     @Test
     void 클라이언트와_같은_최대_길이를_쓴다() {
-        assertThat(QuickChatMessage.MAX_LENGTH).isEqualTo(QuickChatApi.MAX_TEXT_LENGTH);
+        assertThat(QuickChatMessage.MAX_LENGTH).isEqualTo(QuickTtsApi.MAX_TEXT_LENGTH);
     }
 
     @Test

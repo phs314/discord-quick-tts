@@ -22,8 +22,8 @@ import io.github.phs314.quicktts.bot.support.RecordingSpeechPlayer;
 import io.github.phs314.quicktts.common.ApiErrorCode;
 import io.github.phs314.quicktts.common.DeviceRegistrationRequest;
 import io.github.phs314.quicktts.common.DeviceRegistrationResponse;
-import io.github.phs314.quicktts.common.QuickChatApi;
 import io.github.phs314.quicktts.common.QuickChatRequest;
+import io.github.phs314.quicktts.common.QuickTtsApi;
 import io.github.phs314.quicktts.common.VoiceChannelResponse;
 import java.util.concurrent.atomic.AtomicLong;
 import net.dv8tion.jda.api.JDA;
@@ -109,8 +109,8 @@ class QuickTtsApiIntegrationTest {
     void 연결_코드로_PC_를_등록하면_201_과_기기_토큰을_주고_그_토큰으로_API_를_쓸_수_있다() {
         String token = registerDevice(newUser());
 
-        client.get().uri(QuickChatApi.MY_VOICE_CHANNEL_PATH)
-                .header(HttpHeaders.AUTHORIZATION, QuickChatApi.BEARER_PREFIX + token)
+        client.get().uri(QuickTtsApi.MY_VOICE_CHANNEL_PATH)
+                .header(HttpHeaders.AUTHORIZATION, QuickTtsApi.BEARER_PREFIX + token)
                 .exchange()
                 .expectStatus().isNoContent();
     }
@@ -138,8 +138,8 @@ class QuickTtsApiIntegrationTest {
         String token = registerDevice(user);
         VOICE_CHANNELS.enter(user, details(newChannel(newGuild()), "게임"));
 
-        VoiceChannelResponse response = client.get().uri(QuickChatApi.MY_VOICE_CHANNEL_PATH)
-                .header(HttpHeaders.AUTHORIZATION, QuickChatApi.BEARER_PREFIX + token)
+        VoiceChannelResponse response = client.get().uri(QuickTtsApi.MY_VOICE_CHANNEL_PATH)
+                .header(HttpHeaders.AUTHORIZATION, QuickTtsApi.BEARER_PREFIX + token)
                 .exchange()
                 .expectStatus().isOk()
                 .expectBody(VoiceChannelResponse.class)
@@ -163,7 +163,7 @@ class QuickTtsApiIntegrationTest {
 
     @Test
     void 기기_토큰이_없으면_401_과_device_unauthorized() {
-        client.post().uri(QuickChatApi.PATH)
+        client.post().uri(QuickTtsApi.QUICK_CHAT_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new QuickChatRequest("안녕"))
                 .exchange()
@@ -193,7 +193,7 @@ class QuickTtsApiIntegrationTest {
         sendQuickChat(token, " ")
                 .expectStatus().isBadRequest()
                 .expectBody().jsonPath("$.code").isEqualTo(ApiErrorCode.INVALID_VALUE);
-        sendQuickChat(token, "가".repeat(QuickChatApi.MAX_TEXT_LENGTH + 1))
+        sendQuickChat(token, "가".repeat(QuickTtsApi.MAX_TEXT_LENGTH + 1))
                 .expectStatus().isBadRequest()
                 .expectBody().jsonPath("$.code").isEqualTo(ApiErrorCode.INVALID_VALUE);
         assertThat(PLAYER.actions()).isEmpty();
@@ -210,14 +210,14 @@ class QuickTtsApiIntegrationTest {
 
     @Test
     void 같은_디스코드_서버의_다른_채널에서_쓰이고_있으면_423_과_voice_channel_in_use() {
-        GuildId guild = newGuild();
-        VoiceChannel first = newChannel(guild);
+        GuildId guildId = newGuild();
+        VoiceChannel first = newChannel(guildId);
         DiscordUserId firstUser = newUser();
         DiscordUserId secondUser = newUser();
         String firstToken = registerDevice(firstUser);
         String secondToken = registerDevice(secondUser);
         VOICE_CHANNELS.enter(firstUser, details(first, "게임"));
-        VOICE_CHANNELS.enter(secondUser, details(newChannel(guild), "공부"));
+        VOICE_CHANNELS.enter(secondUser, details(newChannel(guildId), "공부"));
 
         sendQuickChat(firstToken, "먼저").expectStatus().isAccepted();
         sendQuickChat(secondToken, "나중")
@@ -255,15 +255,15 @@ class QuickTtsApiIntegrationTest {
     }
 
     private RestTestClient.ResponseSpec postDevice(String pairingCode) {
-        return client.post().uri(QuickChatApi.DEVICES_PATH)
+        return client.post().uri(QuickTtsApi.DEVICES_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new DeviceRegistrationRequest(pairingCode, "테스트 PC"))
                 .exchange();
     }
 
     private RestTestClient.ResponseSpec sendQuickChat(String token, String text) {
-        return client.post().uri(QuickChatApi.PATH)
-                .header(HttpHeaders.AUTHORIZATION, QuickChatApi.BEARER_PREFIX + token)
+        return client.post().uri(QuickTtsApi.QUICK_CHAT_PATH)
+                .header(HttpHeaders.AUTHORIZATION, QuickTtsApi.BEARER_PREFIX + token)
                 .contentType(MediaType.APPLICATION_JSON)
                 .body(new QuickChatRequest(text))
                 .exchange();
@@ -277,8 +277,8 @@ class QuickTtsApiIntegrationTest {
         return new GuildId(IDS.incrementAndGet());
     }
 
-    private static VoiceChannel newChannel(GuildId guild) {
-        return new VoiceChannel(guild, IDS.incrementAndGet());
+    private static VoiceChannel newChannel(GuildId guildId) {
+        return new VoiceChannel(guildId, IDS.incrementAndGet());
     }
 
     private static VoiceChannelDetails details(VoiceChannel channel, String channelName) {

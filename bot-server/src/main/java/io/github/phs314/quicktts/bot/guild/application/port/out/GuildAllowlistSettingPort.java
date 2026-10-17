@@ -5,5 +5,5 @@ package io.github.phs314.quicktts.bot.guild.application.port.out;
  */
 public interface GuildAllowlistSettingPort {
 
-    boolean enabled();
+    boolean isEnabled();
 }

@@ -8,11 +8,11 @@ import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 public interface EnforceGuildAllowlistUseCase {
 
     /** 봇이 디스코드 서버에 막 초대됐을 때. 허용 목록에 없으면 안내를 남기고 나간다. */
-    void checkJoinedGuild(GuildId guild);
+    void leaveIfNotAllowed(GuildId guildId);
 
     /**
      * 봇 서버가 켜졌을 때 봇이 들어가 있는 모든 디스코드 서버를 확인한다. 꺼져 있는 동안 초대된 곳도 여기서 걸린다.
      * 허용 목록이 비어 있으면(처음 켠 때) 지금 들어가 있는 디스코드 서버를 모두 허용 목록에 넣는다.
      */
-    void checkAllJoinedGuilds();
+    void leaveAllNotAllowed();
 }

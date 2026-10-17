@@ -1,4 +1,4 @@
-package io.github.phs314.quicktts.bot.device.adapter.out.persistence;
+package io.github.phs314.quicktts.bot.device.adapter.out.memory;
 
 import io.github.phs314.quicktts.bot.device.application.port.out.PairingPort;
 import io.github.phs314.quicktts.bot.device.domain.Pairing;
@@ -27,7 +27,7 @@ public class InMemoryPairingRepository implements PairingPort {
     }
 
     @Override
-    public Optional<Pairing> take(PairingCode code) {
+    public Optional<Pairing> findAndDelete(PairingCode code) {
         return Optional.ofNullable(pairings.remove(code));
     }
 }

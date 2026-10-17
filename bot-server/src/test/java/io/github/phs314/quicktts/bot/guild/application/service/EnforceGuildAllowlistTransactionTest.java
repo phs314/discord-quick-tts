@@ -44,7 +44,7 @@ class EnforceGuildAllowlistTransactionTest {
 
     @Test
     void 처음_채우다_실패하면_하나도_넣지_않는다() {
-        assertThatThrownBy(enforceGuildAllowlistUseCase::checkAllJoinedGuilds)
+        assertThatThrownBy(enforceGuildAllowlistUseCase::leaveAllNotAllowed)
                 .isInstanceOf(IllegalStateException.class);
 
         // 일부만 남았다면 다음에 켤 때 목록이 비어 있지 않아서 남은 디스코드 서버에서 나가게 된다.
@@ -97,8 +97,8 @@ class EnforceGuildAllowlistTransactionTest {
                 }
 
                 @Override
-                public boolean delete(GuildId guild) {
-                    return delegate.delete(guild);
+                public boolean delete(GuildId guildId) {
+                    return delegate.delete(guildId);
                 }
             };
         }

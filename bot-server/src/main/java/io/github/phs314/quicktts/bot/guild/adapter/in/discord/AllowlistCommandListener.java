@@ -57,17 +57,17 @@ public class AllowlistCommandListener extends ListenerAdapter implements Discord
                         new SubcommandData(ADD, "Allow a Discord server")
                                 .setNameLocalization(DiscordLocale.KOREAN, "추가")
                                 .setDescriptionLocalization(DiscordLocale.KOREAN, "디스코드 서버를 허용 목록에 넣습니다")
-                                .addOptions(serverOption()),
+                                .addOptions(guildOption()),
                         new SubcommandData(REMOVE, "Remove a Discord server; the bot leaves it")
                                 .setNameLocalization(DiscordLocale.KOREAN, "삭제")
                                 .setDescriptionLocalization(DiscordLocale.KOREAN, "디스코드 서버를 허용 목록에서 빼고, 봇이 그 서버에서 나갑니다")
-                                .addOptions(serverOption()),
+                                .addOptions(guildOption()),
                         new SubcommandData(LIST, "Show allowed Discord servers")
                                 .setNameLocalization(DiscordLocale.KOREAN, "보기")
                                 .setDescriptionLocalization(DiscordLocale.KOREAN, "허용 목록을 봅니다"));
     }
 
-    private static OptionData serverOption() {
+    private static OptionData guildOption() {
         // 디스코드 서버 ID 는 디스코드의 정수 옵션 범위(2^53)를 넘을 수 있어 글자로 받는다.
         return new OptionData(OptionType.STRING, SERVER_OPTION, "Discord server ID", true)
                 .setNameLocalization(DiscordLocale.KOREAN, "서버")
@@ -95,25 +95,25 @@ public class AllowlistCommandListener extends ListenerAdapter implements Discord
         event.reply(reply).setEphemeral(true).queue();
     }
 
-    private String add(DiscordUserId requester, GuildId guild) {
-        String result = manageGuildAllowlistUseCase.allow(requester, guild)
-                ? "허용 목록에 넣었어요: **" + guildName(guild) + "**"
-                : "이미 허용 목록에 있어요: **" + guildName(guild) + "**";
-        if (jda.getGuildById(guild.value()) != null) {
+    private String add(DiscordUserId requester, GuildId guildId) {
+        String result = manageGuildAllowlistUseCase.allow(requester, guildId)
+                ? "허용 목록에 넣었어요: **" + guildName(guildId) + "**"
+                : "이미 허용 목록에 있어요: **" + guildName(guildId) + "**";
+        if (jda.getGuildById(guildId.value()) != null) {
             return result;
         }
-        return result + "\n이 링크로 초대하면 돼요: " + inviteUrl(guild);
+        return result + "\n이 링크로 초대하면 돼요: " + inviteUrl(guildId);
     }
 
-    private String remove(DiscordUserId requester, GuildId guild) {
-        String name = guildName(guild);
-        return manageGuildAllowlistUseCase.disallow(requester, guild)
+    private String remove(DiscordUserId requester, GuildId guildId) {
+        String name = guildName(guildId);
+        return manageGuildAllowlistUseCase.disallow(requester, guildId)
                 ? "허용 목록에서 뺐어요: **" + name + "**\n봇이 그 서버에 있었다면 안내를 남기고 나가요."
                 : "허용 목록에 없는 서버예요: **" + name + "**";
     }
 
     private String list(DiscordUserId requester) {
-        GuildAllowlistDto allowlist = manageGuildAllowlistUseCase.allowlist(requester);
+        GuildAllowlistDto allowlist = manageGuildAllowlistUseCase.getAllowlist(requester);
         String header = allowlist.enabled()
                 ? "허용 목록을 쓰는 중이에요. 여기 없는 서버에 초대되면 봇이 안내를 남기고 나가요."
                 : "허용 목록이 꺼져 있어서 어느 서버에나 들어가요.";
@@ -122,7 +122,7 @@ public class AllowlistCommandListener extends ListenerAdapter implements Discord
         }
         String guilds = allowlist.guilds().stream()
                 .map(AllowedGuildDto::guildId)
-                .map(guild -> "・ " + guildName(guild) + " `" + guild.value() + "`")
+                .map(guildId -> "・ " + guildName(guildId) + " `" + guildId.value() + "`")
                 .collect(Collectors.joining("\n"));
         return header + "\n\n" + guilds;
     }
@@ -133,9 +133,9 @@ public class AllowlistCommandListener extends ListenerAdapter implements Discord
     }
 
     /** 그 디스코드 서버가 미리 골라진 봇 초대 링크 */
-    private String inviteUrl(GuildId guild) {
+    private String inviteUrl(GuildId guildId) {
         return "https://discord.com/oauth2/authorize?client_id=" + jda.getSelfUser().getApplicationId()
                 + "&scope=bot+applications.commands&permissions=" + INVITE_PERMISSIONS
-                + "&guild_id=" + guild.value() + "&disable_guild_select=true";
+                + "&guild_id=" + guildId.value() + "&disable_guild_select=true";
     }
 }

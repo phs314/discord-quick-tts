@@ -29,7 +29,7 @@ class EnforceGuildAllowlistServiceTest {
     void 허용_목록에_없는_서버에_초대되면_나간다() {
         allowedGuilds.add(AllowedGuild.allow(MINE, NOW));
 
-        service.checkJoinedGuild(STRANGER);
+        service.leaveIfNotAllowed(STRANGER);
 
         assertThat(joinedGuilds.left).containsExactly(STRANGER);
     }
@@ -40,7 +40,7 @@ class EnforceGuildAllowlistServiceTest {
         allowedGuilds.add(AllowedGuild.allow(FRIEND, NOW));
         joinedGuilds.joined.add(FRIEND);
 
-        service.checkJoinedGuild(FRIEND);
+        service.leaveIfNotAllowed(FRIEND);
 
         assertThat(joinedGuilds.left).isEmpty();
     }
@@ -50,8 +50,8 @@ class EnforceGuildAllowlistServiceTest {
         setting.enabled = false;
         allowedGuilds.add(AllowedGuild.allow(MINE, NOW));
 
-        service.checkJoinedGuild(STRANGER);
-        service.checkAllJoinedGuilds();
+        service.leaveIfNotAllowed(STRANGER);
+        service.leaveAllNotAllowed();
 
         assertThat(joinedGuilds.left).isEmpty();
         assertThat(allowedGuilds.findAll()).containsExactly(AllowedGuild.allow(MINE, NOW));
@@ -61,7 +61,7 @@ class EnforceGuildAllowlistServiceTest {
     void 켜질_때_꺼져_있는_동안_초대된_서버에서_나간다() {
         allowedGuilds.add(AllowedGuild.allow(MINE, NOW));
 
-        service.checkAllJoinedGuilds();
+        service.leaveAllNotAllowed();
 
         assertThat(joinedGuilds.left).containsExactly(STRANGER);
         assertThat(joinedGuilds.joined).containsExactly(MINE);
@@ -69,7 +69,7 @@ class EnforceGuildAllowlistServiceTest {
 
     @Test
     void 허용_목록이_비어_있으면_지금_있는_서버를_모두_허용한다() {
-        service.checkAllJoinedGuilds();
+        service.leaveAllNotAllowed();
 
         assertThat(joinedGuilds.left).isEmpty();
         assertThat(allowedGuilds.findAll()).extracting(AllowedGuild::guildId).containsExactly(MINE, STRANGER);

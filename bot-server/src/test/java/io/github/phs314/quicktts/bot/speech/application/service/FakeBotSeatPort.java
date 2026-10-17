@@ -14,7 +14,7 @@ class FakeBotSeatPort implements BotSeatPort {
     private final Map<GuildId, BotSeat> seats = new HashMap<>();
 
     @Override
-    public void withSeat(GuildId guildId, Consumer<BotSeat> work) {
+    public void withLockedSeat(GuildId guildId, Consumer<BotSeat> work) {
         work.accept(seats.computeIfAbsent(guildId, BotSeat::empty));
     }
 

@@ -98,23 +98,23 @@ final class WindowsForeground {
         private static final SymbolLookup KERNEL32 = SymbolLookup.libraryLookup("kernel32", Arena.global());
 
         static final MethodHandle SEND_INPUT =
-                function(USER32, "SendInput", FunctionDescriptor.of(JAVA_INT, JAVA_INT, ADDRESS, JAVA_INT));
+                downcall(USER32, "SendInput", FunctionDescriptor.of(JAVA_INT, JAVA_INT, ADDRESS, JAVA_INT));
         static final MethodHandle GET_FOREGROUND_WINDOW =
-                function(USER32, "GetForegroundWindow", FunctionDescriptor.of(ADDRESS));
+                downcall(USER32, "GetForegroundWindow", FunctionDescriptor.of(ADDRESS));
         static final MethodHandle FIND_WINDOW =
-                function(USER32, "FindWindowW", FunctionDescriptor.of(ADDRESS, ADDRESS, ADDRESS));
+                downcall(USER32, "FindWindowW", FunctionDescriptor.of(ADDRESS, ADDRESS, ADDRESS));
         static final MethodHandle GET_WINDOW_THREAD_PROCESS_ID =
-                function(USER32, "GetWindowThreadProcessId", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
+                downcall(USER32, "GetWindowThreadProcessId", FunctionDescriptor.of(JAVA_INT, ADDRESS, ADDRESS));
         static final MethodHandle ATTACH_THREAD_INPUT =
-                function(USER32, "AttachThreadInput", FunctionDescriptor.of(JAVA_INT, JAVA_INT, JAVA_INT, JAVA_INT));
+                downcall(USER32, "AttachThreadInput", FunctionDescriptor.of(JAVA_INT, JAVA_INT, JAVA_INT, JAVA_INT));
         static final MethodHandle BRING_WINDOW_TO_TOP =
-                function(USER32, "BringWindowToTop", FunctionDescriptor.of(JAVA_INT, ADDRESS));
+                downcall(USER32, "BringWindowToTop", FunctionDescriptor.of(JAVA_INT, ADDRESS));
         static final MethodHandle SET_FOREGROUND_WINDOW =
-                function(USER32, "SetForegroundWindow", FunctionDescriptor.of(JAVA_INT, ADDRESS));
+                downcall(USER32, "SetForegroundWindow", FunctionDescriptor.of(JAVA_INT, ADDRESS));
         static final MethodHandle GET_CURRENT_THREAD_ID =
-                function(KERNEL32, "GetCurrentThreadId", FunctionDescriptor.of(JAVA_INT));
+                downcall(KERNEL32, "GetCurrentThreadId", FunctionDescriptor.of(JAVA_INT));
 
-        private static MethodHandle function(SymbolLookup library, String name, FunctionDescriptor descriptor) {
+        private static MethodHandle downcall(SymbolLookup library, String name, FunctionDescriptor descriptor) {
             return LINKER.downcallHandle(library.findOrThrow(name), descriptor);
         }
     }

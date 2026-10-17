@@ -36,7 +36,7 @@ public class VoiceCommandListener extends ListenerAdapter implements DiscordSlas
         OptionData voiceOption = new OptionData(OptionType.STRING, VOICE_OPTION, "Voice to read your messages with")
                 .setNameLocalization(DiscordLocale.KOREAN, "목소리")
                 .setDescriptionLocalization(DiscordLocale.KOREAN, "내 문장을 읽어 줄 목소리");
-        manageVoiceUseCase.voices().forEach(voice -> voiceOption.addChoice(voice.label(), voice.id().value()));
+        manageVoiceUseCase.getVoices().forEach(voice -> voiceOption.addChoice(voice.label(), voice.id().value()));
 
         return Commands.slash(COMMAND_NAME, "Choose the voice that reads your quick chat messages")
                 .setNameLocalization(DiscordLocale.KOREAN, "목소리")
@@ -67,8 +67,8 @@ public class VoiceCommandListener extends ListenerAdapter implements DiscordSlas
     }
 
     private String currentVoiceMessage(DiscordUserId user) {
-        Voice current = manageVoiceUseCase.currentVoice(user);
-        String choices = manageVoiceUseCase.voices().stream()
+        Voice current = manageVoiceUseCase.getCurrentVoice(user);
+        String choices = manageVoiceUseCase.getVoices().stream()
                 .map(voice -> (voice.equals(current) ? "▶ " : "・ ") + voice.label())
                 .collect(Collectors.joining("\n"));
         return "지금 목소리: **" + current.label() + "**\n" + choices

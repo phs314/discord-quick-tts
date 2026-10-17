@@ -17,7 +17,7 @@ class FakePairingPort implements PairingPort {
     }
 
     @Override
-    public Optional<Pairing> take(PairingCode code) {
+    public Optional<Pairing> findAndDelete(PairingCode code) {
         return Optional.ofNullable(byCode.remove(code));
     }
 }

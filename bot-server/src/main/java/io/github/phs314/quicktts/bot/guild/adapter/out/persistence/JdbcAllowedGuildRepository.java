@@ -41,9 +41,9 @@ public class JdbcAllowedGuildRepository implements AllowedGuildPort {
     }
 
     @Override
-    public boolean delete(GuildId guild) {
+    public boolean delete(GuildId guildId) {
         return jdbcClient.sql("delete from allowed_guild where guild_id = :guild")
-                .param("guild", guild.value())
+                .param("guild", guildId.value())
                 .update() > 0;
     }
 }

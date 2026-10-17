@@ -31,8 +31,8 @@ final class FakeGuildPorts {
         }
 
         @Override
-        public boolean delete(GuildId guild) {
-            return byGuild.remove(guild) != null;
+        public boolean delete(GuildId guildId) {
+            return byGuild.remove(guildId) != null;
         }
     }
 
@@ -52,9 +52,9 @@ final class FakeGuildPorts {
         }
 
         @Override
-        public void leaveNotAllowed(GuildId guild) {
-            if (joined.remove(guild)) {
-                left.add(guild);
+        public void leaveWithNotice(GuildId guildId) {
+            if (joined.remove(guildId)) {
+                left.add(guildId);
             }
         }
     }
@@ -64,7 +64,7 @@ final class FakeGuildPorts {
         boolean enabled = true;
 
         @Override
-        public boolean enabled() {
+        public boolean isEnabled() {
             return enabled;
         }
     }
