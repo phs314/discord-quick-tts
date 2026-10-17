@@ -72,7 +72,7 @@ public class EdgeReadAloudEngine implements TtsEngine {
     }
 
     @Override
-    public Speech synthesize(String text, VoiceId voice) {
+    public Speech synthesize(String text, VoiceId voiceId) {
         Instant now = clock.instant();
         AudioCollector collector = new AudioCollector();
         WebSocket webSocket = null;
@@ -85,7 +85,7 @@ public class EdgeReadAloudEngine implements TtsEngine {
                     .buildAsync(connectUri(now), collector)
                     .get(TIMEOUT.toSeconds(), TimeUnit.SECONDS);
             webSocket.sendText(configMessage(now), true).join();
-            webSocket.sendText(ssmlMessage(now, voiceName(voice), text), true).join();
+            webSocket.sendText(ssmlMessage(now, voiceName(voiceId), text), true).join();
             byte[] audio = collector.result().get(TIMEOUT.toSeconds(), TimeUnit.SECONDS);
             if (audio.length == 0) {
                 throw new SpeechSynthesisException("Edge TTS 가 음성을 보내지 않았습니다.");
@@ -185,8 +185,8 @@ public class EdgeReadAloudEngine implements TtsEngine {
         return audio;
     }
 
-    private static String voiceName(VoiceId voice) {
-        return voice.value().substring(PREFIX.length());
+    private static String voiceName(VoiceId voiceId) {
+        return voiceId.value().substring(PREFIX.length());
     }
 
     private static Voice voice(String name, String label) {

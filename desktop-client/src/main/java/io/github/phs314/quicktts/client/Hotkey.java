@@ -26,7 +26,7 @@ public record Hotkey(boolean ctrl, boolean alt, boolean shift, boolean win, int 
     private static final Map<Integer, String> KEY_NAMES = keyNames();
 
     /** 문장을 치다가 잘못 눌리지 않도록, F 키가 아니면 Ctrl·Alt·Win 중 하나는 같이 눌러야 한다. */
-    public Optional<String> problem() {
+    public Optional<String> validationProblem() {
         if (ctrl || alt || win || isFunctionKey()) {
             return Optional.empty();
         }
@@ -72,7 +72,7 @@ public record Hotkey(boolean ctrl, boolean alt, boolean shift, boolean win, int 
             return Optional.empty();
         }
         Hotkey hotkey = new Hotkey(ctrl, alt, shift, win, keyCode);
-        return hotkey.problem().isEmpty() ? Optional.of(hotkey) : Optional.empty();
+        return hotkey.validationProblem().isEmpty() ? Optional.of(hotkey) : Optional.empty();
     }
 
     @Override

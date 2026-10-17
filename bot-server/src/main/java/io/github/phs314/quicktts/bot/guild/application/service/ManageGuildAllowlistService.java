@@ -28,30 +28,30 @@ public class ManageGuildAllowlistService implements ManageGuildAllowlistUseCase 
     private final Clock clock;
 
     @Override
-    public GuildAllowlistDto allowlist(DiscordUserId requester) {
+    public GuildAllowlistDto getAllowlist(DiscordUserId requester) {
         requireOwner(requester);
-        return new GuildAllowlistDto(guildAllowlistSettingPort.enabled(),
+        return new GuildAllowlistDto(guildAllowlistSettingPort.isEnabled(),
                 allowedGuildPort.findAll().stream().map(AllowedGuildDto::from).toList());
     }
 
     @Override
-    public boolean allow(DiscordUserId requester, GuildId guild) {
+    public boolean allow(DiscordUserId requester, GuildId guildId) {
         requireOwner(requester);
-        return allowedGuildPort.add(AllowedGuild.allow(guild, clock.instant()));
+        return allowedGuildPort.add(AllowedGuild.allow(guildId, clock.instant()));
     }
 
     @Override
-    public boolean disallow(DiscordUserId requester, GuildId guild) {
+    public boolean disallow(DiscordUserId requester, GuildId guildId) {
         requireOwner(requester);
-        boolean removed = allowedGuildPort.delete(guild);
-        if (!currentAllowlist().permits(guild)) {
-            joinedGuildPort.leaveNotAllowed(guild);
+        boolean removed = allowedGuildPort.delete(guildId);
+        if (!currentAllowlist().permits(guildId)) {
+            joinedGuildPort.leaveWithNotice(guildId);
         }
         return removed;
     }
 
     private GuildAllowlist currentAllowlist() {
-        return new GuildAllowlist(guildAllowlistSettingPort.enabled(),
+        return new GuildAllowlist(guildAllowlistSettingPort.isEnabled(),
                 allowedGuildPort.findAll().stream().map(AllowedGuild::guildId).collect(Collectors.toSet()));
     }
 

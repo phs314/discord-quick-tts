@@ -18,7 +18,7 @@ public class JdbcVoicePreferenceRepository implements VoicePreferencePort {
     private final JdbcClient jdbcClient;
 
     @Override
-    public Optional<VoiceId> find(DiscordUserId user) {
+    public Optional<VoiceId> findVoice(DiscordUserId user) {
         return jdbcClient.sql("select voice_id from voice_preference where discord_user_id = :user")
                 .param("user", user.value())
                 .query((rs, rowNum) -> new VoiceId(rs.getString("voice_id")))
@@ -26,11 +26,11 @@ public class JdbcVoicePreferenceRepository implements VoicePreferencePort {
     }
 
     @Override
-    public void save(DiscordUserId user, VoiceId voice) {
+    public void saveVoice(DiscordUserId user, VoiceId voiceId) {
         jdbcClient.sql("insert into voice_preference (discord_user_id, voice_id) values (:user, :voice)"
                         + " on duplicate key update voice_id = :voice")
                 .param("user", user.value())
-                .param("voice", voice.value())
+                .param("voice", voiceId.value())
                 .update();
     }
 }

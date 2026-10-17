@@ -49,7 +49,7 @@ public class UnlinkCommandListener extends ListenerAdapter implements DiscordSla
         if (!COMMAND_NAME.equals(event.getName())) {
             return;
         }
-        List<DeviceDto> devices = manageOwnDevicesUseCase.listDevices(ownerOf(event.getUser().getIdLong()));
+        List<DeviceDto> devices = manageOwnDevicesUseCase.getDevices(ownerOf(event.getUser().getIdLong()));
         if (devices.isEmpty()) {
             event.reply("연결된 PC 가 없습니다.").setEphemeral(true).queue();
             return;

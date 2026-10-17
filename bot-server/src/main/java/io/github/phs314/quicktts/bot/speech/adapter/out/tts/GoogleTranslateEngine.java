@@ -39,7 +39,7 @@ public class GoogleTranslateEngine implements TtsEngine {
     }
 
     @Override
-    public Speech synthesize(String text, VoiceId voice) {
+    public Speech synthesize(String text, VoiceId voiceId) {
         HttpRequest request = HttpRequest.newBuilder(buildUri(text, "ko"))
                 .header("User-Agent", "Mozilla/5.0")
                 .timeout(Duration.ofSeconds(10))

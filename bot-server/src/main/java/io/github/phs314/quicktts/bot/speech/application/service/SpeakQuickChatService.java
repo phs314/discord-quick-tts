@@ -37,13 +37,13 @@ public class SpeakQuickChatService implements SpeakQuickChatUseCase {
                 .orElseThrow(() -> new SpeakerNotInVoiceChannelException(command.speaker()));
 
         VoiceCatalog catalog = new VoiceCatalog(speechSynthesizerPort.voices(), speechSynthesizerPort.defaultVoice());
-        VoiceId voice = catalog.voiceFor(voicePreferencePort.find(command.speaker())).id();
-        Speech speech = speechSynthesizerPort.synthesize(text, voice);
+        VoiceId voiceId = catalog.chosenOrDefault(voicePreferencePort.findVoice(command.speaker())).id();
+        Speech speech = speechSynthesizerPort.synthesize(text, voiceId);
 
         // 같은 디스코드 서버에서는 자리 잡기와 재생 순서 넣기가 한 번에 하나씩 일어나서 다른 채널의 요청이 끼어들지 못한다.
-        botSeatPort.withSeat(channel.guildId(), seat -> {
+        botSeatPort.withLockedSeat(channel.guildId(), seat -> {
             if (!seat.isFreeFor(channel, voiceChannelLocatorPort::hasPeople)) {
-                throw inUse(seat);
+                throw inUseException(seat);
             }
             // 들어가지 못하면(권한 없음 등) 예외가 나서 자리는 그대로 남는다.
             speechPlayerPort.join(channel);
@@ -52,7 +52,7 @@ public class SpeakQuickChatService implements SpeakQuickChatUseCase {
         });
     }
 
-    private VoiceChannelInUseException inUse(BotSeat seat) {
+    private VoiceChannelInUseException inUseException(BotSeat seat) {
         VoiceChannel inUse = seat.channel().orElseThrow();
         return new VoiceChannelInUseException(voiceChannelLocatorPort.findDetails(inUse)
                 .orElseGet(() -> new VoiceChannelDetails(inUse, "", null, "알 수 없음")));

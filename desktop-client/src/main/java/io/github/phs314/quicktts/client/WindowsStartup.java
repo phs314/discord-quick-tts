@@ -44,15 +44,15 @@ final class WindowsStartup {
     }
 
     boolean isEnabled() {
-        return reg("query", RUN_KEY, "/v", VALUE_NAME);
+        return runReg("query", RUN_KEY, "/v", VALUE_NAME);
     }
 
     /** @return 바꾸는 데 성공했으면 true */
     boolean setEnabled(boolean enabled) {
         if (enabled) {
-            return reg("add", RUN_KEY, "/v", VALUE_NAME, "/t", "REG_SZ", "/d", quoted(exe), "/f");
+            return runReg("add", RUN_KEY, "/v", VALUE_NAME, "/t", "REG_SZ", "/d", quoted(exe), "/f");
         }
-        return reg("delete", RUN_KEY, "/v", VALUE_NAME, "/f");
+        return runReg("delete", RUN_KEY, "/v", VALUE_NAME, "/f");
     }
 
     private static String quoted(Path path) {
@@ -60,7 +60,7 @@ final class WindowsStartup {
         return value.contains(" ") ? "\\\"" + value + "\\\"" : value;
     }
 
-    private static boolean reg(String... args) {
+    private static boolean runReg(String... args) {
         List<String> command = new ArrayList<>();
         command.add("reg");
         command.addAll(List.of(args));

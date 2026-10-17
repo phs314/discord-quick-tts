@@ -7,7 +7,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import io.github.phs314.quicktts.bot.device.domain.InvalidPairingCodeException;
 import io.github.phs314.quicktts.bot.shared.adapter.in.web.ApiExceptionHandler;
 import io.github.phs314.quicktts.common.ApiErrorCode;
-import io.github.phs314.quicktts.common.QuickChatApi;
+import io.github.phs314.quicktts.common.QuickTtsApi;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -24,7 +24,7 @@ class DeviceControllerTest {
                 .setControllerAdvice(new ApiExceptionHandler())
                 .build();
 
-        mockMvc.perform(post(QuickChatApi.DEVICES_PATH)
+        mockMvc.perform(post(QuickTtsApi.DEVICES_PATH)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"pairingCode\":\"ABCD-EFGH\",\"deviceName\":\"내 PC\"}"))
                 .andExpect(status().isBadRequest())

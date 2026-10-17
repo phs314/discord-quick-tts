@@ -16,7 +16,7 @@ public class ManageOwnDevicesService implements ManageOwnDevicesUseCase {
     private final DevicePort devicePort;
 
     @Override
-    public List<DeviceDto> listDevices(DiscordUserId owner) {
+    public List<DeviceDto> getDevices(DiscordUserId owner) {
         return devicePort.findByOwner(owner).stream().map(DeviceDto::from).toList();
     }
 

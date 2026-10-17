@@ -6,7 +6,7 @@ import io.github.phs314.quicktts.bot.device.domain.vo.DeviceToken;
 import io.github.phs314.quicktts.bot.device.domain.vo.PairingCode;
 import io.github.phs314.quicktts.common.DeviceRegistrationRequest;
 import io.github.phs314.quicktts.common.DeviceRegistrationResponse;
-import io.github.phs314.quicktts.common.QuickChatApi;
+import io.github.phs314.quicktts.common.QuickTtsApi;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -23,7 +23,7 @@ public class DeviceController {
 
     private final RegisterDeviceUseCase registerDeviceUseCase;
 
-    @PostMapping(QuickChatApi.DEVICES_PATH)
+    @PostMapping(QuickTtsApi.DEVICES_PATH)
     @ResponseStatus(HttpStatus.CREATED)
     public DeviceRegistrationResponse register(@RequestBody DeviceRegistrationRequest request) {
         DeviceToken token = registerDeviceUseCase.register(

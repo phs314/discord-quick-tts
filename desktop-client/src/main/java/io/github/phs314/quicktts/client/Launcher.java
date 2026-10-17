@@ -16,7 +16,7 @@ public final class Launcher {
         if (instance == null) {
             return;
         }
-        QuickChatApp.singleInstance = instance;
-        Application.launch(QuickChatApp.class, args);
+        QuickTtsApp.singleInstance = instance;
+        Application.launch(QuickTtsApp.class, args);
     }
 }

@@ -14,7 +14,7 @@ public class PropertiesGuildAllowlistSetting implements GuildAllowlistSettingPor
     private final GuildAllowlistProperties properties;
 
     @Override
-    public boolean enabled() {
+    public boolean isEnabled() {
         return properties.enabled();
     }
 }

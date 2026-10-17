@@ -16,9 +16,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class JdaJoinedGuilds implements JoinedGuildPort {
+public class JdaJoinedGuild implements JoinedGuildPort {
 
-    private static final Logger log = LoggerFactory.getLogger(JdaJoinedGuilds.class);
+    private static final Logger log = LoggerFactory.getLogger(JdaJoinedGuild.class);
 
     private final JDA jda;
 
@@ -28,7 +28,7 @@ public class JdaJoinedGuilds implements JoinedGuildPort {
     }
 
     @Override
-    public void leaveNotAllowed(GuildId guildId) {
+    public void leaveWithNotice(GuildId guildId) {
         Guild guild = jda.getGuildById(guildId.value());
         if (guild == null) {
             return;
@@ -40,7 +40,8 @@ public class JdaJoinedGuilds implements JoinedGuildPort {
             return;
         }
         // 안내가 실패해도 나가는 건 해야 하므로 성공, 실패 모두 나간다.
-        channel.sendMessage(notice(guild)).queue(sent -> guild.leave().queue(), error -> guild.leave().queue());
+        channel.sendMessage(notice(guild))
+                .queue(sent -> guild.leave().queue(), error -> guild.leave().queue());
     }
 
     /** 시스템 메시지 채널, 없으면 기본 채널. 봇이 글을 쓸 수 없으면 null. */

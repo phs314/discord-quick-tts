@@ -3,7 +3,7 @@ package io.github.phs314.quicktts.common;
 /**
  * 데스크톱 클라이언트와 봇 서버가 함께 쓰는 API 약속.
  */
-public final class QuickChatApi {
+public final class QuickTtsApi {
 
     /**
      * 모든 경로 앞에 붙는 버전. 배포된 클라이언트가 깨지는 방식으로 요청·응답 모양을 바꿀 때만 올리고,
@@ -12,7 +12,7 @@ public final class QuickChatApi {
     public static final String VERSION_PREFIX = "/api/v1";
 
     /** quick chat 문장을 보내는 엔드포인트 경로. 기기 토큰이 필요하다. */
-    public static final String PATH = VERSION_PREFIX + "/quick-chat";
+    public static final String QUICK_CHAT_PATH = VERSION_PREFIX + "/quick-chat";
 
     /** 지금 quick chat 을 보내면 어느 음성 채널에서 읽힐지 알려 주는 경로. 기기 토큰이 필요하고, 음성 채널에 없으면 204. */
     public static final String MY_VOICE_CHANNEL_PATH = VERSION_PREFIX + "/me/voice-channel";
@@ -26,6 +26,6 @@ public final class QuickChatApi {
     /** 한 번에 읽어 줄 수 있는 최대 글자 수. */
     public static final int MAX_TEXT_LENGTH = 200;
 
-    private QuickChatApi() {
+    private QuickTtsApi() {
     }
 }

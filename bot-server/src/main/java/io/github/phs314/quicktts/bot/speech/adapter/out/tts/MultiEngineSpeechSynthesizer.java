@@ -44,26 +44,26 @@ public class MultiEngineSpeechSynthesizer implements SpeechSynthesizerPort {
     }
 
     @Override
-    public Speech synthesize(SpokenText text, VoiceId voice) {
+    public Speech synthesize(SpokenText text, VoiceId voiceId) {
         try {
-            return engineOf(voice).synthesize(text.text(), voice);
+            return engineOf(voiceId).synthesize(text.text(), voiceId);
         } catch (SpeechSynthesisException e) {
-            if (voice.equals(GoogleTranslateEngine.VOICE_ID) || !offers(GoogleTranslateEngine.VOICE_ID)) {
+            if (voiceId.equals(GoogleTranslateEngine.VOICE_ID) || !offers(GoogleTranslateEngine.VOICE_ID)) {
                 throw e;
             }
-            log.warn("{} 목소리로 읽지 못해 Google 번역 목소리로 대신 읽습니다.", voice.value(), e);
+            log.warn("{} 목소리로 읽지 못해 Google 번역 목소리로 대신 읽습니다.", voiceId.value(), e);
             return engineOf(GoogleTranslateEngine.VOICE_ID).synthesize(text.text(), GoogleTranslateEngine.VOICE_ID);
         }
     }
 
-    private TtsEngine engineOf(VoiceId voice) {
+    private TtsEngine engineOf(VoiceId voiceId) {
         return engines.stream()
-                .filter(engine -> engine.offers(voice))
+                .filter(engine -> engine.offers(voiceId))
                 .findFirst()
-                .orElseThrow(() -> new SpeechSynthesisException("이 목소리를 낼 수 있는 엔진이 없습니다: " + voice.value()));
+                .orElseThrow(() -> new SpeechSynthesisException("이 목소리를 낼 수 있는 엔진이 없습니다: " + voiceId.value()));
     }
 
-    private boolean offers(VoiceId voice) {
-        return engines.stream().anyMatch(engine -> engine.offers(voice));
+    private boolean offers(VoiceId voiceId) {
+        return engines.stream().anyMatch(engine -> engine.offers(voiceId));
     }
 }

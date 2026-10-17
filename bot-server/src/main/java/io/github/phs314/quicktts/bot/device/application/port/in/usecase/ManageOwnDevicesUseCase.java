@@ -10,7 +10,7 @@ import java.util.List;
  */
 public interface ManageOwnDevicesUseCase {
 
-    List<DeviceDto> listDevices(DiscordUserId owner);
+    List<DeviceDto> getDevices(DiscordUserId owner);
 
     /** 그 사용자의 기기가 아니거나 이미 해제됐으면 false. */
     boolean unlink(DiscordUserId owner, DeviceId id);

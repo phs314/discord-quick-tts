@@ -16,9 +16,9 @@ interface TtsEngine {
     /**
      * @throws io.github.phs314.quicktts.bot.speech.application.exception.SpeechSynthesisException 음성 생성에 실패했을 때
      */
-    Speech synthesize(String text, VoiceId voice);
+    Speech synthesize(String text, VoiceId voiceId);
 
-    default boolean offers(VoiceId voice) {
-        return voices().stream().anyMatch(offered -> offered.id().equals(voice));
+    default boolean offers(VoiceId voiceId) {
+        return voices().stream().anyMatch(offered -> offered.id().equals(voiceId));
     }
 }

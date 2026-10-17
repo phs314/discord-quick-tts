@@ -19,19 +19,19 @@ public class ManageVoiceService implements ManageVoiceUseCase {
     private final VoicePreferencePort voicePreferencePort;
 
     @Override
-    public List<Voice> voices() {
+    public List<Voice> getVoices() {
         return speechSynthesizerPort.voices();
     }
 
     @Override
-    public Voice currentVoice(DiscordUserId user) {
-        return catalog().voiceFor(voicePreferencePort.find(user));
+    public Voice getCurrentVoice(DiscordUserId user) {
+        return catalog().chosenOrDefault(voicePreferencePort.findVoice(user));
     }
 
     @Override
     public Voice changeVoice(DiscordUserId user, VoiceId voiceId) {
         Voice voice = catalog().choose(voiceId);
-        voicePreferencePort.save(user, voice.id());
+        voicePreferencePort.saveVoice(user, voice.id());
         return voice;
     }
 

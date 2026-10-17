@@ -1,6 +1,6 @@
 # 유스케이스는 애그리거트 대신 Dto 를 돌려준다
 
-입력 포트 두 개가 애그리거트를 그대로 돌려줬습니다. `IssuePairingCodeUseCase.issue` 는 `Pairing` 을, `ManageOwnDevicesUseCase.listDevices` 는 `List<Device>` 를 돌려줘서 디스코드 리스너가 애그리거트 안을 다 볼 수 있었습니다. `/연결해제` 리스너는 쓰지도 않는 `Device.tokenHash()` 까지 볼 수 있었고, `/연결` 리스너는 도메인 상수 `Pairing.VALID_FOR` 를 직접 읽었습니다.
+입력 포트 두 개가 애그리거트를 그대로 돌려줬습니다. `IssuePairingCodeUseCase.issue` 는 `Pairing` 을, `ManageOwnDevicesUseCase.devices` 는 `List<Device>` 를 돌려줘서 디스코드 리스너가 애그리거트 안을 다 볼 수 있었습니다. `/연결해제` 리스너는 쓰지도 않는 `Device.tokenHash()` 까지 볼 수 있었고, `/연결` 리스너는 도메인 상수 `Pairing.VALID_FOR` 를 직접 읽었습니다.
 
 지금은 애그리거트에 상태를 바꾸는 메서드가 없어서 문제가 드러나지 않습니다. 하지만 메서드가 생기면 어댑터가 유스케이스를 거치지 않고 도메인을 바꿀 수 있게 되고, 그때는 애그리거트를 쓰는 어댑터가 더 많아져 고칠 곳도 늘어납니다. 고칠 곳이 두 곳일 때 규칙을 정하기로 했습니다.
 

@@ -28,14 +28,14 @@ class ManageVoiceServiceTest {
 
     @Test
     void 고른_적이_없으면_기본_목소리다() {
-        assertThat(service.currentVoice(USER)).isEqualTo(SUNHI);
+        assertThat(service.getCurrentVoice(USER)).isEqualTo(SUNHI);
     }
 
     @Test
     void 목소리를_바꾸면_다음부터_그_목소리다() {
         service.changeVoice(USER, INJOON.id());
 
-        assertThat(service.currentVoice(USER)).isEqualTo(INJOON);
+        assertThat(service.getCurrentVoice(USER)).isEqualTo(INJOON);
     }
 
     @Test
@@ -47,9 +47,9 @@ class ManageVoiceServiceTest {
 
     @Test
     void 골랐던_목소리가_목록에서_사라졌으면_기본_목소리로_읽는다() {
-        preferences.save(USER, new VoiceId("edge:사라진-목소리"));
+        preferences.saveVoice(USER, new VoiceId("edge:사라진-목소리"));
 
-        assertThat(service.currentVoice(USER)).isEqualTo(SUNHI);
+        assertThat(service.getCurrentVoice(USER)).isEqualTo(SUNHI);
     }
 
     static class FakeSynthesizer implements SpeechSynthesizerPort {
@@ -65,8 +65,8 @@ class ManageVoiceServiceTest {
         }
 
         @Override
-        public Speech synthesize(SpokenText text, VoiceId voice) {
-            return new Speech((voice.value() + ":" + text.text()).getBytes(), "txt");
+        public Speech synthesize(SpokenText text, VoiceId voiceId) {
+            return new Speech((voiceId.value() + ":" + text.text()).getBytes(), "txt");
         }
     }
 
@@ -75,13 +75,13 @@ class ManageVoiceServiceTest {
         final Map<DiscordUserId, VoiceId> byUser = new HashMap<>();
 
         @Override
-        public Optional<VoiceId> find(DiscordUserId user) {
+        public Optional<VoiceId> findVoice(DiscordUserId user) {
             return Optional.ofNullable(byUser.get(user));
         }
 
         @Override
-        public void save(DiscordUserId user, VoiceId voice) {
-            byUser.put(user, voice);
+        public void saveVoice(DiscordUserId user, VoiceId voiceId) {
+            byUser.put(user, voiceId);
         }
     }
 }

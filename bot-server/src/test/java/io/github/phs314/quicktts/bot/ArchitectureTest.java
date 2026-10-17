@@ -59,6 +59,7 @@ class ArchitectureTest {
             .adapter("tts", "..bot.speech.adapter.out.tts..")
             .adapter("discord", "..bot.speech.adapter.out.discord..")
             .adapter("persistence", "..bot.speech.adapter.out.persistence..")
+            .adapter("memory", "..bot.speech.adapter.out.memory..")
             .withOptionalLayers(true)
             // config 는 포트와 어댑터를 이어 붙이는 조립 코드라서 계층 규칙에서 뺀다.
             .ignoreDependency(resideInAPackage("..bot.config.."), alwaysTrue())
@@ -71,6 +72,7 @@ class ArchitectureTest {
             .adapter("web", "..bot.device.adapter.in.web..")
             .adapter("discord-command", "..bot.device.adapter.in.discord..")
             .adapter("persistence", "..bot.device.adapter.out.persistence..")
+            .adapter("memory", "..bot.device.adapter.out.memory..")
             .withOptionalLayers(true)
             .ignoreDependency(resideInAPackage("..bot.config.."), alwaysTrue())
             .ignoreDependency(resideInAPackage(ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES));
@@ -159,6 +161,15 @@ class ArchitectureTest {
             .that().resideInAPackage("..bot.*.application.port.out..")
             .should().beInterfaces()
             .andShould().haveSimpleNameEndingWith("Port");
+
+    /**
+     * 출력 어댑터 이름은 기술 + 포트 이름에서 Port 를 뺀 것이다. 애그리거트를 담는 저장소(persistence, memory 패키지)만
+     * 뒤에 Repository 를 붙인다 (ADR 0027). 예: {@code JdaBotOwner}, {@code JdbcDeviceRepository}
+     */
+    @ArchTest
+    static final ArchRule outboundAdaptersAreNamedAfterTheirPort = classes()
+            .that().resideInAPackage("..bot.*.adapter.out..").and().areTopLevelClasses()
+            .should(beNamedTechnologyPlusPort());
 
     /** port.in 바로 아래에는 클래스를 두지 않고 usecase, command, dto 폴더로 나눈다 (ADR 0012). */
     @ArchTest
@@ -274,6 +285,26 @@ class ArchitectureTest {
                     events.add(SimpleConditionEvent.violated(field, field.getOwner().getSimpleName() + "."
                             + field.getName() + " 의 이름은 " + expected + " 이어야 합니다."));
                 }
+            }
+        };
+    }
+
+    private static ArchCondition<JavaClass> beNamedTechnologyPlusPort() {
+        return new ArchCondition<>("be named technology + port name") {
+            @Override
+            public void check(JavaClass adapter, ConditionEvents events) {
+                String packageName = adapter.getPackageName();
+                String suffix = packageName.endsWith(".persistence") || packageName.endsWith(".memory") ? "Repository" : "";
+                adapter.getRawInterfaces().stream()
+                        .filter(port -> port.getPackageName().endsWith(".application.port.out"))
+                        .forEach(port -> {
+                            String ending = port.getSimpleName().replaceFirst("Port$", "") + suffix;
+                            String name = adapter.getSimpleName();
+                            if (!name.endsWith(ending) || name.length() == ending.length()) {
+                                events.add(SimpleConditionEvent.violated(adapter, name
+                                        + " 의 이름은 <기술>" + ending + " 이어야 합니다."));
+                            }
+                        });
             }
         };
     }

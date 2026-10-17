@@ -1,4 +1,4 @@
-package io.github.phs314.quicktts.bot.speech.adapter.out.persistence;
+package io.github.phs314.quicktts.bot.speech.adapter.out.memory;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.application.port.out.BotSeatPort;
@@ -17,7 +17,7 @@ public class InMemoryBotSeatRepository implements BotSeatPort {
     private final Map<GuildId, BotSeat> seats = new ConcurrentHashMap<>();
 
     @Override
-    public void withSeat(GuildId guildId, Consumer<BotSeat> work) {
+    public void withLockedSeat(GuildId guildId, Consumer<BotSeat> work) {
         BotSeat seat = seats.computeIfAbsent(guildId, BotSeat::empty);
         // 자리는 지우지 않으므로 디스코드 서버마다 같은 객체를 잠금으로 쓸 수 있다.
         synchronized (seat) {

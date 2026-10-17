@@ -31,7 +31,7 @@ class HotkeyTest {
     void 문장을_치다_눌릴_수_있는_조합은_쓰지_않는다() {
         assertThat(Hotkey.parse("A")).isEmpty();
         assertThat(Hotkey.parse("Shift+A")).isEmpty();
-        assertThat(new Hotkey(false, false, true, false, NativeKeyEvent.VC_SPACE).problem()).isPresent();
+        assertThat(new Hotkey(false, false, true, false, NativeKeyEvent.VC_SPACE).validationProblem()).isPresent();
     }
 
     @Test

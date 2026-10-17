@@ -80,8 +80,8 @@ class ExistingH2DatabaseMigrationTest {
                 .singleElement()
                 .satisfies(device -> assertThat(device.id().value()).isEqualTo("old-device-id"));
         var voices = new JdbcVoicePreferenceRepository(jdbc);
-        voices.save(OWNER, new VoiceId("edge:ko-KR-InJoonNeural"));
-        assertThat(voices.find(OWNER)).contains(new VoiceId("edge:ko-KR-InJoonNeural"));
+        voices.saveVoice(OWNER, new VoiceId("edge:ko-KR-InJoonNeural"));
+        assertThat(voices.findVoice(OWNER)).contains(new VoiceId("edge:ko-KR-InJoonNeural"));
     }
 
     private static String historyType(JdbcClient jdbc, String version) {

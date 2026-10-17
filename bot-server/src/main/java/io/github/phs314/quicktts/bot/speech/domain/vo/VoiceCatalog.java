@@ -33,7 +33,7 @@ public record VoiceCatalog(List<Voice> voices, VoiceId defaultVoice) {
     }
 
     /** 사용자가 고른 목소리로 읽을 목소리를 정한다. 고른 적이 없거나 목록에 없는 목소리면 기본 목소리. */
-    public Voice voiceFor(Optional<VoiceId> chosen) {
+    public Voice chosenOrDefault(Optional<VoiceId> chosen) {
         return chosen.flatMap(this::find).orElseGet(() -> find(defaultVoice).orElseThrow());
     }
 }

@@ -1,7 +1,7 @@
 package io.github.phs314.quicktts.client;
 
 import com.github.kwhat.jnativehook.NativeHookException;
-import io.github.phs314.quicktts.common.QuickChatApi;
+import io.github.phs314.quicktts.common.QuickTtsApi;
 import java.util.Optional;
 import java.util.concurrent.CompletionException;
 import javafx.application.Application;
@@ -10,8 +10,8 @@ import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.TextField;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
@@ -22,10 +22,10 @@ import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
 /**
- * 전역 단축키로 화면 아래쪽 가운데에 띄우는 quick chat 입력 위젯.
+ * QuickTTS 트레이 앱. 전역 단축키로 화면 아래쪽 가운데에 quick chat 입력 위젯을 띄운다.
  * Enter 로 보내고 Esc 나 다른 창 클릭으로 닫는다.
  */
-public class QuickChatApp extends Application {
+public class QuickTtsApp extends Application {
 
     /** 막대 둘레의 그림자 여백. */
     private static final double SHADOW_MARGIN = 24;
@@ -39,7 +39,7 @@ public class QuickChatApp extends Application {
 
     private final TrayMenu trayMenu = new TrayMenu();
     private ClientConfig config;
-    private QuickChatClient client;
+    private QuickTtsClient client;
     private LocalBotServer localBotServer;
     private GlobalHotkey hotkey;
     private Stage stage;
@@ -56,7 +56,7 @@ public class QuickChatApp extends Application {
         config = ClientConfig.load();
         // exe 로 실행했고 서버가 이 PC 면, 봇 서버도 같이 켠다.
         localBotServer = LocalBotServer.startIfNeeded(config.serverUrl());
-        client = new QuickChatClient(config.serverUrl());
+        client = new QuickTtsClient(config.serverUrl());
         if (!config.isRegistered() && !pairDevice()) {
             Platform.exit();
             return;
@@ -158,11 +158,11 @@ public class QuickChatApp extends Application {
 
     private void refreshVoiceChannel() {
         inputBar.showChecking();
-        client.myVoiceChannel(config.deviceToken()).whenComplete((channel, failure) -> Platform.runLater(() -> {
+        client.findMyVoiceChannel(config.deviceToken()).whenComplete((channel, failure) -> Platform.runLater(() -> {
             Throwable cause = failure instanceof CompletionException ? failure.getCause() : failure;
             if (failure == null) {
                 inputBar.showChannel(channel);
-            } else if (cause instanceof QuickChatClient.DeviceUnauthorizedException) {
+            } else if (cause instanceof QuickTtsClient.DeviceUnauthorizedException) {
                 hide();
                 trayMenu.showError(cause.getMessage());
                 forgetDeviceAndPairAgain();
@@ -183,18 +183,18 @@ public class QuickChatApp extends Application {
             hide();
             return;
         }
-        if (text.length() > QuickChatApi.MAX_TEXT_LENGTH) {
-            trayMenu.showError("문장이 너무 깁니다. (최대 " + QuickChatApi.MAX_TEXT_LENGTH + "자)");
+        if (text.length() > QuickTtsApi.MAX_TEXT_LENGTH) {
+            trayMenu.showError("문장이 너무 깁니다. (최대 " + QuickTtsApi.MAX_TEXT_LENGTH + "자)");
             return;
         }
         hide();
         client.send(config.deviceToken(), text).exceptionally(failure -> {
             Throwable cause = failure instanceof CompletionException ? failure.getCause() : failure;
-            String message = cause instanceof QuickChatClient.QuickChatException
+            String message = cause instanceof QuickTtsClient.QuickTtsClientException
                     ? cause.getMessage()
                     : "봇 서버에 연결하지 못했습니다.";
             trayMenu.showError(message);
-            if (cause instanceof QuickChatClient.DeviceUnauthorizedException) {
+            if (cause instanceof QuickTtsClient.DeviceUnauthorizedException) {
                 Platform.runLater(this::forgetDeviceAndPairAgain);
             }
             return null;
@@ -209,7 +209,7 @@ public class QuickChatApp extends Application {
         changingHotkey = true;
         HotkeyDialog dialog = new HotkeyDialog(config.hotkey());
         useAppIcon(dialog);
-        hotkey.startRecording(dialog::pressed);
+        hotkey.startRecording(dialog::onPressed);
         try {
             dialog.showAndWait().ifPresent(newHotkey -> {
                 config = config.withHotkey(newHotkey);
@@ -241,10 +241,10 @@ public class QuickChatApp extends Application {
                 return false;
             }
             try {
-                config = config.withDeviceToken(client.register(code.get().strip()));
+                config = config.withDeviceToken(client.registerDevice(code.get().strip()));
                 config.save();
                 return true;
-            } catch (QuickChatClient.QuickChatException e) {
+            } catch (QuickTtsClient.QuickTtsClientException e) {
                 error = e.getMessage();
             }
         }
@@ -273,6 +273,6 @@ public class QuickChatApp extends Application {
     /** 대화 상자 제목 표시줄과 작업 표시줄에 앱 아이콘을 보여 준다. */
     private static void useAppIcon(Dialog<?> dialog) {
         Stage window = (Stage) dialog.getDialogPane().getScene().getWindow();
-        window.getIcons().add(new Image(QuickChatApp.class.getResource("app-icon.png").toExternalForm()));
+        window.getIcons().add(new Image(QuickTtsApp.class.getResource("app-icon.png").toExternalForm()));
     }
 }

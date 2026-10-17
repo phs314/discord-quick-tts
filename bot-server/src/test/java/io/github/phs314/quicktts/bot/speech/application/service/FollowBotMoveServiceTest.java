@@ -48,6 +48,6 @@ class FollowBotMoveServiceTest {
     }
 
     private void sitIn(VoiceChannel channel) {
-        seats.withSeat(GUILD, seat -> seat.sitIn(channel, other -> false));
+        seats.withLockedSeat(GUILD, seat -> seat.sitIn(channel, other -> false));
     }
 }

@@ -34,7 +34,7 @@ class ManageGuildAllowlistServiceTest {
         assertThat(service.allow(OWNER, FRIEND)).isTrue();
         assertThat(service.allow(OWNER, FRIEND)).isFalse();
 
-        var allowlist = service.allowlist(OWNER);
+        var allowlist = service.getAllowlist(OWNER);
         assertThat(allowlist.enabled()).isTrue();
         assertThat(allowlist.guilds()).containsExactly(new AllowedGuildDto(FRIEND, NOW));
     }
@@ -43,7 +43,7 @@ class ManageGuildAllowlistServiceTest {
     void 봇_주인이_아니면_아무것도_할_수_없다() {
         assertThatThrownBy(() -> service.allow(SOMEONE, FRIEND)).isInstanceOf(NotBotOwnerException.class);
         assertThatThrownBy(() -> service.disallow(SOMEONE, MINE)).isInstanceOf(NotBotOwnerException.class);
-        assertThatThrownBy(() -> service.allowlist(SOMEONE)).isInstanceOf(NotBotOwnerException.class);
+        assertThatThrownBy(() -> service.getAllowlist(SOMEONE)).isInstanceOf(NotBotOwnerException.class);
         assertThat(allowedGuilds.byGuild).isEmpty();
         assertThat(joinedGuilds.left).isEmpty();
     }
@@ -76,6 +76,6 @@ class ManageGuildAllowlistServiceTest {
         service.disallow(OWNER, MINE);
 
         assertThat(joinedGuilds.left).isEmpty();
-        assertThat(service.allowlist(OWNER).enabled()).isFalse();
+        assertThat(service.getAllowlist(OWNER).enabled()).isFalse();
     }
 }

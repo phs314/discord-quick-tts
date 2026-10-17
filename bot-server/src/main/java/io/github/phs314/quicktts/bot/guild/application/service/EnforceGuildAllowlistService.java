@@ -24,9 +24,9 @@ public class EnforceGuildAllowlistService implements EnforceGuildAllowlistUseCas
     private final Clock clock;
 
     @Override
-    public void checkJoinedGuild(GuildId guild) {
-        if (!currentAllowlist().permits(guild)) {
-            joinedGuildPort.leaveNotAllowed(guild);
+    public void leaveIfNotAllowed(GuildId guildId) {
+        if (!currentAllowlist().permits(guildId)) {
+            joinedGuildPort.leaveWithNotice(guildId);
         }
     }
 
@@ -36,18 +36,18 @@ public class EnforceGuildAllowlistService implements EnforceGuildAllowlistUseCas
      */
     @Override
     @Transactional
-    public void checkAllJoinedGuilds() {
+    public void leaveAllNotAllowed() {
         GuildAllowlist allowlist = currentAllowlist();
         List<GuildId> joined = joinedGuildPort.joinedGuilds();
         if (allowlist.needsFirstFill()) {
-            joined.forEach(guild -> allowedGuildPort.add(AllowedGuild.allow(guild, clock.instant())));
+            joined.forEach(guildId -> allowedGuildPort.add(AllowedGuild.allow(guildId, clock.instant())));
             return;
         }
-        allowlist.notPermitted(joined).forEach(joinedGuildPort::leaveNotAllowed);
+        allowlist.notPermitted(joined).forEach(joinedGuildPort::leaveWithNotice);
     }
 
     private GuildAllowlist currentAllowlist() {
-        return new GuildAllowlist(guildAllowlistSettingPort.enabled(),
+        return new GuildAllowlist(guildAllowlistSettingPort.isEnabled(),
                 allowedGuildPort.findAll().stream().map(AllowedGuild::guildId).collect(Collectors.toSet()));
     }
 }
