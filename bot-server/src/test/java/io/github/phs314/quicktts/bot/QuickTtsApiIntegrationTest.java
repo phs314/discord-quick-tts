@@ -11,14 +11,14 @@ import io.github.phs314.quicktts.bot.guild.application.port.out.JoinedGuildPort;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.ManageVoiceUseCase;
+import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechPlayerPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechSynthesizerPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.FakeVoiceChannelLocatorPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocatorPort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
-import io.github.phs314.quicktts.bot.support.FakeSpeechSynthesizer;
-import io.github.phs314.quicktts.bot.support.FakeVoiceChannels;
-import io.github.phs314.quicktts.bot.support.RecordingSpeechPlayer;
 import io.github.phs314.quicktts.common.ApiErrorCode;
 import io.github.phs314.quicktts.common.DeviceRegistrationRequest;
 import io.github.phs314.quicktts.common.DeviceRegistrationResponse;
@@ -55,9 +55,9 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 @MockitoBean(types = {JDA.class, DiscordCommandRegistrar.class, BotOwnerPort.class, JoinedGuildPort.class})
 class QuickTtsApiIntegrationTest {
 
-    private static final FakeVoiceChannels VOICE_CHANNELS = new FakeVoiceChannels();
-    private static final RecordingSpeechPlayer PLAYER = new RecordingSpeechPlayer();
-    private static final FakeSpeechSynthesizer TTS = new FakeSpeechSynthesizer();
+    private static final FakeVoiceChannelLocatorPort VOICE_CHANNELS = new FakeVoiceChannelLocatorPort();
+    private static final FakeSpeechPlayerPort PLAYER = new FakeSpeechPlayerPort();
+    private static final FakeSpeechSynthesizerPort TTS = new FakeSpeechSynthesizerPort();
 
     /** 테스트끼리 봇 자리, 목소리 설정, 기기가 섞이지 않게 사용자, 디스코드 서버, 채널마다 새 ID 를 쓴다. */
     private static final AtomicLong IDS = new AtomicLong(1_000);
@@ -154,7 +154,7 @@ class QuickTtsApiIntegrationTest {
         String token = registerDevice(user);
         VoiceChannel channel = newChannel(newGuild());
         VOICE_CHANNELS.enter(user, details(channel, "게임"));
-        manageVoiceUseCase.changeVoice(user, FakeSpeechSynthesizer.INJOON.id());
+        manageVoiceUseCase.changeVoice(user, FakeSpeechSynthesizerPort.INJOON.id());
 
         sendQuickChat(token, "안녕").expectStatus().isAccepted();
 

@@ -3,6 +3,8 @@ package io.github.phs314.quicktts.bot.device.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import io.github.phs314.quicktts.bot.device.application.port.out.FakeDevicePort;
+import io.github.phs314.quicktts.bot.device.application.port.out.FakePairingPort;
 import io.github.phs314.quicktts.bot.device.domain.InvalidPairingCodeException;
 import io.github.phs314.quicktts.bot.device.domain.Pairing;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
@@ -52,15 +54,15 @@ class RegisterDeviceServiceTest {
 
         assertThatThrownBy(() -> serviceAt(afterExpiry).register(pairing.code(), PC))
                 .isInstanceOf(InvalidPairingCodeException.class);
-        assertThat(devices.byHash).isEmpty();
+        assertThat(devices.saved()).isEmpty();
     }
 
     @Test
     void 서버에는_토큰_원문이_아니라_해시만_저장한다() {
         DeviceToken token = serviceAt(NOW).register(issuedPairing().code(), PC);
 
-        assertThat(devices.byHash).containsOnlyKeys(token.hash());
-        assertThat(devices.byHash.values().stream().map(device -> device.tokenHash().value()))
+        assertThat(devices.saved()).containsOnlyKeys(token.hash());
+        assertThat(devices.saved().values().stream().map(device -> device.tokenHash().value()))
                 .doesNotContain(token.value());
     }
 

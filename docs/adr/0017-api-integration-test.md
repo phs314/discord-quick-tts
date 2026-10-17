@@ -6,8 +6,8 @@
 
 - `QuickTtsApiIntegrationTest` 가 `@SpringBootTest(webEnvironment = RANDOM_PORT)` 로 봇 서버를 통째로 띄우고, 데스크톱 클라이언트처럼 HTTP 로 `/api/v1` 을 부릅니다. 요청·응답 본문은 클라이언트와 같은 common DTO 를 씁니다.
 - 컨트롤러, 서비스, 도메인, 저장소, Flyway 는 실제 것을 씁니다. 바꾸는 것은 바깥 세계에 닿는 출력 포트뿐입니다.
-  - 디스코드: `VoiceChannelLocatorPort`, `SpeechPlayerPort` 는 `support` 의 대역(`FakeVoiceChannels`, `RecordingSpeechPlayer`)으로 바꿉니다. 소리는 나지 않고, 봇이 들어간 채널과 읽은 문장을 글로 남깁니다.
-  - TTS 엔진: `SpeechSynthesizerPort` 는 `FakeSpeechSynthesizer` 로 바꿉니다. Edge, Google 번역을 부르지 않습니다.
+  - 디스코드: `VoiceChannelLocatorPort`, `SpeechPlayerPort` 는 서비스 테스트와 같은 대역(`FakeVoiceChannelLocatorPort`, `FakeSpeechPlayerPort`)으로 바꿉니다. 소리는 나지 않고, 봇이 들어간 채널과 읽은 문장을 글로 남깁니다.
+  - TTS 엔진: `SpeechSynthesizerPort` 는 `FakeSpeechSynthesizerPort` 로 바꿉니다. Edge, Google 번역을 부르지 않습니다.
   - JDA 는 Mockito 빈 껍데기로 바꿔 디스코드에 로그인하지 않게 하고, 켜질 때 디스코드를 부르는 `DiscordCommandRegistrar`, `BotOwnerPort`, `JoinedGuildPort` 도 함께 바꿉니다.
 - 디스코드 `/연결`, `/연결해제`, `/목소리` 로 할 일은 그 명령이 부르는 입력 포트를 테스트가 직접 부릅니다.
 - DB 는 PC 서버와 같은 H2(MySQL 모드)를 메모리로 띄웁니다. MySQL 에서 SQL 이 도는지는 저장소 테스트가 이미 양쪽에서 확인합니다(ADR 0016).

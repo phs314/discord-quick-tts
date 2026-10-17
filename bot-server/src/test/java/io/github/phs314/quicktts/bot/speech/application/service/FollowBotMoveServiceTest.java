@@ -3,6 +3,8 @@ package io.github.phs314.quicktts.bot.speech.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
+import io.github.phs314.quicktts.bot.speech.application.port.out.FakeBotSeatPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -13,7 +15,7 @@ class FollowBotMoveServiceTest {
     private static final VoiceChannel GENERAL = new VoiceChannel(GUILD, 2L);
     private static final VoiceChannel GAME = new VoiceChannel(GUILD, 3L);
 
-    private final RecordingSpeechPlayer player = new RecordingSpeechPlayer();
+    private final FakeSpeechPlayerPort player = new FakeSpeechPlayerPort();
     private final FakeBotSeatPort seats = new FakeBotSeatPort();
     private final FollowBotMoveService service = new FollowBotMoveService(seats, player);
 
@@ -24,7 +26,7 @@ class FollowBotMoveServiceTest {
         service.followBotMove(GENERAL, Optional.of(GAME));
 
         assertThat(seats.channelOf(GUILD)).contains(GAME);
-        assertThat(player.actions).isEmpty();
+        assertThat(player.actions()).isEmpty();
     }
 
     @Test
@@ -34,7 +36,7 @@ class FollowBotMoveServiceTest {
         service.followBotMove(GENERAL, Optional.empty());
 
         assertThat(seats.channelOf(GUILD)).isEmpty();
-        assertThat(player.actions).containsExactly("leave");
+        assertThat(player.actions()).containsExactly("leave:1");
     }
 
     @Test
@@ -44,7 +46,7 @@ class FollowBotMoveServiceTest {
         service.followBotMove(GENERAL, Optional.empty());
 
         assertThat(seats.channelOf(GUILD)).contains(GAME);
-        assertThat(player.actions).isEmpty();
+        assertThat(player.actions()).isEmpty();
     }
 
     private void sitIn(VoiceChannel channel) {

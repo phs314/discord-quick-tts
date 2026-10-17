@@ -1,7 +1,6 @@
-package io.github.phs314.quicktts.bot.support;
+package io.github.phs314.quicktts.bot.speech.application.port.out;
 
 import io.github.phs314.quicktts.bot.speech.application.exception.SpeechSynthesisException;
-import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizerPort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.SpokenText;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
@@ -10,9 +9,9 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 /**
- * API 통합 테스트에서 TTS 엔진 대신 쓰는 대역. 바깥 서비스를 부르지 않고 "목소리:문장" 글을 음성 바이트로 돌려준다.
+ * TTS 엔진 대신 쓰는 대역. 바깥 서비스를 부르지 않고 "목소리:문장" 글을 음성 바이트로 돌려준다. 기본 목소리는 선희다.
  */
-public class FakeSpeechSynthesizer implements SpeechSynthesizerPort {
+public class FakeSpeechSynthesizerPort implements SpeechSynthesizerPort {
 
     public static final Voice SUNHI = new Voice(new VoiceId("fake:sunhi"), "선희");
     public static final Voice INJOON = new Voice(new VoiceId("fake:injoon"), "인준");

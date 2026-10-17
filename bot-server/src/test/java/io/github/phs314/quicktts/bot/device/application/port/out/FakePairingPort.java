@@ -1,15 +1,20 @@
-package io.github.phs314.quicktts.bot.device.application.service;
+package io.github.phs314.quicktts.bot.device.application.port.out;
 
-import io.github.phs314.quicktts.bot.device.application.port.out.PairingPort;
 import io.github.phs314.quicktts.bot.device.domain.Pairing;
 import io.github.phs314.quicktts.bot.device.domain.vo.PairingCode;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-class FakePairingPort implements PairingPort {
+/** 연결 코드 저장소 대신 쓰는 메모리 대역. */
+public class FakePairingPort implements PairingPort {
 
-    final Map<PairingCode, Pairing> byCode = new HashMap<>();
+    private final Map<PairingCode, Pairing> byCode = new HashMap<>();
+
+    /** 아직 쓰지 않은 연결 코드들. */
+    public Map<PairingCode, Pairing> saved() {
+        return Map.copyOf(byCode);
+    }
 
     @Override
     public void save(Pairing pairing) {
