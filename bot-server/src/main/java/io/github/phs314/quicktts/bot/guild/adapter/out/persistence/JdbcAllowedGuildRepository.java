@@ -5,6 +5,8 @@ import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -28,7 +30,7 @@ public class JdbcAllowedGuildRepository implements AllowedGuildPort {
     }
 
     @Override
-    public boolean add(AllowedGuild allowedGuild) {
+    public boolean saveIfAbsent(AllowedGuild allowedGuild) {
         try {
             jdbcClient.sql("insert into allowed_guild (guild_id, allowed_at) values (:guild, :allowedAt)")
                     .param("guild", allowedGuild.guildId().value())
@@ -38,6 +40,23 @@ public class JdbcAllowedGuildRepository implements AllowedGuildPort {
         } catch (DuplicateKeyException e) {
             return false;
         }
+    }
+
+    /** 문장 하나로 넣어서, 하나라도 실패하면 DB 가 모두 되돌린다. */
+    @Override
+    public void saveAll(List<AllowedGuild> allowedGuilds) {
+        if (allowedGuilds.isEmpty()) {
+            return;
+        }
+        String rows = IntStream.range(0, allowedGuilds.size())
+                .mapToObj(i -> "(:guild" + i + ", :allowedAt" + i + ")")
+                .collect(Collectors.joining(", "));
+        var statement = jdbcClient.sql("insert into allowed_guild (guild_id, allowed_at) values " + rows);
+        for (int i = 0; i < allowedGuilds.size(); i++) {
+            statement = statement.param("guild" + i, allowedGuilds.get(i).guildId().value())
+                    .param("allowedAt" + i, Timestamp.from(allowedGuilds.get(i).allowedAt()));
+        }
+        statement.update();
     }
 
     @Override

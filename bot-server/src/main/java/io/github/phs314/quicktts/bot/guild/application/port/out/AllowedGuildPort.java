@@ -13,7 +13,10 @@ public interface AllowedGuildPort {
     List<AllowedGuild> findAll();
 
     /** @return 새로 넣었으면 true, 이미 있었으면 false */
-    boolean add(AllowedGuild allowedGuild);
+    boolean saveIfAbsent(AllowedGuild allowedGuild);
+
+    /** 모두 함께 넣거나, 하나라도 실패하면 하나도 넣지 않는다. */
+    void saveAll(List<AllowedGuild> allowedGuilds);
 
     /** @return 지웠으면 true, 원래 없었으면 false */
     boolean delete(GuildId guildId);

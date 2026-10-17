@@ -37,7 +37,7 @@ public class ManageGuildAllowlistService implements ManageGuildAllowlistUseCase 
     @Override
     public boolean allow(DiscordUserId requester, GuildId guildId) {
         requireOwner(requester);
-        return allowedGuildPort.add(AllowedGuild.allow(guildId, clock.instant()));
+        return allowedGuildPort.saveIfAbsent(AllowedGuild.allow(guildId, clock.instant()));
     }
 
     @Override
