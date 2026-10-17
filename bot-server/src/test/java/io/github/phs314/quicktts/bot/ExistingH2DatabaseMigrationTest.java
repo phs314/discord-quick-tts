@@ -37,7 +37,7 @@ class ExistingH2DatabaseMigrationTest {
         assertThat(historyType(jdbc, "2")).isEqualTo("SQL");
         assertKeepsDeviceAndVoice(jdbc);
         var allowlist = new JdbcAllowedGuildRepository(jdbc);
-        allowlist.add(AllowedGuild.allow(GUILD, Instant.parse("2026-10-11T00:00:00Z")));
+        allowlist.saveIfAbsent(AllowedGuild.allow(GUILD, Instant.parse("2026-10-11T00:00:00Z")));
         assertThat(allowlist.findAll()).extracting(AllowedGuild::guildId).containsExactly(GUILD);
     }
 

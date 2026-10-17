@@ -8,11 +8,11 @@ import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
 import io.github.phs314.quicktts.bot.guild.domain.vo.GuildAllowlist;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import java.time.Clock;
+import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,16 +31,16 @@ public class EnforceGuildAllowlistService implements EnforceGuildAllowlistUseCas
     }
 
     /**
-     * 처음 채울 때는 디스코드 서버마다 한 번씩 DB 에 쓰므로 한 트랜잭션으로 묶는다 (ADR 0009).
-     * 중간에 실패해 일부만 남으면 다음에 켤 때 목록이 비어 있지 않아서 나머지 디스코드 서버에서 나가게 된다.
+     * 처음 채울 때는 봇이 들어가 있는 디스코드 서버를 한꺼번에 넣는다 (ADR 0028). 일부만 남으면 다음에 켤 때
+     * 목록이 비어 있지 않아서 나머지 디스코드 서버에서 나가게 되므로 하나씩 넣지 않는다.
      */
     @Override
-    @Transactional
     public void leaveAllNotAllowed() {
         GuildAllowlist allowlist = currentAllowlist();
         List<GuildId> joined = joinedGuildPort.joinedGuilds();
         if (allowlist.needsFirstFill()) {
-            joined.forEach(guildId -> allowedGuildPort.add(AllowedGuild.allow(guildId, clock.instant())));
+            Instant now = clock.instant();
+            allowedGuildPort.saveAll(joined.stream().map(guildId -> AllowedGuild.allow(guildId, now)).toList());
             return;
         }
         allowlist.notPermitted(joined).forEach(joinedGuildPort::leaveWithNotice);

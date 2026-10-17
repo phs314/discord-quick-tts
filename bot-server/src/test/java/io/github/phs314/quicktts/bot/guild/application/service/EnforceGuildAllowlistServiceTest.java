@@ -27,7 +27,7 @@ class EnforceGuildAllowlistServiceTest {
 
     @Test
     void 허용_목록에_없는_서버에_초대되면_나간다() {
-        allowedGuilds.add(AllowedGuild.allow(MINE, NOW));
+        allowedGuilds.saveIfAbsent(AllowedGuild.allow(MINE, NOW));
 
         service.leaveIfNotAllowed(STRANGER);
 
@@ -36,8 +36,8 @@ class EnforceGuildAllowlistServiceTest {
 
     @Test
     void 허용한_서버에_초대되면_남는다() {
-        allowedGuilds.add(AllowedGuild.allow(MINE, NOW));
-        allowedGuilds.add(AllowedGuild.allow(FRIEND, NOW));
+        allowedGuilds.saveIfAbsent(AllowedGuild.allow(MINE, NOW));
+        allowedGuilds.saveIfAbsent(AllowedGuild.allow(FRIEND, NOW));
         joinedGuilds.join(FRIEND);
 
         service.leaveIfNotAllowed(FRIEND);
@@ -48,7 +48,7 @@ class EnforceGuildAllowlistServiceTest {
     @Test
     void 허용_목록이_꺼져_있으면_어디든_남는다() {
         setting.setEnabled(false);
-        allowedGuilds.add(AllowedGuild.allow(MINE, NOW));
+        allowedGuilds.saveIfAbsent(AllowedGuild.allow(MINE, NOW));
 
         service.leaveIfNotAllowed(STRANGER);
         service.leaveAllNotAllowed();
@@ -59,7 +59,7 @@ class EnforceGuildAllowlistServiceTest {
 
     @Test
     void 켜질_때_꺼져_있는_동안_초대된_서버에서_나간다() {
-        allowedGuilds.add(AllowedGuild.allow(MINE, NOW));
+        allowedGuilds.saveIfAbsent(AllowedGuild.allow(MINE, NOW));
 
         service.leaveAllNotAllowed();
 
