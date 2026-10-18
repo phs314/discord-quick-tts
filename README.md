@@ -215,7 +215,7 @@ winget install --id WiXToolset.WiXToolset
 
 ### 새 버전 내기 (GitHub Releases)
 
-`v1.2.3` 모양의 태그를 푸시하면 **설치 파일** 워크플로가 그 버전으로 설치 파일과 압축 파일을 만들어 [Releases](https://github.com/phs314/discord-quick-tts/releases) 에 올립니다. 버전은 태그에서만 정하므로 코드를 고칠 필요가 없습니다 ([ADR 0020](docs/adr/0020-github-releases-and-update-notice.md)).
+`v1.2.3` 모양의 태그를 푸시하면 **설치 파일** 워크플로가 그 버전으로 설치 파일과 압축 파일을 만들어 [Releases](https://github.com/phs314/discord-quick-tts/releases) 에 올립니다. 버전은 태그에서만 정하므로 코드를 고칠 필요가 없습니다. 태그가 아닌 빌드는 `gradle.properties` 의 `version`(0.1.0)을 씁니다 ([ADR 0020](docs/adr/0020-github-releases-and-update-notice.md)).
 
 ```bash
 git tag v0.2.0

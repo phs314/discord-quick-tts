@@ -38,9 +38,10 @@ application {
 
 val appName = "QuickTTS"
 val serverLauncherName = "QuickTTS-Server"
-// 버전은 v1.2.3 태그를 푸시하면 설치 파일 워크플로가 -PappVersion=1.2.3 으로 넘긴다. 그 밖의 빌드는 기본값을 쓴다.
-val appVersion = providers.gradleProperty("appVersion").getOrElse("0.1.0").also {
-    require(Regex("""\d+\.\d+\.\d+""").matches(it)) { "appVersion 은 1.2.3 처럼 숫자 세 개여야 한다: $it" }
+// 버전은 모든 모듈이 같이 쓰는 project.version 이다(gradle.properties, 태그 빌드는 -Pversion=1.2.3).
+// jpackage 의 --app-version 은 숫자만 받으므로 1.2.3 모양인지 확인한다.
+val appVersion = project.version.toString().also {
+    require(Regex("""\d+\.\d+\.\d+""").matches(it)) { "version 은 1.2.3 처럼 숫자 세 개여야 한다: $it" }
 }
 val jpackageInput = layout.buildDirectory.dir("jpackage/input")
 val jpackageImage = layout.buildDirectory.dir("jpackage/image")

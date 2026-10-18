@@ -55,7 +55,7 @@ jobs:
               echo "::error title=태그 모양이 틀림::태그는 v1.2.3 처럼 v 와 숫자 세 개여야 합니다: $GITHUB_REF_NAME"
               exit 1
             fi
-            echo "APP_VERSION_ARG=-PappVersion=$version" >> "$GITHUB_ENV"
+            echo "APP_VERSION_ARG=-Pversion=$version" >> "$GITHUB_ENV"
           fi
 
       # 실패하면 WiX 오류 줄을 주석(annotation)으로 남겨 PR 의 Checks 요약에서 바로 보이게 한다.
