@@ -1,0 +1,26 @@
+# Release Drafter 는 Autolabeler 로만 쓴다 (.github/workflows/pr-labels.yml, ADR 0022).
+# PR 제목 "<이모지> [<타입>] <요약>" 의 타입과 같은 이름의 라벨을 단다.
+# 타입 목록은 scripts/check-commit-msg.sh 와 같다.
+# sync-labels: 제목을 고쳐 타입이 바뀌면 아래 목록에 있는 예전 타입 라벨은 뗀다.
+sync-labels: true
+autolabeler:
+  - labels: [init]
+    title: ['/^\S+ \[init\] /']
+  - labels: [feat]
+    title: ['/^\S+ \[feat\] /']
+  - labels: [fix]
+    title: ['/^\S+ \[fix\] /']
+  - labels: [refactor]
+    title: ['/^\S+ \[refactor\] /']
+  - labels: [test]
+    title: ['/^\S+ \[test\] /']
+  - labels: [docs]
+    title: ['/^\S+ \[docs\] /']
+  - labels: [style]
+    title: ['/^\S+ \[style\] /']
+  - labels: [chore]
+    title: ['/^\S+ \[chore\] /']
+  - labels: [remove]
+    title: ['/^\S+ \[remove\] /']
+  - labels: [deploy]
+    title: ['/^\S+ \[deploy\] /']
