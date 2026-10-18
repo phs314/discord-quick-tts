@@ -9,6 +9,7 @@ import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.application.exception.BotCannotJoinVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.exception.SpeakerNotInVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.exception.VoiceChannelInUseException;
+import io.github.phs314.quicktts.bot.speech.application.port.in.command.ChangeVoiceCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeBotSeatPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechPlayerPort;
@@ -43,7 +44,7 @@ class SpeakQuickChatServiceTest {
 
     @Test
     void 보낸_사람이_있는_음성_채널에_들어가서_그_사람이_고른_목소리로_읽어_준다() {
-        voices.changeVoice(SPEAKER, FakeSpeechSynthesizerPort.INJOON.id());
+        voices.changeVoice(new ChangeVoiceCommand(SPEAKER, FakeSpeechSynthesizerPort.INJOON.id()));
         discord.enter(SPEAKER, GENERAL);
 
         speak(SPEAKER, "안녕");

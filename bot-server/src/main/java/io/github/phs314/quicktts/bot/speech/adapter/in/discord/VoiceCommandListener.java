@@ -2,6 +2,8 @@ package io.github.phs314.quicktts.bot.speech.adapter.in.discord;
 
 import io.github.phs314.quicktts.bot.shared.adapter.in.discord.DiscordSlashCommand;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
+import io.github.phs314.quicktts.bot.speech.application.port.in.command.ChangeVoiceCommand;
+import io.github.phs314.quicktts.bot.speech.application.port.in.query.GetCurrentVoiceQuery;
 import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.ManageVoiceUseCase;
 import io.github.phs314.quicktts.bot.speech.domain.UnknownVoiceException;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
@@ -57,7 +59,8 @@ public class VoiceCommandListener extends ListenerAdapter implements DiscordSlas
             reply = currentVoiceMessage(user);
         } else {
             try {
-                Voice voice = manageVoiceUseCase.changeVoice(user, new VoiceId(chosen.getAsString()));
+                VoiceId voiceId = new VoiceId(chosen.getAsString());
+                Voice voice = manageVoiceUseCase.changeVoice(new ChangeVoiceCommand(user, voiceId));
                 reply = "목소리를 **" + voice.label() + "** 로 바꿨어요. 다음에 보내는 문장부터 이 목소리로 읽어요.";
             } catch (UnknownVoiceException e) {
                 reply = "없는 목소리예요. 목록에서 골라 주세요.";
@@ -67,7 +70,7 @@ public class VoiceCommandListener extends ListenerAdapter implements DiscordSlas
     }
 
     private String currentVoiceMessage(DiscordUserId user) {
-        Voice current = manageVoiceUseCase.getCurrentVoice(user);
+        Voice current = manageVoiceUseCase.getCurrentVoice(new GetCurrentVoiceQuery(user));
         String choices = manageVoiceUseCase.getVoices().stream()
                 .map(voice -> (voice.equals(current) ? "▶ " : "・ ") + voice.label())
                 .collect(Collectors.joining("\n"));

@@ -1,6 +1,8 @@
 package io.github.phs314.quicktts.bot.speech.adapter.in.discord;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
+import io.github.phs314.quicktts.bot.speech.application.port.in.command.FollowBotMoveCommand;
+import io.github.phs314.quicktts.bot.speech.application.port.in.command.LeaveIfEmptyCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.FollowBotMoveUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.LeaveEmptyVoiceChannelUseCase;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
@@ -38,10 +40,10 @@ public class VoiceStateListener extends ListenerAdapter {
         }
         GuildId guildId = new GuildId(event.getGuild().getIdLong());
         if (event.getMember().getIdLong() == event.getJDA().getSelfUser().getIdLong()) {
-            followBotMoveUseCase.followBotMove(toVoiceChannel(guildId, left),
-                    Optional.ofNullable(event.getChannelJoined()).map(joined -> toVoiceChannel(guildId, joined)));
+            followBotMoveUseCase.followBotMove(new FollowBotMoveCommand(toVoiceChannel(guildId, left),
+                    Optional.ofNullable(event.getChannelJoined()).map(joined -> toVoiceChannel(guildId, joined))));
         } else {
-            leaveEmptyVoiceChannelUseCase.leaveIfEmpty(guildId);
+            leaveEmptyVoiceChannelUseCase.leaveIfEmpty(new LeaveIfEmptyCommand(guildId));
         }
     }
 

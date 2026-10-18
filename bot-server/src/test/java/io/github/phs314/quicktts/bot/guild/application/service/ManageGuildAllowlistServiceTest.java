@@ -4,7 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.phs314.quicktts.bot.guild.application.exception.NotBotOwnerException;
+import io.github.phs314.quicktts.bot.guild.application.port.in.command.AllowGuildCommand;
+import io.github.phs314.quicktts.bot.guild.application.port.in.command.DisallowGuildCommand;
 import io.github.phs314.quicktts.bot.guild.application.port.in.dto.AllowedGuildDto;
+import io.github.phs314.quicktts.bot.guild.application.port.in.query.GetAllowlistQuery;
 import io.github.phs314.quicktts.bot.guild.application.port.out.FakeAllowedGuildPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.FakeGuildAllowlistSettingPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.FakeJoinedGuildPort;
@@ -31,28 +34,31 @@ class ManageGuildAllowlistServiceTest {
 
     @Test
     void 봇_주인은_서버를_넣고_볼_수_있다() {
-        assertThat(service.allow(OWNER, FRIEND)).isTrue();
-        assertThat(service.allow(OWNER, FRIEND)).isFalse();
+        assertThat(service.allow(new AllowGuildCommand(OWNER, FRIEND))).isTrue();
+        assertThat(service.allow(new AllowGuildCommand(OWNER, FRIEND))).isFalse();
 
-        var allowlist = service.getAllowlist(OWNER);
+        var allowlist = service.getAllowlist(new GetAllowlistQuery(OWNER));
         assertThat(allowlist.enabled()).isTrue();
         assertThat(allowlist.guilds()).containsExactly(new AllowedGuildDto(FRIEND, NOW));
     }
 
     @Test
     void 봇_주인이_아니면_아무것도_할_수_없다() {
-        assertThatThrownBy(() -> service.allow(SOMEONE, FRIEND)).isInstanceOf(NotBotOwnerException.class);
-        assertThatThrownBy(() -> service.disallow(SOMEONE, MINE)).isInstanceOf(NotBotOwnerException.class);
-        assertThatThrownBy(() -> service.getAllowlist(SOMEONE)).isInstanceOf(NotBotOwnerException.class);
+        assertThatThrownBy(() -> service.allow(new AllowGuildCommand(SOMEONE, FRIEND)))
+                .isInstanceOf(NotBotOwnerException.class);
+        assertThatThrownBy(() -> service.disallow(new DisallowGuildCommand(SOMEONE, MINE)))
+                .isInstanceOf(NotBotOwnerException.class);
+        assertThatThrownBy(() -> service.getAllowlist(new GetAllowlistQuery(SOMEONE)))
+                .isInstanceOf(NotBotOwnerException.class);
         assertThat(allowedGuilds.findAll()).isEmpty();
         assertThat(joinedGuilds.left()).isEmpty();
     }
 
     @Test
     void 목록에서_빼면_봇이_그_서버에서_나간다() {
-        service.allow(OWNER, MINE);
+        service.allow(new AllowGuildCommand(OWNER, MINE));
 
-        assertThat(service.disallow(OWNER, MINE)).isTrue();
+        assertThat(service.disallow(new DisallowGuildCommand(OWNER, MINE))).isTrue();
 
         assertThat(allowedGuilds.findAll()).isEmpty();
         assertThat(joinedGuilds.left()).containsExactly(MINE);
@@ -60,10 +66,10 @@ class ManageGuildAllowlistServiceTest {
 
     @Test
     void 봇이_없는_서버를_빼면_목록에서만_빠진다() {
-        service.allow(OWNER, FRIEND);
+        service.allow(new AllowGuildCommand(OWNER, FRIEND));
 
-        assertThat(service.disallow(OWNER, FRIEND)).isTrue();
-        assertThat(service.disallow(OWNER, FRIEND)).isFalse();
+        assertThat(service.disallow(new DisallowGuildCommand(OWNER, FRIEND))).isTrue();
+        assertThat(service.disallow(new DisallowGuildCommand(OWNER, FRIEND))).isFalse();
 
         assertThat(joinedGuilds.left()).isEmpty();
     }
@@ -71,11 +77,11 @@ class ManageGuildAllowlistServiceTest {
     @Test
     void 허용_목록이_꺼져_있으면_빼도_나가지_않는다() {
         setting.setEnabled(false);
-        service.allow(OWNER, MINE);
+        service.allow(new AllowGuildCommand(OWNER, MINE));
 
-        service.disallow(OWNER, MINE);
+        service.disallow(new DisallowGuildCommand(OWNER, MINE));
 
         assertThat(joinedGuilds.left()).isEmpty();
-        assertThat(service.getAllowlist(OWNER).enabled()).isFalse();
+        assertThat(service.getAllowlist(new GetAllowlistQuery(OWNER)).enabled()).isFalse();
     }
 }

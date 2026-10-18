@@ -2,6 +2,7 @@ package io.github.phs314.quicktts.bot.guild.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.github.phs314.quicktts.bot.guild.application.port.in.command.LeaveIfNotAllowedCommand;
 import io.github.phs314.quicktts.bot.guild.application.port.out.FakeAllowedGuildPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.FakeGuildAllowlistSettingPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.FakeJoinedGuildPort;
@@ -29,7 +30,7 @@ class EnforceGuildAllowlistServiceTest {
     void 허용_목록에_없는_서버에_초대되면_나간다() {
         allowedGuilds.saveIfAbsent(AllowedGuild.allow(MINE, NOW));
 
-        service.leaveIfNotAllowed(STRANGER);
+        service.leaveIfNotAllowed(new LeaveIfNotAllowedCommand(STRANGER));
 
         assertThat(joinedGuilds.left()).containsExactly(STRANGER);
     }
@@ -40,7 +41,7 @@ class EnforceGuildAllowlistServiceTest {
         allowedGuilds.saveIfAbsent(AllowedGuild.allow(FRIEND, NOW));
         joinedGuilds.join(FRIEND);
 
-        service.leaveIfNotAllowed(FRIEND);
+        service.leaveIfNotAllowed(new LeaveIfNotAllowedCommand(FRIEND));
 
         assertThat(joinedGuilds.left()).isEmpty();
     }
@@ -50,7 +51,7 @@ class EnforceGuildAllowlistServiceTest {
         setting.setEnabled(false);
         allowedGuilds.saveIfAbsent(AllowedGuild.allow(MINE, NOW));
 
-        service.leaveIfNotAllowed(STRANGER);
+        service.leaveIfNotAllowed(new LeaveIfNotAllowedCommand(STRANGER));
         service.leaveAllNotAllowed();
 
         assertThat(joinedGuilds.left()).isEmpty();

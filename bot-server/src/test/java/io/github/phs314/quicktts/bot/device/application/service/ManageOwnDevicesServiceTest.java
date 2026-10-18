@@ -2,7 +2,11 @@ package io.github.phs314.quicktts.bot.device.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.github.phs314.quicktts.bot.device.application.port.in.command.UnlinkAllDevicesCommand;
+import io.github.phs314.quicktts.bot.device.application.port.in.command.UnlinkDeviceCommand;
 import io.github.phs314.quicktts.bot.device.application.port.in.dto.DeviceDto;
+import io.github.phs314.quicktts.bot.device.application.port.in.query.AuthenticateDeviceQuery;
+import io.github.phs314.quicktts.bot.device.application.port.in.query.GetDevicesQuery;
 import io.github.phs314.quicktts.bot.device.application.port.out.FakeDevicePort;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceId;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
@@ -26,25 +30,26 @@ class ManageOwnDevicesServiceTest {
         devices.registered(OWNER, PC, NOW);
         devices.registered(OTHER, new DeviceName("남의-PC"), NOW);
 
-        assertThat(service.getDevices(OWNER)).extracting(DeviceDto::name).containsExactly(PC);
+        assertThat(service.getDevices(new GetDevicesQuery(OWNER))).extracting(DeviceDto::name).containsExactly(PC);
     }
 
     @Test
     void 해제한_PC_의_토큰은_더_이상_인증되지_않는다() {
         DeviceToken token = devices.registered(OWNER, PC, NOW);
-        DeviceId id = service.getDevices(OWNER).getFirst().id();
+        DeviceId id = service.getDevices(new GetDevicesQuery(OWNER)).getFirst().id();
 
-        assertThat(service.unlink(OWNER, id)).isTrue();
-        assertThat(new AuthenticateDeviceService(devices).authenticate(token.value())).isEmpty();
+        assertThat(service.unlink(new UnlinkDeviceCommand(OWNER, id))).isTrue();
+        AuthenticateDeviceQuery query = new AuthenticateDeviceQuery(token.value());
+        assertThat(new AuthenticateDeviceService(devices).authenticate(query)).isEmpty();
     }
 
     @Test
     void 다른_사람의_PC_는_해제할_수_없다() {
         devices.registered(OTHER, PC, NOW);
-        DeviceId othersId = service.getDevices(OTHER).getFirst().id();
+        DeviceId othersId = service.getDevices(new GetDevicesQuery(OTHER)).getFirst().id();
 
-        assertThat(service.unlink(OWNER, othersId)).isFalse();
-        assertThat(service.getDevices(OTHER)).hasSize(1);
+        assertThat(service.unlink(new UnlinkDeviceCommand(OWNER, othersId))).isFalse();
+        assertThat(service.getDevices(new GetDevicesQuery(OTHER))).hasSize(1);
     }
 
     @Test
@@ -53,8 +58,8 @@ class ManageOwnDevicesServiceTest {
         devices.registered(OWNER, new DeviceName("노트북"), NOW.plusSeconds(1));
         devices.registered(OTHER, PC, NOW);
 
-        assertThat(service.unlinkAll(OWNER)).isEqualTo(2);
-        assertThat(service.getDevices(OWNER)).isEmpty();
-        assertThat(service.getDevices(OTHER)).hasSize(1);
+        assertThat(service.unlinkAll(new UnlinkAllDevicesCommand(OWNER))).isEqualTo(2);
+        assertThat(service.getDevices(new GetDevicesQuery(OWNER))).isEmpty();
+        assertThat(service.getDevices(new GetDevicesQuery(OTHER))).hasSize(1);
     }
 }

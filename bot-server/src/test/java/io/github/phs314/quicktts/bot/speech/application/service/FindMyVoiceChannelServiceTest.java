@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
+import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindMyVoiceChannelQuery;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeVoiceChannelLocatorPort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
@@ -21,7 +22,7 @@ class FindMyVoiceChannelServiceTest {
         discord.enter(SPEAKER, DETAILS);
         FindMyVoiceChannelService service = new FindMyVoiceChannelService(discord);
 
-        assertThat(service.findMyVoiceChannel(SPEAKER)).contains(DETAILS);
-        assertThat(service.findMyVoiceChannel(new DiscordUserId(7L))).isEmpty();
+        assertThat(service.findMyVoiceChannel(new FindMyVoiceChannelQuery(SPEAKER))).contains(DETAILS);
+        assertThat(service.findMyVoiceChannel(new FindMyVoiceChannelQuery(new DiscordUserId(7L)))).isEmpty();
     }
 }

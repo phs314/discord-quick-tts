@@ -2,6 +2,7 @@ package io.github.phs314.quicktts.bot.device.application.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import io.github.phs314.quicktts.bot.device.application.port.in.command.IssuePairingCodeCommand;
 import io.github.phs314.quicktts.bot.device.application.port.in.dto.IssuedPairingCodeDto;
 import io.github.phs314.quicktts.bot.device.application.port.out.FakePairingPort;
 import io.github.phs314.quicktts.bot.device.domain.Pairing;
@@ -22,7 +23,7 @@ class IssuePairingCodeServiceTest {
 
     @Test
     void 발급한_연결_코드는_받은_사용자의_것으로_저장된다() {
-        IssuedPairingCodeDto issued = service.issue(OWNER);
+        IssuedPairingCodeDto issued = service.issue(new IssuePairingCodeCommand(OWNER));
 
         assertThat(pairings.saved()).containsOnlyKeys(issued.code());
         Pairing saved = pairings.saved().get(issued.code());

@@ -17,7 +17,7 @@ class DeviceControllerTest {
 
     @Test
     void 없거나_만료된_연결_코드면_400_과_invalid_pairing_code() throws Exception {
-        DeviceController controller = new DeviceController((code, name) -> {
+        DeviceController controller = new DeviceController(command -> {
             throw new InvalidPairingCodeException();
         });
         MockMvc mockMvc = MockMvcBuilders.standaloneSetup(controller)
