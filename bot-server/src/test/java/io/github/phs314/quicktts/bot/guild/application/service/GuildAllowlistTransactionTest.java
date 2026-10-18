@@ -4,8 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.phs314.quicktts.bot.guild.adapter.in.event.GuildDisallowedListener;
-import io.github.phs314.quicktts.bot.guild.adapter.out.event.SpringGuildAllowlistEvent;
-import io.github.phs314.quicktts.bot.guild.adapter.out.persistence.JpaAllowedGuildRepository;
+import io.github.phs314.quicktts.bot.guild.adapter.out.event.GuildAllowlistEventAdapter;
+import io.github.phs314.quicktts.bot.guild.adapter.out.persistence.AllowedGuildPersistenceAdapter;
 import io.github.phs314.quicktts.bot.guild.application.port.in.command.DisallowGuildCommand;
 import io.github.phs314.quicktts.bot.guild.application.port.in.usecase.EnforceGuildAllowlistUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.usecase.ManageGuildAllowlistUseCase;
@@ -58,7 +58,7 @@ class GuildAllowlistTransactionTest {
     ManageGuildAllowlistUseCase manageGuildAllowlistUseCase;
 
     @Autowired
-    JpaAllowedGuildRepository repository;
+    AllowedGuildPersistenceAdapter repository;
 
     @Autowired
     TransactionRecordingJoinedGuildPort joinedGuildPort;
@@ -149,7 +149,7 @@ class GuildAllowlistTransactionTest {
     }
 
     @Configuration
-    @Import({TestJpa.Config.class, JpaAllowedGuildRepository.class})
+    @Import({TestJpa.Config.class, AllowedGuildPersistenceAdapter.class})
     static class Config {
 
         @Bean
@@ -164,16 +164,16 @@ class GuildAllowlistTransactionTest {
 
         @Bean
         EnforceGuildAllowlistService enforceGuildAllowlistService(
-                JpaAllowedGuildRepository repository, TransactionRecordingJoinedGuildPort joinedGuildPort) {
+                AllowedGuildPersistenceAdapter repository, TransactionRecordingJoinedGuildPort joinedGuildPort) {
             return new EnforceGuildAllowlistService(repository, joinedGuildPort,
                     new FakeGuildAllowlistSettingPort(), Clock.fixed(NOW, ZoneOffset.UTC));
         }
 
         @Bean
         ManageGuildAllowlistService manageGuildAllowlistService(
-                JpaAllowedGuildRepository repository, ApplicationEventPublisher applicationEventPublisher) {
+                AllowedGuildPersistenceAdapter repository, ApplicationEventPublisher applicationEventPublisher) {
             return new ManageGuildAllowlistService(() -> OWNER, repository, new FakeGuildAllowlistSettingPort(),
-                    new SpringGuildAllowlistEvent(applicationEventPublisher), Clock.fixed(NOW, ZoneOffset.UTC));
+                    new GuildAllowlistEventAdapter(applicationEventPublisher), Clock.fixed(NOW, ZoneOffset.UTC));
         }
 
         @Bean

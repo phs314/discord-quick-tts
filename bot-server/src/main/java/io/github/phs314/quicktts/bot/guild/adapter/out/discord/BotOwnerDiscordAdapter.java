@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class JdaBotOwner implements BotOwnerPort {
+public class BotOwnerDiscordAdapter implements BotOwnerPort {
 
     private final JDA jda;
     private DiscordUserId owner;

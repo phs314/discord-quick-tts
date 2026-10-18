@@ -10,12 +10,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.jupiter.api.Test;
 
-class InMemoryBotSeatRepositoryTest {
+class BotSeatMemoryAdapterTest {
 
     private static final GuildId GUILD = new GuildId(1L);
     private static final GuildId OTHER_GUILD = new GuildId(9L);
 
-    private final InMemoryBotSeatRepository repository = new InMemoryBotSeatRepository();
+    private final BotSeatMemoryAdapter repository = new BotSeatMemoryAdapter();
 
     @Test
     void 처음_묻는_디스코드_서버는_빈_자리이고_바꾼_자리를_기억한다() {

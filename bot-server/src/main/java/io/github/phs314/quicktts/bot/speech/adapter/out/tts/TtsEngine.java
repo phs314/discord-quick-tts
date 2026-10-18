@@ -8,7 +8,7 @@ import org.springframework.cache.annotation.Cacheable;
 
 /**
  * TTS 엔진 하나. 엔진을 추가하려면 이 인터페이스를 구현한 빈을 만들면
- * {@link MultiEngineSpeechSynthesizer} 가 그 목소리들을 목록에 넣는다.
+ * {@link SpeechSynthesizerAdapter} 가 그 목소리들을 목록에 넣는다.
  */
 interface TtsEngine {
 

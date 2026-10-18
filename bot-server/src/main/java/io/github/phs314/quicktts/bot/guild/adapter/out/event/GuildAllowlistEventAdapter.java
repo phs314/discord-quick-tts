@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 /** 스프링 애플리케이션 이벤트로 허용 목록 이벤트를 낸다. 서비스가 스프링을 모르도록 이 어댑터에만 둔다 (ADR 0026). */
 @Component
 @RequiredArgsConstructor
-public class SpringGuildAllowlistEvent implements GuildAllowlistEventPort {
+public class GuildAllowlistEventAdapter implements GuildAllowlistEventPort {
 
     private final ApplicationEventPublisher applicationEventPublisher;
 

@@ -1,6 +1,7 @@
 # 저장소 어댑터는 JPA 엔티티를 도메인과 따로 두고 매퍼로 옮긴다
 
-- 상태: 채택
+- 상태: 일부 대체됨
+  - `Jpa<이름>Repository` 는 `<이름>PersistenceAdapter`, `SpringData<이름>Repository` 는 `<이름>SpringDataRepository` 로 → ADR 0039
 - 날짜: 2026-10-18
 
 저장소 어댑터 3개(`device`, `voice_preference`, `allowed_guild`)는 `JdbcClient` 로 SQL 을 직접 쓰고, 읽은 행을 그 자리에서 애그리거트로 만들었습니다(ADR 0016, ADR 0030 6번). 테이블 3개에 관계가 없어서 이것으로 충분했지만, 스프링 프로젝트의 저장소는 대부분 Spring Data JPA 로 짜여 있어서 처음 보는 사람에게는 낯선 모양이었습니다. 이 저장소를 다른 프로젝트의 출발점으로도 쓰려면, 도메인은 지금처럼 프레임워크를 모르게 두면서(ADR 0035) 저장 쪽은 흔한 모양으로 맞추는 편이 낫습니다. 이 ADR 은 ADR 0016 의 "JPA 로 바꾸지 않는다" 와 ADR 0030 6번의 "DB 행 → 애그리거트는 저장소 어댑터 안에서" 를 바꿉니다.

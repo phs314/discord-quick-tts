@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
  * 봇 자리를 메모리에 둔다. 봇 서버가 다시 켜지면 봇도 음성 채널에서 나가 있으므로 모두 빈 자리에서 시작하면 된다.
  */
 @Component
-public class InMemoryBotSeatRepository implements BotSeatPort {
+public class BotSeatMemoryAdapter implements BotSeatPort {
 
     private final Map<GuildId, BotSeat> seats = new ConcurrentHashMap<>();
 

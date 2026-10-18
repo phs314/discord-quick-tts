@@ -21,7 +21,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 @ParameterizedClass
 @EnumSource(TestDatabase.class)
-class JpaDeviceRepositoryTest {
+class DevicePersistenceAdapterTest {
 
     private static final DiscordUserId OWNER = new DiscordUserId(123456789012345678L);
     private static final DiscordUserId OTHER = new DiscordUserId(987654321098765432L);
@@ -31,12 +31,12 @@ class JpaDeviceRepositoryTest {
     TestDatabase database;
 
     private AnnotationConfigApplicationContext context;
-    private JpaDeviceRepository repository;
+    private DevicePersistenceAdapter repository;
 
     @BeforeEach
     void setUp() {
-        context = TestJpa.context(database.dataSource(), JpaDeviceRepository.class);
-        repository = context.getBean(JpaDeviceRepository.class);
+        context = TestJpa.context(database.dataSource(), DevicePersistenceAdapter.class);
+        repository = context.getBean(DevicePersistenceAdapter.class);
     }
 
     @AfterEach

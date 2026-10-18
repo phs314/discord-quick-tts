@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class JdaVoiceChannelLocator implements VoiceChannelLocatorPort {
+public class VoiceChannelLocatorDiscordAdapter implements VoiceChannelLocatorPort {
 
     private final JDA jda;
 
@@ -29,7 +29,7 @@ public class JdaVoiceChannelLocator implements VoiceChannelLocatorPort {
         return jda.getGuilds().stream()
                 .map(guild -> guild.getMemberById(user.value()))
                 .filter(Objects::nonNull)
-                .map(JdaVoiceChannelLocator::currentChannel)
+                .map(VoiceChannelLocatorDiscordAdapter::currentChannel)
                 .flatMap(Optional::stream)
                 .findFirst();
     }

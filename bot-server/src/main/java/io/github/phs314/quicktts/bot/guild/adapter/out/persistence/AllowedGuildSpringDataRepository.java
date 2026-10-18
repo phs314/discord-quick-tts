@@ -7,9 +7,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * {@link AllowedGuildJpaEntity} 를 읽고 쓰는 Spring Data 저장소. {@link JpaAllowedGuildRepository} 만 쓴다.
+ * {@link AllowedGuildJpaEntity} 를 읽고 쓰는 Spring Data 저장소. {@link AllowedGuildPersistenceAdapter} 만 쓴다.
  */
-interface SpringDataAllowedGuildRepository extends JpaRepository<AllowedGuildJpaEntity, Long> {
+interface AllowedGuildSpringDataRepository extends JpaRepository<AllowedGuildJpaEntity, Long> {
 
     List<AllowedGuildJpaEntity> findAllByOrderByAllowedAtAscGuildIdAsc();
 

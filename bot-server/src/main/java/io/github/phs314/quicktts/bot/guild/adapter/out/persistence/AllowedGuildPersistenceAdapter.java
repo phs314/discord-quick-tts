@@ -12,13 +12,13 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class JpaAllowedGuildRepository implements AllowedGuildPort {
+public class AllowedGuildPersistenceAdapter implements AllowedGuildPort {
 
-    private final SpringDataAllowedGuildRepository springDataAllowedGuildRepository;
+    private final AllowedGuildSpringDataRepository allowedGuildSpringDataRepository;
 
     @Override
     public List<AllowedGuild> findAll() {
-        return springDataAllowedGuildRepository.findAllByOrderByAllowedAtAscGuildIdAsc().stream()
+        return allowedGuildSpringDataRepository.findAllByOrderByAllowedAtAscGuildIdAsc().stream()
                 .map(AllowedGuildPersistenceMapper::toDomain)
                 .toList();
     }
@@ -26,23 +26,23 @@ public class JpaAllowedGuildRepository implements AllowedGuildPort {
     /** 이미 있으면 넣지 않는다. 있는지 본 뒤 다른 요청이 같은 서버를 먼저 넣으면 기본 키 때문에 커밋에서 실패한다. */
     @Override
     public boolean saveIfAbsent(AllowedGuild allowedGuild) {
-        if (springDataAllowedGuildRepository.existsById(allowedGuild.guildId().value())) {
+        if (allowedGuildSpringDataRepository.existsById(allowedGuild.guildId().value())) {
             return false;
         }
-        springDataAllowedGuildRepository.save(AllowedGuildPersistenceMapper.toEntity(allowedGuild));
+        allowedGuildSpringDataRepository.save(AllowedGuildPersistenceMapper.toEntity(allowedGuild));
         return true;
     }
 
     /** 모두 함께 넣거나 하나도 넣지 않는 것은 부르는 유스케이스의 트랜잭션이 맡는다 (ADR 0033). */
     @Override
     public void saveAll(List<AllowedGuild> allowedGuilds) {
-        springDataAllowedGuildRepository.saveAll(allowedGuilds.stream()
+        allowedGuildSpringDataRepository.saveAll(allowedGuilds.stream()
                 .map(AllowedGuildPersistenceMapper::toEntity)
                 .toList());
     }
 
     @Override
     public boolean delete(GuildId guildId) {
-        return springDataAllowedGuildRepository.deleteByGuildId(guildId.value()) > 0;
+        return allowedGuildSpringDataRepository.deleteByGuildId(guildId.value()) > 0;
     }
 }

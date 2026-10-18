@@ -70,7 +70,7 @@ class GuildSpeechQueue extends AudioEventAdapter {
 
     private static void deleteAudioFile(AudioTrack track) {
         if (track.getUserData() instanceof Path file) {
-            LavaPlayerSpeechPlayer.deleteQuietly(file);
+            SpeechPlayerDiscordAdapter.deleteQuietly(file);
         }
     }
 }

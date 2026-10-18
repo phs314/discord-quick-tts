@@ -2,12 +2,12 @@ package io.github.phs314.quicktts.bot;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.github.phs314.quicktts.bot.device.adapter.out.persistence.JpaDeviceRepository;
-import io.github.phs314.quicktts.bot.guild.adapter.out.persistence.JpaAllowedGuildRepository;
+import io.github.phs314.quicktts.bot.device.adapter.out.persistence.DevicePersistenceAdapter;
+import io.github.phs314.quicktts.bot.guild.adapter.out.persistence.AllowedGuildPersistenceAdapter;
 import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
-import io.github.phs314.quicktts.bot.speech.adapter.out.persistence.JpaVoicePreferenceRepository;
+import io.github.phs314.quicktts.bot.speech.adapter.out.persistence.VoicePreferencePersistenceAdapter;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
 import io.github.phs314.quicktts.bot.support.TestDatabase;
 import io.github.phs314.quicktts.bot.support.TestJpa;
@@ -39,7 +39,7 @@ class ExistingH2DatabaseMigrationTest {
         assertThat(historyType(jdbc, "2")).isEqualTo("SQL");
         try (var context = repositories(dataSource)) {
             assertKeepsDeviceAndVoice(context);
-            var allowlist = context.getBean(JpaAllowedGuildRepository.class);
+            var allowlist = context.getBean(AllowedGuildPersistenceAdapter.class);
             allowlist.saveIfAbsent(AllowedGuild.allow(GUILD, Instant.parse("2026-10-11T00:00:00Z")));
             assertThat(allowlist.findAll()).extracting(AllowedGuild::guildId).containsExactly(GUILD);
         }
@@ -64,7 +64,7 @@ class ExistingH2DatabaseMigrationTest {
 
         try (var context = repositories(dataSource)) {
             assertKeepsDeviceAndVoice(context);
-            assertThat(context.getBean(JpaAllowedGuildRepository.class).findAll())
+            assertThat(context.getBean(AllowedGuildPersistenceAdapter.class).findAll())
                     .extracting(AllowedGuild::guildId)
                     .containsExactly(GUILD);
         }
@@ -73,7 +73,7 @@ class ExistingH2DatabaseMigrationTest {
     /** 서버와 같은 JPA 설정으로 저장소 어댑터를 띄운다. 엔티티가 옛 DB 의 테이블과도 맞는지 함께 확인된다. */
     private static AnnotationConfigApplicationContext repositories(DataSource dataSource) {
         return TestJpa.context(dataSource,
-                JpaDeviceRepository.class, JpaVoicePreferenceRepository.class, JpaAllowedGuildRepository.class);
+                DevicePersistenceAdapter.class, VoicePreferencePersistenceAdapter.class, AllowedGuildPersistenceAdapter.class);
     }
 
     private static void insertDeviceAndVoice(JdbcClient jdbc) {
@@ -88,10 +88,10 @@ class ExistingH2DatabaseMigrationTest {
     }
 
     private static void assertKeepsDeviceAndVoice(AnnotationConfigApplicationContext context) {
-        assertThat(context.getBean(JpaDeviceRepository.class).findByOwner(OWNER))
+        assertThat(context.getBean(DevicePersistenceAdapter.class).findByOwner(OWNER))
                 .singleElement()
                 .satisfies(device -> assertThat(device.id().value()).isEqualTo("old-device-id"));
-        var voices = context.getBean(JpaVoicePreferenceRepository.class);
+        var voices = context.getBean(VoicePreferencePersistenceAdapter.class);
         voices.saveVoice(OWNER, new VoiceId("edge:ko-KR-InJoonNeural"));
         assertThat(voices.findVoice(OWNER)).contains(new VoiceId("edge:ko-KR-InJoonNeural"));
     }
