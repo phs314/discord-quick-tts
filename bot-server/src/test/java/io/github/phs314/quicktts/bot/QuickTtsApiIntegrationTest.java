@@ -1,6 +1,7 @@
 package io.github.phs314.quicktts.bot;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 import io.github.phs314.quicktts.bot.config.DiscordListenerRegistrar;
@@ -85,6 +86,9 @@ class QuickTtsApiIntegrationTest {
 
     @Autowired
     ManageVoiceUseCase manageVoiceUseCase;
+
+    @Autowired
+    JDA jda;
 
     RestTestClient client;
 
@@ -251,6 +255,36 @@ class QuickTtsApiIntegrationTest {
                 .expectStatus().isEqualTo(502)
                 .expectBody().jsonPath("$.code").isEqualTo(ApiErrorCode.SPEECH_SYNTHESIS_FAILED);
         assertThat(PLAYER.actions()).isEmpty();
+    }
+
+    @Test
+    void 상태_확인은_토큰_없이_열려_있고_디스코드에_붙어_있으면_UP() {
+        when(jda.getStatus()).thenReturn(JDA.Status.CONNECTED);
+
+        client.get().uri(QuickTtsApi.HEALTH_PATH)
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody().jsonPath("$.status").isEqualTo("UP");
+    }
+
+    @Test
+    void 디스코드에서_끊겨_있으면_상태_확인이_503_과_DOWN() {
+        when(jda.getStatus()).thenReturn(JDA.Status.ATTEMPTING_TO_RECONNECT);
+
+        client.get().uri(QuickTtsApi.HEALTH_PATH)
+                .exchange()
+                .expectStatus().isEqualTo(503)
+                .expectBody().jsonPath("$.status").isEqualTo("DOWN");
+    }
+
+    @Test
+    void 지표는_기기_토큰이_있어야_본다() {
+        client.get().uri("/actuator/metrics").exchange().expectStatus().isUnauthorized();
+
+        client.get().uri("/actuator/metrics")
+                .header(HttpHeaders.AUTHORIZATION, QuickTtsApi.BEARER_PREFIX + registerDevice(newUser()))
+                .exchange()
+                .expectStatus().isOk();
     }
 
     /** 디스코드 /연결 로 코드를 받아 클라이언트 첫 실행처럼 등록하고 기기 토큰을 돌려준다. */

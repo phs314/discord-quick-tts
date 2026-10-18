@@ -1,6 +1,7 @@
 # 기기 토큰 인증은 스프링 시큐리티 필터가 맡는다
 
-- 상태: 채택
+- 상태: 일부 대체됨
+  - 토큰 없이 여는 경로에 상태 확인(`GET /actuator/health`)이 더해짐 → ADR 0036
 - 날짜: 2026-10-18
 
 quick chat 컨트롤러가 요청마다 `Authorization` 헤더를 직접 읽고, `device` 의 `AuthenticateDeviceUseCase` 에 기기 토큰의 주인을 물었습니다(ADR 0005). 엔드포인트가 둘뿐이라 동작에는 문제가 없었지만, 두 가지가 마음에 걸렸습니다.

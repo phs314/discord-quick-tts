@@ -17,7 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.servlet.HandlerExceptionResolver;
 
 /**
- * 웹 API 의 인증 규칙 (ADR 0031). 기기 등록만 토큰 없이 열고, 나머지는 모두 기기 토큰이 있어야 한다.
+ * 웹 API 의 인증 규칙 (ADR 0031). 기기 등록과 상태 확인만 토큰 없이 열고, 나머지는 모두 기기 토큰이 있어야 한다.
  * 클라이언트는 매 요청에 토큰을 싣는 프로그램이라 세션, 로그인 화면, CSRF 토큰을 쓰지 않는다.
  */
 @Configuration
@@ -36,6 +36,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers(HttpMethod.POST, QuickTtsApi.DEVICES_PATH).permitAll()
+                        .requestMatchers(HttpMethod.GET, QuickTtsApi.HEALTH_PATH).permitAll()
                         .anyRequest().authenticated())
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint(new DeviceTokenAuthenticationEntryPoint(handlerExceptionResolver)))

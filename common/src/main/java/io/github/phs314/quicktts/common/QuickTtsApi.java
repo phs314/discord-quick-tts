@@ -20,6 +20,9 @@ public final class QuickTtsApi {
     /** 연결 코드로 PC 를 등록하고 기기 토큰을 받는 엔드포인트 경로. */
     public static final String DEVICES_PATH = VERSION_PREFIX + "/devices";
 
+    /** 서버가 떠 있는지 보는 상태 확인 경로. 토큰 없이 열려 있고, 디스코드에 붙어 있지 않으면 503 이다. */
+    public static final String HEALTH_PATH = "/actuator/health";
+
     /** 기기 토큰을 {@code Authorization} 헤더에 실을 때 붙이는 접두사. */
     public static final String BEARER_PREFIX = "Bearer ";
 
