@@ -2,9 +2,7 @@ package io.github.phs314.quicktts.bot.device.adapter.in.web;
 
 import io.github.phs314.quicktts.bot.device.application.port.in.command.RegisterDeviceCommand;
 import io.github.phs314.quicktts.bot.device.application.port.in.usecase.RegisterDeviceUseCase;
-import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceToken;
-import io.github.phs314.quicktts.bot.device.domain.vo.PairingCode;
 import io.github.phs314.quicktts.common.DeviceRegistrationRequest;
 import io.github.phs314.quicktts.common.DeviceRegistrationResponse;
 import io.github.phs314.quicktts.common.QuickTtsApi;
@@ -27,8 +25,8 @@ public class DeviceController {
     @PostMapping(QuickTtsApi.DEVICES_PATH)
     @ResponseStatus(HttpStatus.CREATED)
     public DeviceRegistrationResponse register(@RequestBody DeviceRegistrationRequest request) {
-        DeviceToken token = registerDeviceUseCase.register(new RegisterDeviceCommand(
-                new PairingCode(request.pairingCode()), new DeviceName(request.deviceName())));
-        return new DeviceRegistrationResponse(token.value());
+        RegisterDeviceCommand command = DeviceWebMapper.toCommand(request);
+        DeviceToken token = registerDeviceUseCase.register(command);
+        return DeviceWebMapper.toResponse(token);
     }
 }

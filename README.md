@@ -65,7 +65,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │   │   ├── port/out/           SpeechSynthesizerPort, VoiceChannelLocatorPort, SpeechPlayerPort, VoicePreferencePort, BotSeatPort
 │   │   └── service/            입력 포트마다 하나 (SpeakQuickChatService 등)
 │   └── adapter/
-│       ├── in/web/             quick chat REST 컨트롤러
+│       ├── in/web/             quick chat REST 컨트롤러와 웹 매퍼
 │       ├── in/discord/         /목소리 슬래시 명령, 음성 채널 입·퇴장 소식
 │       ├── out/tts/            TTS 엔진 (Edge, Google 번역) 과 엔진 고르기
 │       ├── out/discord/        JDA + LavaPlayer 로 채널 찾기, 들어가기·재생·나가기
@@ -82,7 +82,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │   │   ├── port/out/           PairingPort, DevicePort
 │   │   └── service/            입력 포트마다 하나 (RegisterDeviceService 등)
 │   └── adapter/
-│       ├── in/web/             기기 등록 REST 컨트롤러
+│       ├── in/web/             기기 등록 REST 컨트롤러와 웹 매퍼
 │       ├── in/discord/         /연결 슬래시 명령
 │       ├── out/persistence/    기기 저장소 (JdbcClient)
 │       └── out/memory/         연결 코드 저장소 (메모리)
@@ -114,6 +114,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 - 인바운드 어댑터는 애그리거트(`Device`, `Pairing`, `BotSeat`)를 직접 쓰지 않고, 입력 포트가 돌려주는 `...Dto` 로만 봅니다. `port/in` 에는 `...UseCase`, `...Command`, `...Query`, `...Dto` 만 둡니다 ([ADR 0010](docs/adr/0010-use-cases-return-dtos.md)).
 - `port/in` 은 `usecase` / `command` / `query` / `dto` 폴더로 나누고, 애플리케이션 예외는 `application/exception` 에 모읍니다 ([ADR 0012](docs/adr/0012-application-subpackages.md)).
 - 유스케이스 메서드는 상태를 바꾸면 `...Command`, 조회면 `...Query` 하나를 받고, 받을 값이 없으면 인자 없이 둡니다 ([ADR 0029](docs/adr/0029-commands-and-queries.md)).
+- 컨트롤러는 웹 요청·응답을 직접 바꾸지 않고, 같은 패키지의 웹 매퍼(`DeviceWebMapper`)에 맡깁니다 ([ADR 0030](docs/adr/0030-web-mappers.md)).
 - 도메인 규칙을 어겼을 때 던지는 예외는 각 컨텍스트의 `domain` 바로 아래에 둡니다. 데이터 상태로 정하는 규칙은 애그리거트와 값 객체에, 누가 부르는지로 정하는 권한은 서비스에 둡니다 ([ADR 0024](docs/adr/0024-rules-live-in-the-domain.md)).
 - 우리가 만든 예외는 모두 `BusinessException` 을 상속하고 종류(`ErrorKind`)를 가집니다. 웹은 `ApiExceptionHandler` 한 곳이 종류로 HTTP 상태를 정하고 예상하지 못한 실패까지 같은 오류 응답 모양으로 돌려주며, 디스코드 명령은 명령이 잡지 않은 실패에도 답이 가도록 감싸서 등록합니다 ([ADR 0025](docs/adr/0025-business-exceptions-by-kind.md)).
 - 설정 값은 그 값을 쓰는 어댑터 패키지에 두고(`TtsProperties`, `GuildAllowlistProperties`), 어댑터는 `config` 를 쓰지 않습니다 ([ADR 0023](docs/adr/0023-properties-per-adapter.md)).

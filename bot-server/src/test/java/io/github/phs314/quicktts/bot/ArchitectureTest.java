@@ -6,6 +6,8 @@ import static com.tngtech.archunit.core.domain.JavaClass.Predicates.assignableTo
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAPackage;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyPackage;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideOutsideOfPackages;
+import static com.tngtech.archunit.core.domain.JavaCall.Predicates.target;
+import static com.tngtech.archunit.core.domain.properties.HasOwner.Predicates.With.owner;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.fields;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
@@ -26,6 +28,7 @@ import io.github.phs314.quicktts.bot.shared.domain.BusinessException;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
@@ -211,6 +214,23 @@ class ArchitectureTest {
     static final ArchRule dtosAreNamedDto = classes()
             .that().resideInAPackage("..bot.*.application.port.in.dto..").and().areTopLevelClasses()
             .should().haveSimpleNameEndingWith("Dto");
+
+    /** 웹 매퍼는 그 컨트롤러 옆, 각 컨텍스트의 adapter.in.web 에 둔다 (ADR 0030). */
+    @ArchTest
+    static final ArchRule webMappersLiveNextToTheirController = classes()
+            .that().haveSimpleNameEndingWith("WebMapper")
+            .should().resideInAPackage("..bot.*.adapter.in.web");
+
+    /**
+     * 컨트롤러는 Command, Query, 웹 응답을 직접 만들지 않고 웹 매퍼에 맡긴다. 컨트롤러에는 유스케이스를 부르는 흐름만 남는다
+     * (ADR 0030).
+     */
+    @ArchTest
+    static final ArchRule controllersLeaveConversionToWebMappers = noClasses()
+            .that().areAnnotatedWith(RestController.class)
+            .should().callConstructorWhere(target(owner(resideInAnyPackage(
+                    "..bot.*.application.port.in.command..", "..bot.*.application.port.in.query..",
+                    "io.github.phs314.quicktts.common.."))));
 
     /** 애플리케이션 예외는 각 컨텍스트의 application.exception 폴더에 모은다 (ADR 0012). */
     @ArchTest
