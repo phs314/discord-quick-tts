@@ -175,6 +175,14 @@ class QuickTtsApiIntegrationTest {
     }
 
     @Test
+    void 내_음성_채널을_물을_때도_기기_토큰이_없으면_401_과_device_unauthorized() {
+        client.get().uri(QuickTtsApi.MY_VOICE_CHANNEL_PATH)
+                .exchange()
+                .expectStatus().isUnauthorized()
+                .expectBody().jsonPath("$.code").isEqualTo(ApiErrorCode.DEVICE_UNAUTHORIZED);
+    }
+
+    @Test
     void 연결을_해제한_PC_의_토큰이면_401_과_device_unauthorized() {
         DiscordUserId user = newUser();
         String token = registerDevice(user);

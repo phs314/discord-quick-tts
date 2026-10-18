@@ -44,7 +44,7 @@ class ArchitectureTest {
      * 컨텍스트를 새로 만들면 여기에 넣어야 빌드가 통과한다.
      */
     private static final Map<String, Set<String>> CONTEXT_MAP = Map.of(
-            "speech", Set.of("device"),
+            "speech", Set.of(),
             "device", Set.of(),
             "guild", Set.of());
 

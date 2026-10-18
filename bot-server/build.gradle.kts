@@ -7,6 +7,8 @@ plugins {
 dependencies {
     implementation(project(":common"))
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
+    // 기기 토큰 인증. 토큰으로 사람을 알아내는 필터만 우리가 쓰고 나머지는 스프링 시큐리티 기본을 따른다.
+    implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
     // 스키마는 Flyway 마이그레이션(resources/db/migration)으로 관리한다.
     implementation("org.springframework.boot:spring-boot-starter-flyway")

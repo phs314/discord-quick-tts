@@ -10,7 +10,7 @@
 
 컨텍스트 사이 규칙은 `ArchitectureTest` 가 확인합니다.
 
-- `speech` 는 `device` 를 공개 입구인 `device.application.port.in` 으로만 씁니다. 실제 접점은 quick chat 컨트롤러가 기기 토큰의 주인을 묻는 `AuthenticateDeviceUseCase` 하나입니다.
+- `speech` 는 `device` 를 공개 입구인 `device.application.port.in` 으로만 씁니다. 실제 접점은 quick chat 컨트롤러가 기기 토큰의 주인을 묻는 `AuthenticateDeviceUseCase` 하나였는데, ADR 0031 에서 기기 토큰 인증을 device 의 스프링 시큐리티 필터로 옮기며 없어졌습니다.
 - `device` 는 `speech` 를 모르고, `guild` 와 다른 두 컨텍스트는 서로 모르며, `shared` 는 어느 컨텍스트도 모릅니다.
 
 ## 결과

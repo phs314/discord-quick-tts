@@ -82,7 +82,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │   │   ├── port/out/           PairingPort, DevicePort
 │   │   └── service/            입력 포트마다 하나 (RegisterDeviceService 등)
 │   └── adapter/
-│       ├── in/web/             기기 등록 REST 컨트롤러와 웹 매퍼
+│       ├── in/web/             기기 등록 REST 컨트롤러와 웹 매퍼, 기기 토큰 인증 필터
 │       ├── in/discord/         /연결 슬래시 명령
 │       ├── out/persistence/    기기 저장소 (JdbcClient)
 │       └── out/memory/         연결 코드 저장소 (메모리)
@@ -103,18 +103,19 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │       ├── out/persistence/    허용 목록 저장소 (JdbcClient)
 │       └── out/settings/       허용 목록을 쓸지 설정 값 (GuildAllowlistProperties)
 ├── shared/                     공유 커널(domain/vo 의 DiscordUserId, GuildId, 예외 공통 부모 BusinessException)과 웹·디스코드 공통 예외 처리
-└── config/                     디스코드 토큰, JDA, 시계, 슬래시 명령 등록
+└── config/                     디스코드 토큰, JDA, 시계, 슬래시 명령 등록, 웹 보안 규칙
 ```
 
 `ArchitectureTest`(ArchUnit)가 빌드 때마다 다음 규칙을 확인합니다.
 
 - 각 컨텍스트의 `domain` 은 스프링, JDA, LavaPlayer 를 모르고, `application` 은 스프링 중 `@Service`, `@Transactional` 만 씁니다 ([ADR 0009](docs/adr/0009-spring-annotations-on-services.md)). 어댑터끼리는 서로 모릅니다.
-- 컨텍스트끼리는 컨텍스트 지도(`ArchitectureTest.CONTEXT_MAP`)에 적힌 대로만, 상대의 공개 입구(`application.port.in`)로만 부릅니다. 부르는 자리는 인바운드 어댑터나 `adapter/out/<상대>` 이고, 서비스와 도메인은 다른 컨텍스트를 모릅니다. 지금은 `speech` 가 quick chat 요청의 기기 토큰 주인을 `device` 에 묻는 것이 유일한 접점이고, `guild` 는 다른 컨텍스트와 서로 모르며, `shared` 는 어느 컨텍스트도 모릅니다 ([ADR 0026](docs/adr/0026-calls-between-contexts.md)).
+- 컨텍스트끼리는 컨텍스트 지도(`ArchitectureTest.CONTEXT_MAP`)에 적힌 대로만, 상대의 공개 입구(`application.port.in`)로만 부릅니다. 부르는 자리는 인바운드 어댑터나 `adapter/out/<상대>` 이고, 서비스와 도메인은 다른 컨텍스트를 모릅니다. 지금은 서로 부르는 컨텍스트가 없고(`guild` 는 다른 컨텍스트와 서로 모름), `shared` 는 어느 컨텍스트도 모릅니다 ([ADR 0026](docs/adr/0026-calls-between-contexts.md)).
 - 서비스는 입력 포트(`...UseCase`) 하나만 구현하고 이름은 `...Service` 입니다 ([ADR 0008](docs/adr/0008-one-service-per-use-case.md)).
 - 인바운드 어댑터는 애그리거트(`Device`, `Pairing`, `BotSeat`)를 직접 쓰지 않고, 입력 포트가 돌려주는 `...Dto` 로만 봅니다. `port/in` 에는 `...UseCase`, `...Command`, `...Query`, `...Dto` 만 둡니다 ([ADR 0010](docs/adr/0010-use-cases-return-dtos.md)).
 - `port/in` 은 `usecase` / `command` / `query` / `dto` 폴더로 나누고, 애플리케이션 예외는 `application/exception` 에 모읍니다 ([ADR 0012](docs/adr/0012-application-subpackages.md)).
 - 유스케이스 메서드는 상태를 바꾸면 `...Command`, 조회면 `...Query` 하나를 받고, 받을 값이 없으면 인자 없이 둡니다 ([ADR 0029](docs/adr/0029-commands-and-queries.md)).
 - 컨트롤러는 웹 요청·응답을 직접 바꾸지 않고, 같은 패키지의 웹 매퍼(`DeviceWebMapper`)에 맡깁니다 ([ADR 0030](docs/adr/0030-web-mappers.md)).
+- 기기 토큰 인증은 스프링 시큐리티가 맡습니다. 기기 등록만 토큰 없이 열려 있고, device 의 필터가 `Bearer` 토큰의 주인을 알아내면 컨트롤러는 `@AuthenticationPrincipal DiscordUserId` 로 받습니다 ([ADR 0031](docs/adr/0031-device-token-authentication-with-spring-security.md)).
 - 도메인 규칙을 어겼을 때 던지는 예외는 각 컨텍스트의 `domain` 바로 아래에 둡니다. 데이터 상태로 정하는 규칙은 애그리거트와 값 객체에, 누가 부르는지로 정하는 권한은 서비스에 둡니다 ([ADR 0024](docs/adr/0024-rules-live-in-the-domain.md)).
 - 우리가 만든 예외는 모두 `BusinessException` 을 상속하고 종류(`ErrorKind`)를 가집니다. 웹은 `ApiExceptionHandler` 한 곳이 종류로 HTTP 상태를 정하고 예상하지 못한 실패까지 같은 오류 응답 모양으로 돌려주며, 디스코드 명령은 명령이 잡지 않은 실패에도 답이 가도록 감싸서 등록합니다 ([ADR 0025](docs/adr/0025-business-exceptions-by-kind.md)).
 - 설정 값은 그 값을 쓰는 어댑터 패키지에 두고(`TtsProperties`, `GuildAllowlistProperties`), 어댑터는 `config` 를 쓰지 않습니다 ([ADR 0023](docs/adr/0023-properties-per-adapter.md)).

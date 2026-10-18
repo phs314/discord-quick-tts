@@ -96,7 +96,7 @@ _Avoid_: 로그인, 가입
 _Avoid_: API 키, 로그인 토큰, 비밀번호
 
 **기기 인증** (`authenticate`):
-기기 토큰으로 그 기기의 주인을 알아내는 일. speech 가 device 에 묻는 유일한 질문입니다.
+기기 토큰으로 그 기기의 주인을 알아내는 일. 웹 요청마다 device 의 인증 필터가 하고, speech 는 알아낸 디스코드 사용자만 받습니다.
 _Avoid_: 로그인
 
 **기기 ID** (`DeviceId`):
@@ -139,7 +139,7 @@ _Avoid_: 앱, 기기 (기기는 PC 자체)
 
 ## 관계
 
-- **speech → device**: speech 는 기기 인증으로 "이 기기 토큰의 주인이 누구인가" 만 묻습니다. 기기나 대기 중인 연결은 모릅니다.
+- **speech → device**: 없습니다. quick chat 을 보낸 사람은 기기 인증이 끝난 디스코드 사용자로 받고, 기기나 기기 토큰은 모릅니다.
 - **device → speech**: 없습니다. device 는 문장이나 목소리를 모릅니다.
 - **guild ↔ speech, device**: 서로 모릅니다. 봇이 허용 목록 밖 디스코드 서버에서 나가면 speech 는 그곳에서 읽을 일이 없을 뿐입니다.
 - **speech, device, guild → shared**: 사람은 디스코드 사용자로, 디스코드 서버는 `GuildId` 로 가리킵니다.
