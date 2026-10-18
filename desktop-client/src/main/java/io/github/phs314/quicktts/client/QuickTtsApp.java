@@ -9,11 +9,7 @@ import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Dialog;
 import javafx.scene.control.TextField;
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.image.Image;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
@@ -230,17 +226,12 @@ public class QuickTtsApp extends Application {
     private boolean pairDevice() {
         String error = null;
         while (true) {
-            TextInputDialog dialog = new TextInputDialog();
-            useAppIcon(dialog);
-            dialog.setTitle("Discord Quick TTS");
-            dialog.setHeaderText("디스코드에서 /연결 을 입력하고 받은 코드를 붙여 넣어 주세요.");
-            dialog.setContentText(error == null ? "연결 코드" : error + "\n\n연결 코드");
-            Optional<String> code = dialog.showAndWait();
+            Optional<String> code = new PairingDialog(error).showAndWait();
             if (code.isEmpty()) {
                 return false;
             }
             try {
-                config = config.withDeviceToken(client.registerDevice(code.get().strip()));
+                config = config.withDeviceToken(client.registerDevice(code.get()));
                 config.save();
                 return true;
             } catch (QuickTtsClient.QuickTtsClientException e) {
@@ -262,16 +253,7 @@ public class QuickTtsApp extends Application {
     }
 
     private static void showFatal(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR, message);
-        alert.setHeaderText("Discord Quick TTS");
-        useAppIcon(alert);
-        alert.showAndWait();
+        ErrorDialog.show(message);
         Platform.exit();
-    }
-
-    /** 대화 상자 제목 표시줄과 작업 표시줄에 앱 아이콘을 보여 준다. */
-    private static void useAppIcon(Dialog<?> dialog) {
-        Stage window = (Stage) dialog.getDialogPane().getScene().getWindow();
-        window.getIcons().add(new Image(QuickTtsApp.class.getResource("app-icon.png").toExternalForm()));
     }
 }
