@@ -43,7 +43,7 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/installers"
           for version in 0.0.1 0.0.2; do
-            ./gradlew :desktop-client:packageInstaller -PappVersion=$version
+            ./gradlew :desktop-client:packageInstaller -Pversion=$version
             cp "desktop-client/build/distributions/QuickTTS-$version.exe" "$RUNNER_TEMP/installers/"
           done
 

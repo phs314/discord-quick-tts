@@ -6,7 +6,7 @@ plugins {
 
 subprojects {
     group = "io.github.phs314.quicktts"
-    version = "0.1.0-SNAPSHOT"
+    // version 은 gradle.properties 에서 정하고, 태그 빌드는 -Pversion=1.2.3 으로 덮어쓴다.
 
     repositories {
         mavenCentral()
