@@ -5,7 +5,6 @@ import io.github.phs314.quicktts.bot.speech.application.port.out.VoicePreference
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Component;
 
 /**
@@ -13,24 +12,19 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class JdbcVoicePreferenceRepository implements VoicePreferencePort {
+public class JpaVoicePreferenceRepository implements VoicePreferencePort {
 
-    private final JdbcClient jdbcClient;
+    private final SpringDataVoicePreferenceRepository springDataVoicePreferenceRepository;
 
     @Override
     public Optional<VoiceId> findVoice(DiscordUserId user) {
-        return jdbcClient.sql("select voice_id from voice_preference where discord_user_id = :user")
-                .param("user", user.value())
-                .query((rs, rowNum) -> new VoiceId(rs.getString("voice_id")))
-                .optional();
+        return springDataVoicePreferenceRepository.findById(user.value())
+                .map(VoicePreferencePersistenceMapper::toVoiceId);
     }
 
+    /** 기본 키가 사용자라서, 고른 적이 있으면 JPA 가 그 줄을 고치고 없으면 넣는다. */
     @Override
     public void saveVoice(DiscordUserId user, VoiceId voiceId) {
-        jdbcClient.sql("insert into voice_preference (discord_user_id, voice_id) values (:user, :voice)"
-                        + " on duplicate key update voice_id = :voice")
-                .param("user", user.value())
-                .param("voice", voiceId.value())
-                .update();
+        springDataVoicePreferenceRepository.save(VoicePreferencePersistenceMapper.toEntity(user, voiceId));
     }
 }

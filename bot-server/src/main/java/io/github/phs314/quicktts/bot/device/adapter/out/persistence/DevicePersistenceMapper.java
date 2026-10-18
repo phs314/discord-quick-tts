@@ -1,0 +1,30 @@
+package io.github.phs314.quicktts.bot.device.adapter.out.persistence;
+
+import io.github.phs314.quicktts.bot.device.domain.Device;
+import io.github.phs314.quicktts.bot.device.domain.vo.DeviceId;
+import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
+import io.github.phs314.quicktts.bot.device.domain.vo.DeviceTokenHash;
+import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
+
+/**
+ * {@link Device} 애그리거트와 {@link DeviceJpaEntity} 를 서로 바꾼다 (ADR 0038).
+ */
+final class DevicePersistenceMapper {
+
+    private DevicePersistenceMapper() {
+    }
+
+    static DeviceJpaEntity toEntity(Device device) {
+        return new DeviceJpaEntity(device.tokenHash().value(), device.id().value(), device.owner().value(),
+                device.name().value(), device.registeredAt());
+    }
+
+    static Device toDomain(DeviceJpaEntity entity) {
+        return new Device(
+                new DeviceId(entity.getDeviceId()),
+                new DeviceTokenHash(entity.getTokenHash()),
+                new DiscordUserId(entity.getDiscordUserId()),
+                new DeviceName(entity.getName()),
+                entity.getRegisteredAt());
+    }
+}

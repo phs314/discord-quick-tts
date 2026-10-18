@@ -70,7 +70,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │       ├── in/discord/         /목소리 슬래시 명령, 음성 채널 입·퇴장 소식
 │       ├── out/tts/            TTS 엔진 (Edge, Google 번역), 엔진 고르기, 결과 캐시와 지표
 │       ├── out/discord/        JDA + LavaPlayer 로 채널 찾기, 들어가기·재생·나가기
-│       ├── out/persistence/    사용자별 목소리 저장소 (JdbcClient)
+│       ├── out/persistence/    사용자별 목소리 저장소 (JPA 엔티티 + 매퍼)
 │       └── out/memory/         봇 자리 저장소 (메모리)
 ├── device/
 │   ├── domain/                 Pairing, Device (엔티티), InvalidPairingCodeException
@@ -85,7 +85,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │   └── adapter/
 │       ├── in/web/             기기 등록 REST 컨트롤러와 웹 매퍼, 기기 토큰 인증 필터
 │       ├── in/discord/         /연결 슬래시 명령
-│       ├── out/persistence/    기기 저장소 (JdbcClient)
+│       ├── out/persistence/    기기 저장소 (JPA 엔티티 + 매퍼)
 │       └── out/memory/         연결 코드 저장소 (메모리)
 ├── guild/
 │   ├── domain/                 AllowedGuild (허용한 디스코드 서버)
@@ -104,7 +104,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │       ├── in/event/           허용 목록에서 빼면 커밋 뒤에 그 서버에서 나가기
 │       ├── out/discord/        봇이 들어가 있는 서버 보기·나가기, 봇 주인 알아내기
 │       ├── out/event/          허용 목록 이벤트 내기 (스프링 이벤트)
-│       ├── out/persistence/    허용 목록 저장소 (JdbcClient)
+│       ├── out/persistence/    허용 목록 저장소 (JPA 엔티티 + 매퍼)
 │       └── out/settings/       허용 목록을 쓸지 설정 값 (GuildAllowlistProperties)
 ├── shared/                     공유 커널(domain/vo 의 DiscordUserId, GuildId, 예외 공통 부모 BusinessException)과 웹·디스코드 공통 예외 처리
 └── config/                     디스코드 토큰, JDA, 시계, 디스코드 리스너와 슬래시 명령 등록, 웹 보안 규칙, 디스코드 연결 상태 확인, 캐시 켜기
@@ -125,10 +125,11 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 - `port/in` 은 `usecase` / `command` / `query` / `dto` 폴더로 나누고, 애플리케이션 예외는 `application/exception` 에 모읍니다 ([ADR 0012](docs/adr/0012-application-subpackages.md)).
 - 유스케이스 메서드는 상태를 바꾸면 `...Command`, 조회면 `...Query` 하나를 받고, 받을 값이 없으면 인자 없이 둡니다 ([ADR 0029](docs/adr/0029-commands-and-queries.md)).
 - 컨트롤러는 웹 요청·응답을 직접 바꾸지 않고, 같은 패키지의 웹 매퍼(`DeviceWebMapper`)에 맡깁니다 ([ADR 0030](docs/adr/0030-web-mappers.md)).
+- 저장소 어댑터는 Spring Data JPA 를 쓰고, JPA 엔티티(`DeviceJpaEntity`)를 도메인과 따로 둡니다. 엔티티와 애그리거트는 같은 패키지의 퍼시스턴스 매퍼(`DevicePersistenceMapper`)가 옮기고, 도메인 클래스에는 JPA 애너테이션을 붙이지 않습니다 ([ADR 0038](docs/adr/0038-jpa-entities-with-persistence-mappers.md)).
 - 기기 토큰 인증은 스프링 시큐리티가 맡습니다. 기기 등록과 상태 확인(`/actuator/health`)만 토큰 없이 열려 있고, device 의 필터가 `Bearer` 토큰의 주인을 알아내면 컨트롤러는 `@AuthenticationPrincipal DiscordUserId` 로 받습니다 ([ADR 0031](docs/adr/0031-device-token-authentication-with-spring-security.md), [ADR 0036](docs/adr/0036-health-and-metrics-with-actuator.md)).
 - 도메인 규칙을 어겼을 때 던지는 예외는 각 컨텍스트의 `domain` 바로 아래에 둡니다. 데이터 상태로 정하는 규칙은 애그리거트와 값 객체에, 누가 부르는지로 정하는 권한은 서비스에 둡니다 ([ADR 0024](docs/adr/0024-rules-live-in-the-domain.md)).
 - 우리가 만든 예외는 모두 `BusinessException` 을 상속하고 종류(`ErrorKind`)를 가집니다. 웹은 `ApiExceptionHandler` 한 곳이 종류로 HTTP 상태를 정하고 예상하지 못한 실패까지 같은 오류 응답 모양으로 돌려주며, 디스코드 명령은 명령이 잡지 않은 실패에도 답이 가도록 감싸서 등록합니다 ([ADR 0025](docs/adr/0025-business-exceptions-by-kind.md)).
-- 출력 어댑터 이름은 기술 + 포트 이름에서 `Port` 를 뺀 것이고(`JdaBotOwner`), 애그리거트를 담는 저장소만 뒤에 `Repository` 를 붙입니다(`JdbcDeviceRepository`). 디스코드 서버는 코드에서 언제나 `guild` 이고 `server` 는 봇 서버만 뜻합니다 ([ADR 0027](docs/adr/0027-naming-rules.md)).
+- 출력 어댑터 이름은 기술 + 포트 이름에서 `Port` 를 뺀 것이고(`JdaBotOwner`), 애그리거트를 담는 저장소만 뒤에 `Repository` 를 붙입니다(`JpaDeviceRepository`). 디스코드 서버는 코드에서 언제나 `guild` 이고 `server` 는 봇 서버만 뜻합니다 ([ADR 0027](docs/adr/0027-naming-rules.md)).
 - 출력 포트 테스트 대역은 포트마다 하나(`Fake<포트 이름>`)이고 테스트 폴더에서 포트와 같은 패키지에 있어서, 서비스 테스트와 통합 테스트가 같은 대역을 씁니다 ([ADR 0027](docs/adr/0027-naming-rules.md)).
 
 그 밖에:

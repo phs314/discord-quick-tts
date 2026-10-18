@@ -8,18 +8,20 @@ import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceTokenHash;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.support.TestDatabase;
+import io.github.phs314.quicktts.bot.support.TestJpa;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.Parameter;
 import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 @ParameterizedClass
 @EnumSource(TestDatabase.class)
-class JdbcDeviceRepositoryTest {
+class JpaDeviceRepositoryTest {
 
     private static final DiscordUserId OWNER = new DiscordUserId(123456789012345678L);
     private static final DiscordUserId OTHER = new DiscordUserId(987654321098765432L);
@@ -28,11 +30,21 @@ class JdbcDeviceRepositoryTest {
     @Parameter
     TestDatabase database;
 
-    private JdbcDeviceRepository repository;
+    private AnnotationConfigApplicationContext context;
+    private JpaDeviceRepository repository;
 
     @BeforeEach
     void setUp() {
-        repository = new JdbcDeviceRepository(JdbcClient.create(database.dataSource()));
+        context = TestJpa.context(database.dataSource(), JpaDeviceRepository.class);
+        repository = context.getBean(JpaDeviceRepository.class);
+    }
+
+    @AfterEach
+    void tearDown() {
+        // Docker 가 없어 MySQL 쪽을 건너뛰면 문맥을 만들기 전에 끝난다.
+        if (context != null) {
+            context.close();
+        }
     }
 
     @Test

@@ -2,17 +2,19 @@ package io.github.phs314.quicktts.bot;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.github.phs314.quicktts.bot.device.adapter.out.persistence.JdbcDeviceRepository;
-import io.github.phs314.quicktts.bot.guild.adapter.out.persistence.JdbcAllowedGuildRepository;
+import io.github.phs314.quicktts.bot.device.adapter.out.persistence.JpaDeviceRepository;
+import io.github.phs314.quicktts.bot.guild.adapter.out.persistence.JpaAllowedGuildRepository;
 import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
-import io.github.phs314.quicktts.bot.speech.adapter.out.persistence.JdbcVoicePreferenceRepository;
+import io.github.phs314.quicktts.bot.speech.adapter.out.persistence.JpaVoicePreferenceRepository;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
 import io.github.phs314.quicktts.bot.support.TestDatabase;
+import io.github.phs314.quicktts.bot.support.TestJpa;
 import java.time.Instant;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
 /**
@@ -35,10 +37,12 @@ class ExistingH2DatabaseMigrationTest {
 
         assertThat(historyType(jdbc, "1")).isEqualTo("BASELINE");
         assertThat(historyType(jdbc, "2")).isEqualTo("SQL");
-        assertKeepsDeviceAndVoice(jdbc);
-        var allowlist = new JdbcAllowedGuildRepository(jdbc);
-        allowlist.saveIfAbsent(AllowedGuild.allow(GUILD, Instant.parse("2026-10-11T00:00:00Z")));
-        assertThat(allowlist.findAll()).extracting(AllowedGuild::guildId).containsExactly(GUILD);
+        try (var context = repositories(dataSource)) {
+            assertKeepsDeviceAndVoice(context);
+            var allowlist = context.getBean(JpaAllowedGuildRepository.class);
+            allowlist.saveIfAbsent(AllowedGuild.allow(GUILD, Instant.parse("2026-10-11T00:00:00Z")));
+            assertThat(allowlist.findAll()).extracting(AllowedGuild::guildId).containsExactly(GUILD);
+        }
     }
 
     @Test
@@ -58,10 +62,18 @@ class ExistingH2DatabaseMigrationTest {
 
         TestDatabase.migrate(dataSource);
 
-        assertKeepsDeviceAndVoice(jdbc);
-        assertThat(new JdbcAllowedGuildRepository(jdbc).findAll())
-                .extracting(AllowedGuild::guildId)
-                .containsExactly(GUILD);
+        try (var context = repositories(dataSource)) {
+            assertKeepsDeviceAndVoice(context);
+            assertThat(context.getBean(JpaAllowedGuildRepository.class).findAll())
+                    .extracting(AllowedGuild::guildId)
+                    .containsExactly(GUILD);
+        }
+    }
+
+    /** 서버와 같은 JPA 설정으로 저장소 어댑터를 띄운다. 엔티티가 옛 DB 의 테이블과도 맞는지 함께 확인된다. */
+    private static AnnotationConfigApplicationContext repositories(DataSource dataSource) {
+        return TestJpa.context(dataSource,
+                JpaDeviceRepository.class, JpaVoicePreferenceRepository.class, JpaAllowedGuildRepository.class);
     }
 
     private static void insertDeviceAndVoice(JdbcClient jdbc) {
@@ -75,11 +87,11 @@ class ExistingH2DatabaseMigrationTest {
                 .update();
     }
 
-    private static void assertKeepsDeviceAndVoice(JdbcClient jdbc) {
-        assertThat(new JdbcDeviceRepository(jdbc).findByOwner(OWNER))
+    private static void assertKeepsDeviceAndVoice(AnnotationConfigApplicationContext context) {
+        assertThat(context.getBean(JpaDeviceRepository.class).findByOwner(OWNER))
                 .singleElement()
                 .satisfies(device -> assertThat(device.id().value()).isEqualTo("old-device-id"));
-        var voices = new JdbcVoicePreferenceRepository(jdbc);
+        var voices = context.getBean(JpaVoicePreferenceRepository.class);
         voices.saveVoice(OWNER, new VoiceId("edge:ko-KR-InJoonNeural"));
         assertThat(voices.findVoice(OWNER)).contains(new VoiceId("edge:ko-KR-InJoonNeural"));
     }
