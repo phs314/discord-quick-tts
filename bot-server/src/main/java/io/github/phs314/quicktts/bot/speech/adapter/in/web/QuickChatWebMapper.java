@@ -1,6 +1,5 @@
 package io.github.phs314.quicktts.bot.speech.adapter.in.web;
 
-import io.github.phs314.quicktts.bot.device.application.port.in.query.AuthenticateDeviceQuery;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindMyVoiceChannelQuery;
@@ -16,10 +15,6 @@ import io.github.phs314.quicktts.common.VoiceChannelResponse;
 final class QuickChatWebMapper {
 
     private QuickChatWebMapper() {
-    }
-
-    static AuthenticateDeviceQuery toQuery(String deviceToken) {
-        return new AuthenticateDeviceQuery(deviceToken);
     }
 
     static SpeakQuickChatCommand toCommand(DiscordUserId speaker, QuickChatRequest request) {

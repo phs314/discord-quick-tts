@@ -1,7 +1,5 @@
 package io.github.phs314.quicktts.bot.speech.adapter.in.web;
 
-import io.github.phs314.quicktts.bot.device.application.port.in.query.AuthenticateDeviceQuery;
-import io.github.phs314.quicktts.bot.device.application.port.in.usecase.AuthenticateDeviceUseCase;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindMyVoiceChannelQuery;
@@ -13,40 +11,35 @@ import io.github.phs314.quicktts.common.QuickTtsApi;
 import io.github.phs314.quicktts.common.VoiceChannelResponse;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
  * 데스크톱 클라이언트가 보내는 quick chat 요청과 "어느 채널에서 읽힐지" 조회를 받는 인바운드 어댑터.
- * 보낸 사람은 device 컨텍스트의 공개 유스케이스에 기기 토큰을 물어서 알아낸다.
+ * 보낸 사람은 기기 토큰 인증(ADR 0031)이 알아낸 디스코드 사용자로 받는다.
  */
 @RestController
 @RequiredArgsConstructor
 public class QuickChatController {
 
-    private final AuthenticateDeviceUseCase authenticateDeviceUseCase;
     private final SpeakQuickChatUseCase speakQuickChatUseCase;
     private final FindMyVoiceChannelUseCase findMyVoiceChannelUseCase;
 
     @PostMapping(QuickTtsApi.QUICK_CHAT_PATH)
     public ResponseEntity<Void> quickChat(
-            @RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) String authorization,
+            @AuthenticationPrincipal DiscordUserId speaker,
             @RequestBody QuickChatRequest request) {
-        DiscordUserId speaker = authenticatedUser(authorization);
         SpeakQuickChatCommand command = QuickChatWebMapper.toCommand(speaker, request);
         speakQuickChatUseCase.speak(command);
         return ResponseEntity.accepted().build();
     }
 
     @GetMapping(QuickTtsApi.MY_VOICE_CHANNEL_PATH)
-    public ResponseEntity<VoiceChannelResponse> myVoiceChannel(
-            @RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) String authorization) {
-        DiscordUserId user = authenticatedUser(authorization);
+    public ResponseEntity<VoiceChannelResponse> myVoiceChannel(@AuthenticationPrincipal DiscordUserId user) {
         FindMyVoiceChannelQuery query = QuickChatWebMapper.toQuery(user);
         Optional<VoiceChannelDetails> details = findMyVoiceChannelUseCase.findMyVoiceChannel(query);
         if (details.isEmpty()) {
@@ -54,20 +47,5 @@ public class QuickChatController {
         }
         VoiceChannelResponse response = QuickChatWebMapper.toResponse(details.get());
         return ResponseEntity.ok(response);
-    }
-
-    /** 기기 토큰의 주인. 토큰이 없거나 해제된 기기면 401 로 끝난다. */
-    private DiscordUserId authenticatedUser(String authorization) {
-        String token = bearerToken(authorization).orElseThrow(DeviceUnauthorizedException::new);
-        AuthenticateDeviceQuery query = QuickChatWebMapper.toQuery(token);
-        return authenticateDeviceUseCase.authenticate(query).orElseThrow(DeviceUnauthorizedException::new);
-    }
-
-    private static Optional<String> bearerToken(String authorization) {
-        if (authorization == null || !authorization.startsWith(QuickTtsApi.BEARER_PREFIX)) {
-            return Optional.empty();
-        }
-        String token = authorization.substring(QuickTtsApi.BEARER_PREFIX.length()).strip();
-        return token.isEmpty() ? Optional.empty() : Optional.of(token);
     }
 }

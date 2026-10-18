@@ -8,7 +8,7 @@
 2. **조회 유스케이스 메서드는 `...Query` 하나를 받습니다**: `getDevices(GetDevicesQuery query)`, `findMyVoiceChannel(FindMyVoiceChannelQuery query)`, `authenticate(AuthenticateDeviceQuery query)`.
 3. **받을 값이 없으면 인자 없이 둡니다.** 빈 record 는 만들지 않습니다: `getVoices()`, `leaveAllNotAllowed()`.
 4. 이름은 메서드가 하는 일 + `Command` / `Query` 입니다(`ChangeVoiceCommand`, `GetCurrentVoiceQuery`). 한 유스케이스에 메서드가 여럿이면 메서드마다 하나씩 만듭니다(`ManageOwnDevicesUseCase` 는 `GetDevicesQuery`, `UnlinkDeviceCommand`, `UnlinkAllDevicesCommand`).
-5. Command 와 Query 는 필드만 있는 record 입니다. 값 검사는 지금처럼 값 객체(`GuildId`, `DeviceName`, `QuickChatMessage`)가 하고, record 는 검사를 더하지 않습니다. 필드도 값 객체로 둡니다. 다른 컨텍스트가 부르는 `AuthenticateDeviceQuery` 만 device 도메인 타입 대신 토큰 원문(`String`)을 받습니다(ADR 0026).
+5. Command 와 Query 는 필드만 있는 record 입니다. 값 검사는 지금처럼 값 객체(`GuildId`, `DeviceName`, `QuickChatMessage`)가 하고, record 는 검사를 더하지 않습니다. 필드도 값 객체로 둡니다. `AuthenticateDeviceQuery` 만 device 도메인 타입 대신 헤더의 토큰 원문(`String`)을 받습니다. 빈 값이나 틀린 모양도 예외 대신 "주인 없음" 으로 돌려주기 위해서입니다.
 6. 폴더는 `port/in/command`, `port/in/query` 입니다. 웹 DTO(`...Request`)는 그대로 두고, 인바운드 어댑터가 Command·Query 로 옮겨 담습니다.
 
 ## 결과

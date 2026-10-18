@@ -6,9 +6,9 @@
 
 1. **컨트롤러마다 웹 매퍼 하나를 같은 패키지(`<컨텍스트>/adapter/in/web`)에 둡니다.** 이름은 컨트롤러 이름에서 `Controller` 를 뺀 것 + `WebMapper` 입니다: `DeviceController` → `DeviceWebMapper`, `QuickChatController` → `QuickChatWebMapper`.
 2. 웹 매퍼는 상태 없는 `final` 클래스이고 `static` 메서드만 둡니다. 스프링 빈이 아니고 패키지 밖에 공개하지 않습니다.
-3. 메서드는 만드는 것에 따라 `toCommand`, `toQuery`, `toResponse` 입니다. 같은 이름이 둘이면 받는 타입으로 나뉩니다(`toQuery(String deviceToken)`, `toQuery(DiscordUserId user)`).
-4. 웹 요청 본문에 없는 값은 따로 받습니다. 보낸 사람은 `Authorization` 헤더의 기기 토큰으로 알아낸 값이라 `toCommand(DiscordUserId speaker, QuickChatRequest request)` 처럼 받습니다. 헤더에서 토큰을 꺼내는 일은 변환이 아니라 인증이라 컨트롤러에 남깁니다.
-5. 컨트롤러는 Command, Query, 웹 응답을 직접 만들지 않습니다. 컨트롤러에는 인증, 유스케이스 부르기, 상태 코드 고르기만 남습니다. 단계마다 변수에 담아 한 줄씩 씁니다(Command 만들기 → 유스케이스 부르기 → 응답 만들기). 호출을 한 줄에 겹쳐 쓰지 않아서 흐름이 위에서 아래로 읽힙니다.
+3. 메서드는 만드는 것에 따라 `toCommand`, `toQuery`, `toResponse` 입니다. 같은 이름이 둘이면 받는 타입으로 나뉩니다.
+4. 웹 요청 본문에 없는 값은 따로 받습니다. 보낸 사람은 기기 토큰 인증이 알아낸 값이라 `toCommand(DiscordUserId speaker, QuickChatRequest request)` 처럼 받습니다. 토큰을 읽는 일은 변환이 아니라 인증이라 스프링 시큐리티 필터가 합니다(ADR 0031).
+5. 컨트롤러는 Command, Query, 웹 응답을 직접 만들지 않습니다. 컨트롤러에는 유스케이스 부르기와 상태 코드 고르기만 남습니다. 단계마다 변수에 담아 한 줄씩 씁니다(Command 만들기 → 유스케이스 부르기 → 응답 만들기). 호출을 한 줄에 겹쳐 쓰지 않아서 흐름이 위에서 아래로 읽힙니다.
 6. 다른 자리의 변환은 지금처럼 둡니다.
    - 애그리거트 → 유스케이스 결과 Dto 는 Dto 의 `from(...)` 이 합니다(ADR 0010). Dto 의 필드와 변환이 한 파일에 있어서 같이 고치게 됩니다.
    - DB 행 → 애그리거트는 저장소 어댑터 안에서 합니다. JdbcClient 로 행을 바로 애그리거트로 만들어서 따로 둘 엔티티 클래스가 없습니다.

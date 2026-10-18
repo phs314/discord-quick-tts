@@ -1,5 +1,6 @@
 package io.github.phs314.quicktts.bot.speech.adapter.in.web;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -7,60 +8,67 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import io.github.phs314.quicktts.bot.device.application.port.in.usecase.AuthenticateDeviceUseCase;
 import io.github.phs314.quicktts.bot.shared.adapter.in.web.ApiExceptionHandler;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.application.exception.BotCannotJoinVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.exception.SpeakerNotInVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.exception.VoiceChannelInUseException;
+import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.SpeakQuickChatUseCase;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import io.github.phs314.quicktts.common.ApiErrorCode;
 import io.github.phs314.quicktts.common.QuickTtsApi;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.method.annotation.AuthenticationPrincipalArgumentResolver;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 /**
  * 클라이언트가 안내 문구를 고르는 오류 코드가 응답 본문 맨 위의 code 속성에 실리는지 확인한다.
+ * 기기 토큰 인증은 필터가 맡으므로 여기서는 인증을 마친 요청으로 보낸다. 토큰이 없을 때의 401 은 통합 테스트가 본다.
  */
 class QuickChatControllerTest {
 
-    private static final String TOKEN = "good-token";
     private static final DiscordUserId SPEAKER = new DiscordUserId(42L);
-    private static final AuthenticateDeviceUseCase AUTHENTICATE =
-            query -> query.rawDeviceToken().equals(TOKEN) ? Optional.of(SPEAKER) : Optional.empty();
 
     private SpeakQuickChatUseCase speak = command -> { };
 
-    @Test
-    void 문장을_받으면_202() throws Exception {
-        sendQuickChat(TOKEN, "안녕").andExpect(status().isAccepted());
+    /** 기기 토큰 인증 필터가 SPEAKER 를 알아낸 뒤의 요청으로 보낸다. */
+    @BeforeEach
+    void signIn() {
+        SecurityContextHolder.getContext()
+                .setAuthentication(UsernamePasswordAuthenticationToken.authenticated(SPEAKER, null, List.of()));
+    }
+
+    @AfterEach
+    void signOut() {
+        SecurityContextHolder.clearContext();
     }
 
     @Test
-    void 기기_토큰이_없으면_401_과_device_unauthorized() throws Exception {
-        sendQuickChat(null, "안녕")
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value(ApiErrorCode.DEVICE_UNAUTHORIZED));
-    }
+    void 인증된_사람이_보낸_문장으로_받으면_202() throws Exception {
+        List<SpeakQuickChatCommand> spoken = new ArrayList<>();
+        speak = spoken::add;
 
-    @Test
-    void 해제된_기기의_토큰이면_401_과_device_unauthorized() throws Exception {
-        sendQuickChat("revoked-token", "안녕")
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value(ApiErrorCode.DEVICE_UNAUTHORIZED));
+        sendQuickChat("안녕").andExpect(status().isAccepted());
+
+        assertThat(spoken).extracting(SpeakQuickChatCommand::speaker).containsExactly(SPEAKER);
     }
 
     @Test
     void 빈_문장이면_400_과_invalid_value() throws Exception {
-        sendQuickChat(TOKEN, " ")
+        sendQuickChat(" ")
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(ApiErrorCode.INVALID_VALUE))
                 .andExpect(jsonPath("$.detail").isNotEmpty());
@@ -71,7 +79,7 @@ class QuickChatControllerTest {
         speak = command -> {
             throw new SpeakerNotInVoiceChannelException(command.speaker());
         };
-        sendQuickChat(TOKEN, "안녕")
+        sendQuickChat("안녕")
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value(ApiErrorCode.SPEAKER_NOT_IN_VOICE_CHANNEL));
     }
@@ -82,7 +90,7 @@ class QuickChatControllerTest {
             throw new VoiceChannelInUseException(
                     new VoiceChannelDetails(new VoiceChannel(new GuildId(1L), 3L), "우리 서버", null, "게임"));
         };
-        sendQuickChat(TOKEN, "안녕")
+        sendQuickChat("안녕")
                 .andExpect(status().isLocked())
                 .andExpect(jsonPath("$.code").value(ApiErrorCode.VOICE_CHANNEL_IN_USE));
     }
@@ -92,7 +100,7 @@ class QuickChatControllerTest {
         speak = command -> {
             throw new BotCannotJoinVoiceChannelException(new VoiceChannel(new GuildId(1L), 2L), null);
         };
-        sendQuickChat(TOKEN, "안녕")
+        sendQuickChat("안녕")
                 .andExpect(status().isForbidden())
                 .andExpect(jsonPath("$.code").value(ApiErrorCode.BOT_CANNOT_JOIN_VOICE_CHANNEL));
     }
@@ -100,7 +108,6 @@ class QuickChatControllerTest {
     @Test
     void JSON_이_깨졌으면_400_과_invalid_request() throws Exception {
         mockMvc().perform(post(QuickTtsApi.QUICK_CHAT_PATH)
-                        .header(HttpHeaders.AUTHORIZATION, QuickTtsApi.BEARER_PREFIX + TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{\"text\":"))
                 .andExpect(status().isBadRequest())
@@ -112,32 +119,28 @@ class QuickChatControllerTest {
         speak = command -> {
             throw new IllegalStateException("내부 사정");
         };
-        sendQuickChat(TOKEN, "안녕")
+        sendQuickChat("안녕")
                 .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.code").value(ApiErrorCode.UNEXPECTED_FAILURE))
                 .andExpect(jsonPath("$.detail").value(not(containsString("내부 사정"))));
     }
 
     @Test
-    void 내_음성_채널을_물을_때도_토큰이_없으면_401_과_device_unauthorized() throws Exception {
+    void 내_음성_채널에_없으면_204() throws Exception {
         mockMvc().perform(get(QuickTtsApi.MY_VOICE_CHANNEL_PATH))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value(ApiErrorCode.DEVICE_UNAUTHORIZED));
+                .andExpect(status().isNoContent());
     }
 
-    private ResultActions sendQuickChat(String token, String text) throws Exception {
-        var request = post(QuickTtsApi.QUICK_CHAT_PATH)
+    private ResultActions sendQuickChat(String text) throws Exception {
+        return mockMvc().perform(post(QuickTtsApi.QUICK_CHAT_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"text\":\"" + text + "\"}");
-        if (token != null) {
-            request.header(HttpHeaders.AUTHORIZATION, QuickTtsApi.BEARER_PREFIX + token);
-        }
-        return mockMvc().perform(request);
+                .content("{\"text\":\"" + text + "\"}"));
     }
 
     private MockMvc mockMvc() {
-        QuickChatController controller = new QuickChatController(AUTHENTICATE, speak, query -> Optional.empty());
+        QuickChatController controller = new QuickChatController(speak, query -> Optional.empty());
         return MockMvcBuilders.standaloneSetup(controller)
+                .setCustomArgumentResolvers(new AuthenticationPrincipalArgumentResolver())
                 .setControllerAdvice(new ApiExceptionHandler())
                 .build();
     }

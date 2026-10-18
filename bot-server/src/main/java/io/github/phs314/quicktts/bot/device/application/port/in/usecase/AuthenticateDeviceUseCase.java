@@ -5,8 +5,8 @@ import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import java.util.Optional;
 
 /**
- * 기기 토큰으로 그 PC 의 주인을 찾는다. 다른 컨텍스트가 부르는 device 컨텍스트의 공개 입구라서
- * device 도메인 타입 대신 토큰 원문을 받는다 ({@link AuthenticateDeviceQuery}).
+ * 기기 토큰으로 그 PC 의 주인을 찾는다. 웹 요청마다 기기 토큰 인증 필터가 부른다 (ADR 0031).
+ * 토큰이 없거나 틀리면 예외 대신 빈 값을 돌려주고, 막는 일은 보안 설정이 한다 ({@link AuthenticateDeviceQuery}).
  */
 public interface AuthenticateDeviceUseCase {
 
