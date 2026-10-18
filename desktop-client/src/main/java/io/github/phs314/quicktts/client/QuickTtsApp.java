@@ -208,7 +208,6 @@ public class QuickTtsApp extends Application {
         }
         changingHotkey = true;
         HotkeyDialog dialog = new HotkeyDialog(config.hotkey());
-        useAppIcon(dialog);
         hotkey.startRecording(dialog::onPressed);
         try {
             dialog.showAndWait().ifPresent(newHotkey -> {

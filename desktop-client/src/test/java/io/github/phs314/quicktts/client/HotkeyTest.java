@@ -23,6 +23,11 @@ class HotkeyTest {
     }
 
     @Test
+    void 키_이름을_누르는_순서대로_나눠_준다() {
+        assertThat(Hotkey.parse("Win+Shift+PageUp").get().keys()).containsExactly("Shift", "Win", "PageUp");
+    }
+
+    @Test
     void F_키는_혼자_써도_된다() {
         assertThat(Hotkey.parse("F9")).get().hasToString("F9");
     }

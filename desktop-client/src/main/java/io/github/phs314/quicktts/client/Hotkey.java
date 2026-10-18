@@ -3,8 +3,10 @@ package io.github.phs314.quicktts.client;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
@@ -77,12 +79,18 @@ public record Hotkey(boolean ctrl, boolean alt, boolean shift, boolean win, int 
 
     @Override
     public String toString() {
-        StringBuilder text = new StringBuilder();
-        if (ctrl) text.append("Ctrl+");
-        if (alt) text.append("Alt+");
-        if (shift) text.append("Shift+");
-        if (win) text.append("Win+");
-        return text.append(KEY_NAMES.getOrDefault(keyCode, "Key" + keyCode)).toString();
+        return String.join("+", keys());
+    }
+
+    /** 누르는 순서대로의 키 이름. {@code Ctrl+Shift+Space} 면 Ctrl, Shift, Space 다. */
+    public List<String> keys() {
+        List<String> names = new ArrayList<>();
+        if (ctrl) names.add("Ctrl");
+        if (alt) names.add("Alt");
+        if (shift) names.add("Shift");
+        if (win) names.add("Win");
+        names.add(KEY_NAMES.getOrDefault(keyCode, "Key" + keyCode));
+        return names;
     }
 
     private boolean isFunctionKey() {

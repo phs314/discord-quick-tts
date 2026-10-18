@@ -1,0 +1,157 @@
+/* 단축키 바꾸기 창. 입력창(InputBar)과 같은 디스코드 어두운 색을 쓴다. */
+
+.root {
+    -fx-font-family: 'Malgun Gothic';
+    -fx-background-color: transparent;
+}
+
+.card {
+    -fx-background-color: rgba(255, 255, 255, 0.06), #313338;
+    -fx-background-insets: 0, 1;
+    -fx-background-radius: 12, 11;
+    -fx-effect: dropshadow(gaussian, rgba(0, 0, 0, 0.45), 22, 0, 0, 6);
+}
+
+.header {
+    -fx-padding: 14 12 0 18;
+    -fx-cursor: move;
+}
+
+.title {
+    -fx-text-fill: #f2f3f5;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.close {
+    -fx-background-color: transparent;
+    -fx-background-radius: 6;
+    -fx-text-fill: #b5bac1;
+    -fx-font-size: 13px;
+    -fx-padding: 3 8 3 8;
+    -fx-cursor: hand;
+}
+
+.close:hover {
+    -fx-background-color: #3f4147;
+    -fx-text-fill: #f2f3f5;
+}
+
+.body {
+    -fx-padding: 6 18 12 18;
+}
+
+.prompt {
+    -fx-text-fill: #b5bac1;
+    -fx-font-size: 13px;
+}
+
+.key-box {
+    -fx-background-color: #3f4147, #1e1f22;
+    -fx-background-insets: 0, 1.5;
+    -fx-background-radius: 10, 8.5;
+    -fx-padding: 12 16 16 16;
+}
+
+.key-box:new {
+    -fx-background-color: #5865f2, #1e1f22;
+}
+
+.key-box:invalid {
+    -fx-background-color: #f23f43, #1e1f22;
+}
+
+.key-tag {
+    -fx-text-fill: #949ba4;
+    -fx-font-size: 11px;
+    -fx-font-weight: bold;
+}
+
+.key-box:new .key-tag {
+    -fx-text-fill: #949cf7;
+}
+
+.key-box:invalid .key-tag {
+    -fx-text-fill: #fa777c;
+}
+
+.keycap {
+    -fx-background-color: #111214, #4e5058;
+    -fx-background-insets: 0, 0 0 3 0;
+    -fx-background-radius: 6;
+    -fx-padding: 5 12 8 12;
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+}
+
+.key-plus {
+    -fx-text-fill: #80848e;
+    -fx-font-size: 15px;
+    -fx-font-weight: bold;
+}
+
+.message {
+    -fx-text-fill: #b5bac1;
+    -fx-font-size: 12px;
+}
+
+.message:warning {
+    -fx-text-fill: #f0b232;
+}
+
+.message:error {
+    -fx-text-fill: #fa777c;
+}
+
+.footer {
+    -fx-background-color: #2b2d31;
+    -fx-background-radius: 0 0 11 11;
+    -fx-background-insets: 0 1 1 1;
+    -fx-padding: 14 18 14 18;
+}
+
+.button {
+    -fx-background-radius: 6;
+    -fx-font-size: 13px;
+    -fx-padding: 7 16 7 16;
+    -fx-cursor: hand;
+}
+
+.reset {
+    -fx-background-color: transparent;
+    -fx-text-fill: #b5bac1;
+    -fx-padding: 7 4 7 4;
+}
+
+.reset:hover {
+    -fx-text-fill: #f2f3f5;
+    -fx-underline: true;
+}
+
+.cancel {
+    -fx-background-color: transparent;
+    -fx-text-fill: #f2f3f5;
+}
+
+.cancel:hover {
+    -fx-underline: true;
+}
+
+.save {
+    -fx-background-color: #5865f2;
+    -fx-text-fill: #ffffff;
+    -fx-font-weight: bold;
+}
+
+.save:hover {
+    -fx-background-color: #4752c4;
+}
+
+.save:pressed {
+    -fx-background-color: #3c45a5;
+}
+
+.save:disabled {
+    -fx-opacity: 0.45;
+}
