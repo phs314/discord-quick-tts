@@ -10,6 +10,7 @@ import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceCatalog;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +30,7 @@ public class ManageVoiceService implements ManageVoiceUseCase {
     }
 
     @Override
+    @Transactional
     public Voice changeVoice(ChangeVoiceCommand command) {
         Voice voice = catalog().choose(command.voiceId());
         voicePreferencePort.saveVoice(command.user(), voice.id());

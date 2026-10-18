@@ -52,6 +52,7 @@ class EnforceGuildAllowlistServiceTest {
         allowedGuilds.saveIfAbsent(AllowedGuild.allow(MINE, NOW));
 
         service.leaveIfNotAllowed(new LeaveIfNotAllowedCommand(STRANGER));
+        service.fillIfEmpty();
         service.leaveAllNotAllowed();
 
         assertThat(joinedGuilds.left()).isEmpty();
@@ -62,6 +63,7 @@ class EnforceGuildAllowlistServiceTest {
     void 켜질_때_꺼져_있는_동안_초대된_서버에서_나간다() {
         allowedGuilds.saveIfAbsent(AllowedGuild.allow(MINE, NOW));
 
+        service.fillIfEmpty();
         service.leaveAllNotAllowed();
 
         assertThat(joinedGuilds.left()).containsExactly(STRANGER);
@@ -70,9 +72,27 @@ class EnforceGuildAllowlistServiceTest {
 
     @Test
     void 허용_목록이_비어_있으면_지금_있는_서버를_모두_허용한다() {
+        service.fillIfEmpty();
         service.leaveAllNotAllowed();
 
         assertThat(joinedGuilds.left()).isEmpty();
         assertThat(allowedGuilds.findAll()).extracting(AllowedGuild::guildId).containsExactly(MINE, STRANGER);
+    }
+
+    @Test
+    void 채우기_전에는_켜질_때_아무_데서도_나가지_않는다() {
+        service.leaveAllNotAllowed();
+
+        assertThat(joinedGuilds.left()).isEmpty();
+        assertThat(allowedGuilds.findAll()).isEmpty();
+    }
+
+    @Test
+    void 허용_목록이_있으면_다시_채우지_않는다() {
+        allowedGuilds.saveIfAbsent(AllowedGuild.allow(MINE, NOW));
+
+        service.fillIfEmpty();
+
+        assertThat(allowedGuilds.findAll()).containsExactly(AllowedGuild.allow(MINE, NOW));
     }
 }

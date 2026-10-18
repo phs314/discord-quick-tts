@@ -88,18 +88,21 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │       └── out/memory/         연결 코드 저장소 (메모리)
 ├── guild/
 │   ├── domain/                 AllowedGuild (허용한 디스코드 서버)
-│   │   └── vo/                 GuildAllowlist (허용 목록으로 머물 곳 정하기)
+│   │   ├── vo/                 GuildAllowlist (허용 목록으로 머물 곳 정하기)
+│   │   └── event/              GuildDisallowed (허용 목록에서 뺐다)
 │   ├── application/
 │   │   ├── exception/          NotBotOwnerException
 │   │   ├── port/in/usecase/    ManageGuildAllowlist, EnforceGuildAllowlist
 │   │   ├── port/in/command/    AllowGuild, DisallowGuild, LeaveIfNotAllowed (...Command)
 │   │   ├── port/in/query/      GetAllowlist (...Query)
 │   │   ├── port/in/dto/        AllowedGuildDto, GuildAllowlistDto
-│   │   ├── port/out/           AllowedGuildPort, JoinedGuildPort, BotOwnerPort, GuildAllowlistSettingPort
+│   │   ├── port/out/           AllowedGuildPort, JoinedGuildPort, BotOwnerPort, GuildAllowlistSettingPort, GuildAllowlistEventPort
 │   │   └── service/            입력 포트마다 하나
 │   └── adapter/
 │       ├── in/discord/         /허용목록 슬래시 명령, 초대·시작 때 확인
+│       ├── in/event/           허용 목록에서 빼면 커밋 뒤에 그 서버에서 나가기
 │       ├── out/discord/        봇이 들어가 있는 서버 보기·나가기, 봇 주인 알아내기
+│       ├── out/event/          허용 목록 이벤트 내기 (스프링 이벤트)
 │       ├── out/persistence/    허용 목록 저장소 (JdbcClient)
 │       └── out/settings/       허용 목록을 쓸지 설정 값 (GuildAllowlistProperties)
 ├── shared/                     공유 커널(domain/vo 의 DiscordUserId, GuildId, 예외 공통 부모 BusinessException)과 웹·디스코드 공통 예외 처리
@@ -124,7 +127,8 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 그 밖에:
 
 - 같은 디스코드 서버에서는 먼저 쓰고 있는 음성 채널이 우선이고, 사람이 다 나가면 봇도 나갑니다. 이 판단은 디스코드 서버마다 하나인 봇 자리(`BotSeat`)가 하고, 잠금도 디스코드 서버마다 따로입니다 ([ADR 0007](docs/adr/0007-first-come-voice-channel.md), [ADR 0014](docs/adr/0014-bot-seat-aggregate.md)).
-- 한 번에 함께 저장하는 것은 애그리거트 하나입니다. 같은 종류를 한꺼번에 넣거나 지울 때만 포트 메서드 하나(`saveAll`, `deleteAllByOwner`)로 묶고, 다른 애그리거트는 순서대로 따로 저장합니다. 트랜잭션 안에서는 디스코드 서버 나가기 같은 되돌릴 수 없는 호출을 하지 않습니다 ([ADR 0028](docs/adr/0028-one-aggregate-per-write.md)).
+- 한 번에 함께 저장하는 것은 애그리거트 하나입니다. 같은 종류를 한꺼번에 넣거나 지울 때만 포트 메서드 하나(`saveAll`, `deleteAllByOwner`)로 묶고, 다른 애그리거트는 순서대로 따로 저장합니다 ([ADR 0028](docs/adr/0028-one-aggregate-per-write.md)).
+- DB 에 쓰는 유스케이스 메서드에는 `@Transactional` 을 붙이고, 저장소는 그 트랜잭션 안에서 한 줄씩 씁니다. 읽기만 하는 유스케이스에는 붙이지 않습니다. 트랜잭션 안에서는 디스코드 서버 나가기 같은 되돌릴 수 없는 호출을 하지 않고, 쓴 결과로 나가야 하면 도메인 이벤트를 내서 커밋 뒤에 받는 쪽이 나갑니다(`@TransactionalEventListener`) ([ADR 0033](docs/adr/0033-transactional-on-writing-use-cases.md)).
 - TTS 엔진은 `SpeechSynthesizerPort` 뒤에 있습니다. 지금은 무료인 Microsoft Edge "소리 내어 읽기" 목소리(선희, 인준, 현수)와 Google 번역 목소리를 쓰고, Edge 가 실패하면 Google 번역 목소리로 대신 읽습니다. 엔진을 추가하려면 `speech/adapter/out/tts` 에 `TtsEngine` 구현을 하나 더 만들면 됩니다. 둘 다 공식 API 가 아니라서 언제든 막힐 수 있습니다.
 - 기기 토큰은 서버에 SHA-256 해시로만 저장합니다. 연결 코드는 5분짜리 일회용이고 메모리에만 둡니다.
 - DB 는 배포 서버가 MySQL, 이 PC 에서 띄우는 서버(개발, exe)가 H2 파일입니다. 스키마는 Flyway 마이그레이션(`bot-server/src/main/resources/db/migration`)으로 관리하고, 저장소 테스트는 H2 와 MySQL 양쪽에서 돕니다 ([ADR 0016](docs/adr/0016-mysql-and-flyway.md)).

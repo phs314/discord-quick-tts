@@ -9,16 +9,15 @@ import io.github.phs314.quicktts.bot.guild.application.port.in.query.GetAllowlis
 import io.github.phs314.quicktts.bot.guild.application.port.in.usecase.ManageGuildAllowlistUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.out.AllowedGuildPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.BotOwnerPort;
+import io.github.phs314.quicktts.bot.guild.application.port.out.GuildAllowlistEventPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.GuildAllowlistSettingPort;
-import io.github.phs314.quicktts.bot.guild.application.port.out.JoinedGuildPort;
 import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
-import io.github.phs314.quicktts.bot.guild.domain.vo.GuildAllowlist;
+import io.github.phs314.quicktts.bot.guild.domain.event.GuildDisallowed;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
-import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import java.time.Clock;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -26,8 +25,8 @@ public class ManageGuildAllowlistService implements ManageGuildAllowlistUseCase 
 
     private final BotOwnerPort botOwnerPort;
     private final AllowedGuildPort allowedGuildPort;
-    private final JoinedGuildPort joinedGuildPort;
     private final GuildAllowlistSettingPort guildAllowlistSettingPort;
+    private final GuildAllowlistEventPort guildAllowlistEventPort;
     private final Clock clock;
 
     @Override
@@ -38,25 +37,22 @@ public class ManageGuildAllowlistService implements ManageGuildAllowlistUseCase 
     }
 
     @Override
+    @Transactional
     public boolean allow(AllowGuildCommand command) {
         requireOwner(command.requester());
         return allowedGuildPort.saveIfAbsent(AllowedGuild.allow(command.guildId(), clock.instant()));
     }
 
+    /** 목록에서 빼기만 하고, 봇이 그 서버에서 나가는 일은 커밋 뒤에 이벤트를 받는 쪽이 한다 (ADR 0033). */
     @Override
+    @Transactional
     public boolean disallow(DisallowGuildCommand command) {
         requireOwner(command.requester());
-        GuildId guildId = command.guildId();
-        boolean removed = allowedGuildPort.delete(guildId);
-        if (!currentAllowlist().permits(guildId)) {
-            joinedGuildPort.leaveWithNotice(guildId);
+        boolean removed = allowedGuildPort.delete(command.guildId());
+        if (removed) {
+            guildAllowlistEventPort.publish(new GuildDisallowed(command.guildId()));
         }
         return removed;
-    }
-
-    private GuildAllowlist currentAllowlist() {
-        return new GuildAllowlist(guildAllowlistSettingPort.isEnabled(),
-                allowedGuildPort.findAll().stream().map(AllowedGuild::guildId).collect(Collectors.toSet()));
     }
 
     private void requireOwner(DiscordUserId requester) {

@@ -108,6 +108,7 @@ public class AllowlistCommandListener extends ListenerAdapter implements Discord
         return result + "\n이 링크로 초대하면 돼요: " + inviteUrl(guildId);
     }
 
+    /** 봇이 그 서버에서 나가는 일은 목록에서 빼는 트랜잭션이 커밋된 뒤에 이벤트로 일어난다 (ADR 0033). */
     private String remove(DiscordUserId requester, GuildId guildId) {
         String name = guildName(guildId);
         return manageGuildAllowlistUseCase.disallow(new DisallowGuildCommand(requester, guildId))
