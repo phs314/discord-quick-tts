@@ -8,6 +8,8 @@ import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.SpokenText;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -16,6 +18,8 @@ class MultiEngineSpeechSynthesizerTest {
 
     private static final VoiceId EDGE = new VoiceId("edge:ko-KR-SunHiNeural");
     private static final SpokenText HELLO = new SpokenText("안녕");
+
+    private final MeterRegistry meterRegistry = new SimpleMeterRegistry();
 
     @Test
     void 엔진들의_목소리를_한_목록으로_내놓고_설정한_기본_목소리를_쓴다() {
@@ -47,17 +51,44 @@ class MultiEngineSpeechSynthesizerTest {
     }
 
     @Test
+    void 목소리별로_걸린_시간과_결과를_센다() {
+        MultiEngineSpeechSynthesizer synthesizer = synthesizer(new FakeEngine(EDGE, false), defaultVoice(EDGE.value()));
+
+        synthesizer.synthesize(HELLO, EDGE);
+
+        assertThat(synthesisCount(EDGE, "success")).isEqualTo(1);
+        assertThat(meterRegistry.find(MultiEngineSpeechSynthesizer.FALLBACK_METRIC).counter()).isNull();
+    }
+
+    @Test
+    void 대신_읽으면_실패와_대신_읽은_횟수를_센다() {
+        MultiEngineSpeechSynthesizer synthesizer = synthesizer(new FakeEngine(EDGE, true), defaultVoice(EDGE.value()));
+
+        synthesizer.synthesize(HELLO, EDGE);
+
+        assertThat(synthesisCount(EDGE, "failure")).isEqualTo(1);
+        assertThat(synthesisCount(GoogleTranslateEngine.VOICE_ID, "success")).isEqualTo(1);
+        assertThat(meterRegistry.get(MultiEngineSpeechSynthesizer.FALLBACK_METRIC)
+                .tag("voice", EDGE.value()).counter().count()).isEqualTo(1);
+    }
+
+    @Test
     void 없는_목소리로는_읽을_수_없다() {
         MultiEngineSpeechSynthesizer synthesizer = new MultiEngineSpeechSynthesizer(
-                List.of(new FakeEngine(EDGE, false)), defaultVoice(EDGE.value()));
+                List.of(new FakeEngine(EDGE, false)), defaultVoice(EDGE.value()), meterRegistry);
 
         assertThatThrownBy(() -> synthesizer.synthesize(HELLO, new VoiceId("edge:없는-목소리")))
                 .isInstanceOf(SpeechSynthesisException.class);
     }
 
-    private static MultiEngineSpeechSynthesizer synthesizer(TtsEngine edge, TtsProperties properties) {
+    private MultiEngineSpeechSynthesizer synthesizer(TtsEngine edge, TtsProperties properties) {
         return new MultiEngineSpeechSynthesizer(
-                List.of(edge, new FakeEngine(GoogleTranslateEngine.VOICE_ID, false)), properties);
+                List.of(edge, new FakeEngine(GoogleTranslateEngine.VOICE_ID, false)), properties, meterRegistry);
+    }
+
+    private long synthesisCount(VoiceId voiceId, String outcome) {
+        return meterRegistry.get(MultiEngineSpeechSynthesizer.SYNTHESIS_METRIC)
+                .tag("voice", voiceId.value()).tag("outcome", outcome).timer().count();
     }
 
     private static TtsProperties defaultVoice(String voice) {

@@ -14,6 +14,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     // 스키마는 Flyway 마이그레이션(resources/db/migration)으로 관리한다.
     implementation("org.springframework.boot:spring-boot-starter-flyway")
+    // 상태 확인(/actuator/health)과 지표(Micrometer).
+    implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.flywaydb:flyway-mysql")
     // 배포 서버는 MySQL, 이 PC 에서 띄우는 서버(개발, exe)는 설치가 필요 없는 H2 파일 DB.
     runtimeOnly("com.mysql:mysql-connector-j")

@@ -1,5 +1,6 @@
 package io.github.phs314.quicktts.client;
 
+import io.github.phs314.quicktts.common.QuickTtsApi;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -72,9 +73,9 @@ final class LocalBotServer implements AutoCloseable {
         return host != null && LOCAL_HOSTS.contains(host.toLowerCase());
     }
 
-    /** 무슨 응답이든 오면 떠 있는 것이다. */
+    /** 상태 확인 주소에 무슨 응답이든 오면 떠 있는 것이다. 디스코드 연결이 잠깐 끊겨 503 이 와도 떠 있다고 본다. */
     private static boolean isRunning(String serverUrl) {
-        HttpRequest request = HttpRequest.newBuilder(URI.create(serverUrl + "/"))
+        HttpRequest request = HttpRequest.newBuilder(URI.create(serverUrl + QuickTtsApi.HEALTH_PATH))
                 .timeout(Duration.ofSeconds(1))
                 .GET()
                 .build();
