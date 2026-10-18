@@ -1,5 +1,5 @@
 # Release 본문의 자동 생성 노트(--generate-notes)를 PR 라벨로 나눈다.
-# 라벨은 PR 라벨 워크플로가 PR 제목의 [타입]을 보고 단다 (ADR 0022).
+# 라벨은 PR 라벨 워크플로(Release Drafter Autolabeler)가 PR 제목의 [타입]을 보고 단다 (ADR 0022).
 # 위에서부터 처음 맞는 묶음에 들어가고, 라벨이 없거나 다른 타입이면 "기타"로 간다.
 changelog:
   categories:

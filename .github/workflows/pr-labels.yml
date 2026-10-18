@@ -1,14 +1,15 @@
 name: PR 라벨
 
-# PR 제목의 [타입](feat, fix, refactor ...)과 같은 이름의 라벨을 단다.
+# PR 제목의 [타입](feat, fix, refactor ...)과 같은 이름의 라벨을 Release Drafter 의 Autolabeler 로 단다.
+# 타입별 규칙은 .github/release-drafter.yml 에 있고, 초안 Release 는 만들지 않는다.
 # Release 노트가 이 라벨로 "새 기능 / 버그 수정 / 기타"를 나눈다 (.github/release.yml, ADR 0022).
-# 제목을 고쳐 타입이 바뀌면 예전 타입 라벨은 뗀다. 코드를 받아 오지 않으므로 pull_request_target 으로 돈다.
+# 코드를 받아 오지 않으므로 pull_request_target 으로 돌고, 설정은 기본 브랜치의 것을 읽는다.
 on:
   pull_request_target:
     types: [opened, edited, reopened]
 
 permissions:
-  issues: write
+  contents: read
   pull-requests: write
 
 jobs:
@@ -16,30 +17,4 @@ jobs:
     name: 타입 라벨 달기
     runs-on: ubuntu-latest
     steps:
-      - name: 제목에서 타입 읽어 라벨 달기
-        env:
-          GH_TOKEN: ${{ github.token }}
-          GH_REPO: ${{ github.repository }}
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_TITLE: ${{ github.event.pull_request.title }}
-        run: |
-          # scripts/check-commit-msg.sh 의 타입과 같은 목록. 색은 GitHub 라벨 화면에서 보이는 색이다.
-          declare -A color_of=(
-            [feat]=1d76db [fix]=d73a4a [refactor]=c5def5 [test]=0e8a16 [docs]=0075ca
-            [style]=fbca04 [chore]=bfd4f2 [remove]=e99695 [deploy]=5319e7 [init]=ededed
-          )
-          if [[ ! "$PR_TITLE" =~ ^[^\ ]+\ \[([a-z]+)\]\  ]] || [[ -z "${color_of[${BASH_REMATCH[1]}]:-}" ]]; then
-            echo "제목에 아는 [타입]이 없어 라벨을 달지 않습니다: $PR_TITLE"
-            exit 0
-          fi
-          type=${BASH_REMATCH[1]}
-
-          gh label create "$type" --color "${color_of[$type]}" --description "PR 제목의 [$type]" --force
-          gh pr edit "$PR_NUMBER" --add-label "$type"
-
-          current=$(gh pr view "$PR_NUMBER" --json labels --jq '.labels[].name')
-          for other in "${!color_of[@]}"; do
-            if [[ "$other" != "$type" ]] && grep -qx "$other" <<< "$current"; then
-              gh pr edit "$PR_NUMBER" --remove-label "$other"
-            fi
-          done
+      - uses: release-drafter/release-drafter/autolabeler@v7
