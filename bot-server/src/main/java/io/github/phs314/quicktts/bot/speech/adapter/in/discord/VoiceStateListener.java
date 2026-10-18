@@ -6,10 +6,8 @@ import io.github.phs314.quicktts.bot.speech.application.port.in.command.LeaveIfE
 import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.FollowBotMoveUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.LeaveEmptyVoiceChannelUseCase;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
-import jakarta.annotation.PostConstruct;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.events.guild.voice.GuildVoiceUpdateEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
@@ -23,14 +21,8 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class VoiceStateListener extends ListenerAdapter {
 
-    private final JDA jda;
     private final LeaveEmptyVoiceChannelUseCase leaveEmptyVoiceChannelUseCase;
     private final FollowBotMoveUseCase followBotMoveUseCase;
-
-    @PostConstruct
-    void register() {
-        jda.addEventListener(this);
-    }
 
     @Override
     public void onGuildVoiceUpdate(GuildVoiceUpdateEvent event) {

@@ -8,7 +8,7 @@
 - 컨트롤러, 서비스, 도메인, 저장소, Flyway 는 실제 것을 씁니다. 바꾸는 것은 바깥 세계에 닿는 출력 포트뿐입니다.
   - 디스코드: `VoiceChannelLocatorPort`, `SpeechPlayerPort` 는 서비스 테스트와 같은 대역(`FakeVoiceChannelLocatorPort`, `FakeSpeechPlayerPort`)으로 바꿉니다. 소리는 나지 않고, 봇이 들어간 채널과 읽은 문장을 글로 남깁니다.
   - TTS 엔진: `SpeechSynthesizerPort` 는 `FakeSpeechSynthesizerPort` 로 바꿉니다. Edge, Google 번역을 부르지 않습니다.
-  - JDA 는 Mockito 빈 껍데기로 바꿔 디스코드에 로그인하지 않게 하고, 켜질 때 디스코드를 부르는 `DiscordCommandRegistrar`, `BotOwnerPort`, `JoinedGuildPort` 도 함께 바꿉니다.
+  - JDA 는 Mockito 빈 껍데기로 바꿔 디스코드에 로그인하지 않게 하고, 켜질 때 디스코드를 부르는 `DiscordListenerRegistrar`, `BotOwnerPort`, `JoinedGuildPort` 도 함께 바꿉니다.
 - 디스코드 `/연결`, `/연결해제`, `/목소리` 로 할 일은 그 명령이 부르는 입력 포트를 테스트가 직접 부릅니다.
 - DB 는 PC 서버와 같은 H2(MySQL 모드)를 메모리로 띄웁니다. MySQL 에서 SQL 이 도는지는 저장소 테스트가 이미 양쪽에서 확인합니다(ADR 0016).
 - 컨트롤러 테스트는 그대로 둡니다. 오류 코드 하나하나는 거기서 빠르게 보고, 통합 테스트는 실제 서버에서 요청부터 응답까지 이어지는 흐름을 봅니다.
