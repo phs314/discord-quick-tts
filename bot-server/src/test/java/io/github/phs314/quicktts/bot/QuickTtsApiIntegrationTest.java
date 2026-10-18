@@ -278,10 +278,11 @@ class QuickTtsApiIntegrationTest {
     }
 
     @Test
-    void 지표는_기기_토큰이_있어야_본다() {
-        client.get().uri("/actuator/metrics").exchange().expectStatus().isUnauthorized();
+    void 지표는_기기_토큰이_있어야_보고_음성_캐시_지표도_있다() {
+        String cacheGets = "/actuator/metrics/cache.gets?tag=cache:speech";
+        client.get().uri(cacheGets).exchange().expectStatus().isUnauthorized();
 
-        client.get().uri("/actuator/metrics")
+        client.get().uri(cacheGets)
                 .header(HttpHeaders.AUTHORIZATION, QuickTtsApi.BEARER_PREFIX + registerDevice(newUser()))
                 .exchange()
                 .expectStatus().isOk();
