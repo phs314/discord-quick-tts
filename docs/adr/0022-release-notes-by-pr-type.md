@@ -1,5 +1,8 @@
 # Release 노트는 PR 제목의 타입으로 나눈다
 
+- 상태: 채택
+- 날짜: 2026-10-14
+
 Release 본문의 PR 목록은 GitHub 자동 생성(`--generate-notes`, [ADR 0020](0020-github-releases-and-update-notice.md))이라, 그 사이 머지된 PR 이 머지 순서대로 한 줄씩 나옵니다. 리팩터링, 테스트, CI 정리처럼 쓰는 사람에게는 달라지는 게 없는 PR 이 새 기능 사이에 섞여서, 이번 버전에서 무엇이 바뀌었는지 한눈에 보이지 않습니다.
 
 ## 결정

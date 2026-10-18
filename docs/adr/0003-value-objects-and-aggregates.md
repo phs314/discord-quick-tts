@@ -1,5 +1,9 @@
 # 값 객체는 domain/vo 의 record, 애그리거트는 식별자로 비교하는 class
 
+- 상태: 일부 대체됨
+  - speech 에도 애그리거트 `BotSeat` 가 생김 → ADR 0014
+- 날짜: 2026-10-11
+
 자바 `record` 는 모든 필드가 같으면 같은 객체로 칩니다. 값 객체에는 이것이 맞지만, 애그리거트에는 틀립니다. 같은 기기는 이름이 바뀌어도 같은 기기여야 하기 때문입니다. 그래서 둘을 다르게 만들기로 했습니다.
 
 - **값 객체**는 각 컨텍스트의 `domain/vo` 패키지에 `record` 로 둡니다. 규칙에 맞지 않는 값은 생성자에서 `InvalidDomainValueException` 으로 막아, 만들어졌다면 올바른 값이 되게 합니다. 예: `PairingCode`, `DeviceToken`, `QuickChatMessage`, `VoiceId`, `DiscordUserId`.
