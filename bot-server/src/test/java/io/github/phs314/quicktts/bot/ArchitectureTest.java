@@ -171,12 +171,23 @@ class ArchitectureTest {
             .that().areDeclaredInClassesThat().resideInAPackage("..bot.*.application.service..")
             .should().notHaveRawType(resideInAPackage("..bot.*.application.port.in.usecase.."));
 
+    /**
+     * 위의 계층 규칙은 적어 둔 어댑터 폴더만 본다. 어댑터 폴더를 새로 만들어도 도메인과 애플리케이션은 어댑터를 모른다 (ADR 0035).
+     */
     @ArchTest
-    static final ArchRule domainIsFrameworkFree = noClasses()
+    static final ArchRule domainAndApplicationDoNotKnowAdapters = noClasses()
+            .that().resideInAnyPackage("..bot.*.domain..", "..bot.*.application..")
+            .should().dependOnClassesThat().resideInAPackage("..bot.*.adapter..");
+
+    /**
+     * 도메인은 자바 표준 라이브러리와 도메인, 클라이언트와 함께 쓰는 API 약속(common 의 오류 코드)만 쓴다.
+     * 쓰면 안 되는 라이브러리를 적는 대신 써도 되는 것만 적어서, 새 라이브러리를 들여도 이 규칙은 그대로 막는다 (ADR 0035).
+     */
+    @ArchTest
+    static final ArchRule domainDependsOnlyOnJavaAndDomain = classes()
             .that().resideInAPackage("..bot.*.domain..")
-            .should().dependOnClassesThat().resideInAnyPackage(
-                    "org.springframework..", "net.dv8tion..", "com.sedmelluq..", "club.minnced..",
-                    "..bot.config..");
+            .should().onlyDependOnClassesThat().resideInAnyPackage(
+                    "java..", "..bot.*.domain..", "io.github.phs314.quicktts.common..");
 
     /** 서비스에는 빈 등록(@Service)과 트랜잭션(@Transactional) 애너테이션만 허용한다 (ADR 0009). */
     @ArchTest

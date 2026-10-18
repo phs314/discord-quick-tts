@@ -1,6 +1,7 @@
 # ArchUnit 은 의존 방향만 검사한다
 
-- 상태: 채택
+- 상태: 일부 대체됨
+  - `domainIsFrameworkFree` 는 허용 목록 규칙 `domainDependsOnlyOnJavaAndDomain` 으로 바뀌고, 패턴 규칙 `domainAndApplicationDoNotKnowAdapters` 를 더해 13개 → ADR 0035
 - 날짜: 2026-10-18
 
 `ArchitectureTest` 에는 규칙이 29개 있었고, `TestDoubleArchitectureTest` 가 테스트 코드 규칙을 하나 더 봤습니다. 이 가운데 어느 패키지가 어느 패키지를 알아도 되는지 보는 의존 규칙은 12개뿐이고, 나머지 17개와 테스트 대역 규칙은 이름 끝(`...Port`, `...UseCase`, `...Command`), 파일 자리(`exception` 폴더, `domain` 바로 아래), 클래스 모양(입력 포트 하나만 구현, 메서드 인자 하나)을 봤습니다.
