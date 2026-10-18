@@ -11,11 +11,16 @@
   - JDA 는 Mockito 빈 껍데기로 바꿔 디스코드에 로그인하지 않게 하고, 켜질 때 디스코드를 부르는 `DiscordCommandRegistrar`, `BotOwnerPort`, `JoinedGuildPort` 도 함께 바꿉니다.
 - 디스코드 `/연결`, `/연결해제`, `/목소리` 로 할 일은 그 명령이 부르는 입력 포트를 테스트가 직접 부릅니다.
 - DB 는 PC 서버와 같은 H2(MySQL 모드)를 메모리로 띄웁니다. MySQL 에서 SQL 이 도는지는 저장소 테스트가 이미 양쪽에서 확인합니다(ADR 0016).
-- 컨트롤러 MockMvc 테스트는 그대로 둡니다. 오류 코드 하나하나는 거기서 빠르게 보고, 통합 테스트는 실제 서버에서 요청부터 응답까지 이어지는 흐름을 봅니다.
+- 컨트롤러 테스트는 그대로 둡니다. 오류 코드 하나하나는 거기서 빠르게 보고, 통합 테스트는 실제 서버에서 요청부터 응답까지 이어지는 흐름을 봅니다.
+- 컨트롤러 테스트는 스프링 MVC 슬라이스 테스트(`@WebMvcTest(<컨트롤러>.class)`)로 씁니다. 컨트롤러 하나와 실제 MVC, JSON 설정, 예외 처리기(`ApiExceptionHandler`)만 올리고, `@Import(SecurityConfig.class)` 로 보안 필터 체인(ADR 0031)도 함께 올립니다.
+  - 유스케이스(입력 포트)는 `@MockitoBean` 으로 바꿉니다. 컨트롤러가 쓰는 것과, 보안 필터가 쓰는 `AuthenticateDeviceUseCase` 둘 다입니다. 출력 포트 대역 규칙(ADR 0027 6번)은 서비스가 부르는 출력 포트의 것이라, 컨트롤러 앞에서 입력 포트를 바꾸는 이 자리와는 겹치지 않습니다.
+  - 인증된 요청은 `Authorization: Bearer <토큰>` 을 싣고, `AuthenticateDeviceUseCase` 대역이 그 토큰의 주인을 돌려줍니다. 토큰이 없거나, `Bearer` 가 아니거나, 모르는 토큰이면 401 과 `device-unauthorized` 인지도 여기서 봅니다.
+  - `@WebMvcTest` 는 `@Component`, `@Configuration` 을 훑지 않으므로 JDA 같은 디스코드 빈이나 `DiscordProperties` 는 올라오지 않습니다. 필요한 설정만 `@Import` 로 고릅니다.
 
 ## 고르지 않은 것
 
 - 바깥 HTTP(Edge, Google 번역)를 WireMock 같은 가짜 서버로 받기: 엔진 어댑터는 이미 따로 테스트하고, 비공식 API 의 응답 모양을 테스트에 박제하면 엔진이 바뀔 때마다 고쳐야 합니다.
+- 컨트롤러 테스트를 `MockMvcBuilders.standaloneSetup` 으로 쓰기: 빠르지만 실제 MVC, JSON 설정과 보안 필터가 빠져서, 인증이 걸린 경로에서는 테스트가 principal 을 직접 넣어야 했고 401 은 볼 수 없었습니다.
 - JDA 를 깊게 흉내 내 디스코드 쪽 어댑터까지 돌리기: JDA 내부 구조를 테스트가 알아야 해서 깨지기 쉽습니다. 디스코드 연동은 지금처럼 실제 디스코드에서 확인합니다.
 - 통합 테스트도 MySQL 에서 돌리기: Spring 문맥을 두 번 띄워 빌드가 느려지는 데 비해, 저장소 테스트 이상으로 잡을 것이 거의 없습니다.
 

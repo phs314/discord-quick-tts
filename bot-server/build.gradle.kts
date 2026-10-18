@@ -27,6 +27,8 @@ dependencies {
     runtimeOnly(libs.jdave.natives.linux)
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    // 컨트롤러 테스트(@WebMvcTest)가 MVC, JSON, 보안 필터를 실제 설정 그대로 올린다.
+    testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
     testImplementation(libs.archunit.junit5)
     // 저장소 테스트를 진짜 MySQL 에서도 돌린다. Docker 가 있어야 한다.
     testImplementation("org.testcontainers:testcontainers-mysql")
