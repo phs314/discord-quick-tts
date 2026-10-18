@@ -1,5 +1,8 @@
 # DB 에 쓰는 유스케이스에는 @Transactional 을 붙인다
 
+- 상태: 채택
+- 날짜: 2026-10-18
+
 ADR 0009 는 "한 유스케이스가 DB 에 두 번 이상 쓸 때만" `@Transactional` 을 붙이게 했고, ADR 0028 은 같은 종류를 한꺼번에 넣을 때 어댑터가 SQL 문장 하나로 처리하게 했습니다. 그래서 서비스 중 `@Transactional` 을 쓰는 곳이 없었고, `JdbcAllowedGuildRepository.saveAll` 은 줄 수만큼 `(:guild0, :allowedAt0), (:guild1, ...)` 를 이어 붙여 `insert` 문장 하나를 만들었습니다.
 
 - 트랜잭션이 필요한지를 유스케이스마다 "DB 에 몇 번 쓰나" 로 따져야 했습니다. 서비스나 저장소가 바뀌어 쓰기가 하나 늘면, 붙여야 하는 줄 모르고 지나치기 쉽습니다.

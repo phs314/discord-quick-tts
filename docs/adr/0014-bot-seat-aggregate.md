@@ -1,5 +1,8 @@
 # 디스코드 서버별 봇 자리(BotSeat)를 speech 의 애그리거트로 둔다
 
+- 상태: 채택
+- 날짜: 2026-10-11
+
 "먼저 온 채널 우선"(ADR 0007) 규칙이 세 곳에 흩어져 있었습니다. 거절 판단은 `SpeakQuickChatService`, "봇만 남은 채널은 쓰이지 않는다" 판단은 `JdaVoiceChannelLocator`, 같은 판단이 자동 퇴장용 `EmptyVoiceChannelWatcher` 에 한 번 더 있었고, 상태는 JDA 캐시에만 있었습니다. 그래서 세 가지 문제가 있었습니다.
 
 - 모든 디스코드 서버의 요청이 `synchronized (this)` 잠금 하나를 지나갔습니다. 서로 상관없는 디스코드 서버끼리 기다립니다.

@@ -1,5 +1,10 @@
 # 컨텍스트 사이 호출은 컨텍스트 지도와 공개 입구로만 한다
 
+- 상태: 일부 대체됨
+  - speech → device 호출이 없어져 지도가 빔 → ADR 0031
+  - 도메인 이벤트를 처음 씀(`GuildDisallowed`) → ADR 0033
+- 날짜: 2026-10-16
+
 컨텍스트끼리 부르는 길은 `speech` 의 웹 어댑터(`QuickChatController`)가 `device` 의 `AuthenticateDeviceUseCase` 를 부르는 것 하나였습니다. ArchUnit 도 그 짝 하나만 열어 두고, 나머지는 짝마다 따로 막았습니다(`speech` 는 `device` 공개 입구만, `device` 는 `speech` 를 모름, `guild` 는 둘과 서로 모름). 그래서 두 가지가 비어 있었습니다.
 
 - 서비스가 일하는 도중에 다른 컨텍스트의 값이 필요할 때 쓸 길이 없습니다. 서비스는 입력 포트를 필드로 가질 수 없고(ADR 0008), 그 규칙은 다른 컨텍스트의 입력 포트도 막습니다.
