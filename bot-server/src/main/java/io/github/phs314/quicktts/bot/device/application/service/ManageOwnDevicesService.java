@@ -9,6 +9,7 @@ import io.github.phs314.quicktts.bot.device.application.port.out.DevicePort;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +23,7 @@ public class ManageOwnDevicesService implements ManageOwnDevicesUseCase {
     }
 
     @Override
+    @Transactional
     public boolean unlink(UnlinkDeviceCommand command) {
         // 다른 사람의 기기는 있는지도 알려 주지 않고 없는 기기처럼 다룬다.
         return devicePort.findById(command.deviceId())
@@ -31,6 +33,7 @@ public class ManageOwnDevicesService implements ManageOwnDevicesUseCase {
     }
 
     @Override
+    @Transactional
     public int unlinkAll(UnlinkAllDevicesCommand command) {
         return devicePort.deleteAllByOwner(command.owner());
     }

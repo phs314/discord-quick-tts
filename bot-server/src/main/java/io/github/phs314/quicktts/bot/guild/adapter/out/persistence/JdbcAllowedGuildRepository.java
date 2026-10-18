@@ -5,8 +5,6 @@ import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import java.sql.Timestamp;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -32,31 +30,17 @@ public class JdbcAllowedGuildRepository implements AllowedGuildPort {
     @Override
     public boolean saveIfAbsent(AllowedGuild allowedGuild) {
         try {
-            jdbcClient.sql("insert into allowed_guild (guild_id, allowed_at) values (:guild, :allowedAt)")
-                    .param("guild", allowedGuild.guildId().value())
-                    .param("allowedAt", Timestamp.from(allowedGuild.allowedAt()))
-                    .update();
+            insert(allowedGuild);
             return true;
         } catch (DuplicateKeyException e) {
             return false;
         }
     }
 
-    /** 문장 하나로 넣어서, 하나라도 실패하면 DB 가 모두 되돌린다. */
+    /** 한 줄씩 넣는다. 모두 함께 넣거나 하나도 넣지 않는 것은 부르는 유스케이스의 트랜잭션이 맡는다 (ADR 0033). */
     @Override
     public void saveAll(List<AllowedGuild> allowedGuilds) {
-        if (allowedGuilds.isEmpty()) {
-            return;
-        }
-        String rows = IntStream.range(0, allowedGuilds.size())
-                .mapToObj(i -> "(:guild" + i + ", :allowedAt" + i + ")")
-                .collect(Collectors.joining(", "));
-        var statement = jdbcClient.sql("insert into allowed_guild (guild_id, allowed_at) values " + rows);
-        for (int i = 0; i < allowedGuilds.size(); i++) {
-            statement = statement.param("guild" + i, allowedGuilds.get(i).guildId().value())
-                    .param("allowedAt" + i, Timestamp.from(allowedGuilds.get(i).allowedAt()));
-        }
-        statement.update();
+        allowedGuilds.forEach(this::insert);
     }
 
     @Override
@@ -64,5 +48,12 @@ public class JdbcAllowedGuildRepository implements AllowedGuildPort {
         return jdbcClient.sql("delete from allowed_guild where guild_id = :guild")
                 .param("guild", guildId.value())
                 .update() > 0;
+    }
+
+    private void insert(AllowedGuild allowedGuild) {
+        jdbcClient.sql("insert into allowed_guild (guild_id, allowed_at) values (:guild, :allowedAt)")
+                .param("guild", allowedGuild.guildId().value())
+                .param("allowedAt", Timestamp.from(allowedGuild.allowedAt()))
+                .update();
     }
 }

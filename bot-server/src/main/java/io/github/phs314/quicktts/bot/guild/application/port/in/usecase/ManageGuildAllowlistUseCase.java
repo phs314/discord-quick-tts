@@ -18,7 +18,9 @@ public interface ManageGuildAllowlistUseCase {
     boolean allow(AllowGuildCommand command);
 
     /**
-     * 허용 목록에서 뺀다. 허용 목록을 쓰는 중이고 봇이 그 디스코드 서버에 있으면 안내를 남기고 나간다.
+     * 허용 목록에서 뺀다. 봇을 그 디스코드 서버에서 내보내는 일은 하지 않으므로, 부르는 쪽이 이어서
+     * {@link EnforceGuildAllowlistUseCase#leaveIfNotAllowed} 를 부른다. 나가기를 이 트랜잭션 밖에서 하기 위해서다
+     * (ADR 0033).
      *
      * @return 목록에서 뺐으면 true, 원래 없었으면 false
      */

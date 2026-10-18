@@ -9,8 +9,10 @@ import io.github.phs314.quicktts.bot.guild.application.port.in.command.DisallowG
 import io.github.phs314.quicktts.bot.guild.application.port.in.dto.AllowedGuildDto;
 import io.github.phs314.quicktts.bot.guild.application.port.in.query.GetAllowlistQuery;
 import io.github.phs314.quicktts.bot.guild.application.port.out.FakeAllowedGuildPort;
+import io.github.phs314.quicktts.bot.guild.application.port.out.FakeGuildAllowlistEventPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.FakeGuildAllowlistSettingPort;
-import io.github.phs314.quicktts.bot.guild.application.port.out.FakeJoinedGuildPort;
+import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
+import io.github.phs314.quicktts.bot.guild.domain.event.GuildDisallowed;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import java.time.Clock;
@@ -27,10 +29,10 @@ class ManageGuildAllowlistServiceTest {
     private static final GuildId FRIEND = new GuildId(2L);
 
     private final FakeAllowedGuildPort allowedGuilds = new FakeAllowedGuildPort();
-    private final FakeJoinedGuildPort joinedGuilds = new FakeJoinedGuildPort(MINE);
     private final FakeGuildAllowlistSettingPort setting = new FakeGuildAllowlistSettingPort();
+    private final FakeGuildAllowlistEventPort events = new FakeGuildAllowlistEventPort();
     private final ManageGuildAllowlistService service = new ManageGuildAllowlistService(
-            () -> OWNER, allowedGuilds, joinedGuilds, setting, Clock.fixed(NOW, ZoneOffset.UTC));
+            () -> OWNER, allowedGuilds, setting, events, Clock.fixed(NOW, ZoneOffset.UTC));
 
     @Test
     void 봇_주인은_서버를_넣고_볼_수_있다() {
@@ -51,37 +53,29 @@ class ManageGuildAllowlistServiceTest {
         assertThatThrownBy(() -> service.getAllowlist(new GetAllowlistQuery(SOMEONE)))
                 .isInstanceOf(NotBotOwnerException.class);
         assertThat(allowedGuilds.findAll()).isEmpty();
-        assertThat(joinedGuilds.left()).isEmpty();
+        assertThat(events.published()).isEmpty();
+    }
+
+    /** 봇이 그 서버에서 나가는 일은 커밋 뒤에 이벤트를 받는 GuildDisallowedListener 가 한다. */
+    @Test
+    void 목록에서_빼면_목록에서_빠지고_뺐다는_이벤트를_한_번_낸다() {
+        service.allow(new AllowGuildCommand(OWNER, MINE));
+        service.allow(new AllowGuildCommand(OWNER, FRIEND));
+
+        assertThat(service.disallow(new DisallowGuildCommand(OWNER, MINE))).isTrue();
+        assertThat(service.disallow(new DisallowGuildCommand(OWNER, MINE))).isFalse();
+
+        assertThat(allowedGuilds.findAll()).extracting(AllowedGuild::guildId).containsExactly(FRIEND);
+        assertThat(events.published()).containsExactly(new GuildDisallowed(MINE));
     }
 
     @Test
-    void 목록에서_빼면_봇이_그_서버에서_나간다() {
+    void 허용_목록이_꺼져_있어도_넣고_뺄_수_있다() {
+        setting.setEnabled(false);
         service.allow(new AllowGuildCommand(OWNER, MINE));
 
         assertThat(service.disallow(new DisallowGuildCommand(OWNER, MINE))).isTrue();
 
-        assertThat(allowedGuilds.findAll()).isEmpty();
-        assertThat(joinedGuilds.left()).containsExactly(MINE);
-    }
-
-    @Test
-    void 봇이_없는_서버를_빼면_목록에서만_빠진다() {
-        service.allow(new AllowGuildCommand(OWNER, FRIEND));
-
-        assertThat(service.disallow(new DisallowGuildCommand(OWNER, FRIEND))).isTrue();
-        assertThat(service.disallow(new DisallowGuildCommand(OWNER, FRIEND))).isFalse();
-
-        assertThat(joinedGuilds.left()).isEmpty();
-    }
-
-    @Test
-    void 허용_목록이_꺼져_있으면_빼도_나가지_않는다() {
-        setting.setEnabled(false);
-        service.allow(new AllowGuildCommand(OWNER, MINE));
-
-        service.disallow(new DisallowGuildCommand(OWNER, MINE));
-
-        assertThat(joinedGuilds.left()).isEmpty();
         assertThat(service.getAllowlist(new GetAllowlistQuery(OWNER)).enabled()).isFalse();
     }
 }

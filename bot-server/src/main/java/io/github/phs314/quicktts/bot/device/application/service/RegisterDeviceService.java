@@ -13,6 +13,7 @@ import java.time.Clock;
 import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +24,7 @@ public class RegisterDeviceService implements RegisterDeviceUseCase {
     private final Clock clock;
 
     @Override
+    @Transactional
     public DeviceToken register(RegisterDeviceCommand command) {
         Instant now = clock.instant();
         Pairing pairing = pairingPort.findAndDelete(command.code()).orElseThrow(InvalidPairingCodeException::new);
