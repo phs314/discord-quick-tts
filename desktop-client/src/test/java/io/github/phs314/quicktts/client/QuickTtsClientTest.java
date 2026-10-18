@@ -40,6 +40,13 @@ class QuickTtsClientTest {
 
     @Test
     void 봇이_다른_채널에_있으면_그_채널이_비면_쓸_수_있다고_안내한다() {
+        assertThat(client.sendFailure(409, problem(ApiErrorCode.VOICE_CHANNEL_IN_USE, "x")).getMessage())
+                .contains("다른 음성 채널");
+    }
+
+    /** 옛 봇 서버는 같은 경우에 423 을 보낸다. 안내 문구는 오류 코드로 고르므로 똑같다. */
+    @Test
+    void 옛_봇_서버가_423_으로_보내도_같은_안내를_한다() {
         assertThat(client.sendFailure(423, problem(ApiErrorCode.VOICE_CHANNEL_IN_USE, "x")).getMessage())
                 .contains("다른 음성 채널");
     }

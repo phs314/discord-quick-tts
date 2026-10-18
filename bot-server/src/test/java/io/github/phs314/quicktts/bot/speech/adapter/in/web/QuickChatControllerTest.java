@@ -125,12 +125,12 @@ class QuickChatControllerTest {
     }
 
     @Test
-    void 봇이_다른_채널에서_쓰이고_있으면_423_과_voice_channel_in_use() throws Exception {
+    void 봇이_다른_채널에서_쓰이고_있으면_409_와_voice_channel_in_use() throws Exception {
         willThrow(new VoiceChannelInUseException(
                 new VoiceChannelDetails(new VoiceChannel(new GuildId(1L), 3L), "우리 서버", null, "게임")))
                 .given(speak).speak(any());
         sendQuickChat("안녕")
-                .andExpect(status().isLocked())
+                .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.code").value(ApiErrorCode.VOICE_CHANNEL_IN_USE));
     }
 

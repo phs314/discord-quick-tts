@@ -11,6 +11,7 @@ import io.github.phs314.quicktts.common.ApiErrorCode;
 public class VoiceChannelInUseException extends BusinessException {
 
     public VoiceChannelInUseException(VoiceChannelDetails inUse) {
-        super(ErrorKind.IN_USE, ApiErrorCode.VOICE_CHANNEL_IN_USE, "봇이 이 디스코드 서버의 다른 음성 채널(" + inUse.channelName() + ")에서 쓰이고 있습니다.");
+        super(ErrorKind.CONFLICT, ApiErrorCode.VOICE_CHANNEL_IN_USE,
+                "봇이 이 디스코드 서버의 다른 음성 채널(" + inUse.channelName() + ")에서 쓰이고 있습니다.");
     }
 }

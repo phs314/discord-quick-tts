@@ -220,7 +220,7 @@ class QuickTtsApiIntegrationTest {
     }
 
     @Test
-    void 같은_디스코드_서버의_다른_채널에서_쓰이고_있으면_423_과_voice_channel_in_use() {
+    void 같은_디스코드_서버의_다른_채널에서_쓰이고_있으면_409_와_voice_channel_in_use() {
         GuildId guildId = newGuild();
         VoiceChannel first = newChannel(guildId);
         DiscordUserId firstUser = newUser();
@@ -232,7 +232,7 @@ class QuickTtsApiIntegrationTest {
 
         sendQuickChat(firstToken, "먼저").expectStatus().isAccepted();
         sendQuickChat(secondToken, "나중")
-                .expectStatus().isEqualTo(423)
+                .expectStatus().isEqualTo(409)
                 .expectBody()
                 .jsonPath("$.code").isEqualTo(ApiErrorCode.VOICE_CHANNEL_IN_USE)
                 .jsonPath("$.detail").value(String.class, detail -> assertThat(detail).contains("게임"));
