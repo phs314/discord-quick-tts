@@ -10,6 +10,8 @@
   - `speech/adapter/out/tts/TtsProperties` (`quicktts.tts`): 기본 목소리, Edge 브라우저 버전
   - `guild/adapter/out/settings/GuildAllowlistProperties` (`quicktts.guild-allowlist`): 허용 목록을 쓸지
 - `config` 에는 JDA 를 만드는 데 필요한 `DiscordProperties` (`quicktts.discord`, 봇 토큰)만 남깁니다. 토큰이 비어 있으면 켜질 때 멈추는 것도 그대로입니다.
+- 기본값은 `application.yml` 에 적습니다(`${QUICKTTS_DEFAULT_VOICE:edge:ko-KR-SunHiNeural}`, Edge 브라우저 버전처럼). 운영하는 사람이 yml 하나만 보고 값과 안내 주석을 찾을 수 있게 하려는 것입니다. 레코드 생성자에서 기본값을 채우지 않습니다. 다만 값이 빠지면 조용히 `false` 가 되어 위험한 허용 목록 `enabled` 는 레코드에도 `@DefaultValue("true")` 를 둡니다.
+- 꼭 있어야 하는 값은 레코드에 `@Validated` 를 붙이고 `@NotBlank` 같은 제약으로 적습니다(봇 토큰, 기본 목소리, Edge 브라우저 버전). 손으로 쓴 `if` 와 예외가 사라지고, 값이 비면 Spring Boot 가 어느 설정 키가 왜 틀렸는지 알려 주며 켜지지 않습니다. 이 검사를 위해 bot-server 에만 `spring-boot-starter-validation` 을 더합니다.
 - 어댑터는 `config` 의 설정이나 빈을 쓰지 않습니다. `ArchitectureTest` 의 `adaptersDoNotUseConfig` 가 확인합니다. `config` 가 어댑터를 쓰는 것(예: `DiscordListenerRegistrar` 가 디스코드 리스너를 모으는 것)은 조립 코드라 괜찮습니다.
 
 ## 고르지 않은 것
