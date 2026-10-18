@@ -17,7 +17,7 @@
 ## 결과
 
 - `DeviceWebMapper`, `QuickChatWebMapper` 를 더하고 두 컨트롤러가 변환을 맡기게 했습니다. 웹 경로와 JSON 은 바뀌지 않습니다.
-- `ArchitectureTest` 가 확인합니다. `...WebMapper` 는 `adapter.in.web` 에만 있고(`webMappersLiveNextToTheirController`), `@RestController` 는 `port.in.command`, `port.in.query`, common 모듈의 클래스를 직접 만들지 않습니다(`controllersLeaveConversionToWebMappers`).
+- 리뷰로 지킵니다 ([ADR 0032](0032-archunit-checks-dependencies-only.md)). `...WebMapper` 는 `adapter.in.web` 에만 있고, `@RestController` 는 `port.in.command`, `port.in.query`, common 모듈의 클래스를 직접 만들지 않습니다.
 - 2026-10-09 에 정한 "매퍼 클래스는 두지 않는다" 는 웹 어댑터에 한해 바뀝니다. 서비스 쪽(ADR 0010 의 `from`)은 그대로입니다.
 
 ## 고르지 않은 것

@@ -40,6 +40,6 @@
 
 ## 결과
 
-- `ArchitectureTest` 가 도메인의 예외는 `domain` 패키지 바로 아래에만 있는지 확인합니다(`domainExceptionsLiveNextToAggregates`).
+- 도메인의 예외를 `domain` 패키지 바로 아래에만 두는지는 리뷰로 봅니다 ([ADR 0032](0032-archunit-checks-dependencies-only.md)).
 - 도메인 테스트가 생겼습니다: `DeviceTest`, `PairingTest`, `GuildAllowlistTest`, `VoiceCatalogTest` 의 고르기.
 - `FakeDevicePort` 는 더 이상 주인 조건을 흉내 내지 않습니다.

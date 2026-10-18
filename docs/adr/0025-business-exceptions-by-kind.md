@@ -42,6 +42,6 @@
 ## 결과
 
 - 예외를 하나 더할 때 고칠 곳은 예외 클래스와 (새 코드라면) `ApiErrorCode` 둘입니다.
-- `ArchitectureTest` 가 확인합니다: 우리가 만든 예외는 모두 `BusinessException` 을 상속한다(`exceptionsAreBusinessExceptions`), `@RestControllerAdvice` 는 `ApiExceptionHandler` 하나뿐이다(`onlyOneWebExceptionHandler`). 인바운드 어댑터가 `ErrorKind` 를 쓸 수 있도록 "애그리거트를 쓰지 않는다" 규칙에서 `domain` 바로 아래 enum 을 뺐습니다.
+- 우리가 만든 예외가 모두 `BusinessException` 을 상속하는지, `@RestControllerAdvice` 가 `ApiExceptionHandler` 하나뿐인지는 리뷰로 봅니다 ([ADR 0032](0032-archunit-checks-dependencies-only.md)). 인바운드 어댑터가 `ErrorKind` 를 쓸 수 있도록 `ArchitectureTest` 의 "애그리거트를 쓰지 않는다" 규칙에서 `domain` 바로 아래 enum 을 뺐습니다.
 - 응답 본문 모양(ProblemDetail + `code`, ADR 0013)은 그대로입니다. `ApiResponse` 같은 봉투로 감싸지 않습니다.
 - `ApiExceptionHandlerTest` 가 종류마다 HTTP 상태를 고정하고, `FailureReplyingListenerTest` 가 디스코드 공통 답장을 확인합니다. `QuickChatControllerTest` 가 깨진 JSON(400 `invalid-request`)과 예상하지 못한 실패(500 `unexpected-failure`)를 확인합니다.

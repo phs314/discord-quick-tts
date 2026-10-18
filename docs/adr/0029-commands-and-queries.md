@@ -17,7 +17,7 @@
 - 유스케이스 입력 모양이 하나라서, 필드가 늘어도 유스케이스 인터페이스와 서비스 시그니처는 바뀌지 않고 부르는 곳의 `new ...Command(...)` 만 바뀝니다.
 - 이름을 보면 상태를 바꾸는 일인지 조회인지 알 수 있습니다. ADR 0027 규칙 3번(조회는 `get` / `find`)과 짝입니다.
 - 잃는 것은 필드 하나짜리 record 가 많아지는 것입니다(Command·Query 16개 중 9개). 부르는 곳이 `new LeaveIfEmptyCommand(guildId)` 처럼 한 번 더 감쌉니다.
-- `ArchitectureTest` 가 확인합니다. `query` 폴더의 클래스는 `Query` 로 끝나고(`queriesAreNamedQuery`), 유스케이스 메서드는 인자가 없거나 `port.in.command` / `port.in.query` 의 타입 하나만 받습니다(`useCaseMethodsTakeOneCommandOrQuery`). 상태를 바꾸는 메서드가 Query 를 받는지는 기계로 가리기 어려워 리뷰로 봅니다.
+- 리뷰로 지킵니다 ([ADR 0032](0032-archunit-checks-dependencies-only.md)). `query` 폴더의 클래스는 `Query` 로 끝나고, 유스케이스 메서드는 인자가 없거나 `port.in.command` / `port.in.query` 의 타입 하나만 받으며, 상태를 바꾸는 메서드는 Query 를 받지 않습니다.
 
 ## 고르지 않은 것
 

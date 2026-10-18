@@ -19,6 +19,6 @@
 - 서비스는 자기 유스케이스에 필요한 출력 포트만 받습니다. 인바운드 어댑터는 서비스 클래스가 아니라 입력 포트 타입으로 주입받습니다. (빈 등록 방식은 ADR 0009 참고)
 - 새 유스케이스는 기존 서비스를 키우지 않고 새 입력 포트와 새 서비스로 추가합니다.
 - 한 입력 포트 안의 메서드(`ManageOwnDevicesUseCase` 의 목록·해제·모두 해제, `ManageVoiceUseCase` 의 목록·현재 목소리·바꾸기)는 계속 한 서비스에 둡니다. 읽기와 쓰기를 나눌지는 따로 판단합니다.
-- `ArchitectureTest` 가 `application/service` 의 클래스는 입력 포트를 하나만 구현하고, 이름이 그 입력 포트의 `UseCase` 를 `Service` 로 바꾼 것인지 확인합니다.
+- `application/service` 의 클래스가 입력 포트를 하나만 구현하고, 이름이 그 입력 포트의 `UseCase` 를 `Service` 로 바꾼 것인지는 리뷰로 봅니다 ([ADR 0032](0032-archunit-checks-dependencies-only.md)).
 - ~~먼저 온 채널 규칙(ADR 0007)과 그 잠금은 이제 `SpeakQuickChatService` 에만 있습니다.~~ ADR 0014 로 규칙은 `BotSeat`, 잠금은 디스코드 서버별로 `BotSeatPort` 에 있습니다. 서비스는 9개가 됐습니다(`LeaveEmptyVoiceChannelService`, `FollowBotMoveService` 추가).
 - 서비스는 다른 서비스의 입력 포트를 받지 않고 출력 포트와 도메인만 씁니다. 두 서비스가 같은 규칙을 써야 하면 그 규칙을 도메인으로 옮깁니다. 예: 읽을 목소리를 정하는 규칙은 `VoiceCatalog` 에 있고 `ManageVoiceService` 와 `SpeakQuickChatService` 가 함께 씁니다. `ArchitectureTest` 가 서비스의 필드가 입력 포트 타입이 아닌지 확인합니다. (2026-10-15)
