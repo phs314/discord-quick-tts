@@ -18,9 +18,9 @@ public interface ManageGuildAllowlistUseCase {
     boolean allow(AllowGuildCommand command);
 
     /**
-     * 허용 목록에서 뺀다. 봇을 그 디스코드 서버에서 내보내는 일은 하지 않으므로, 부르는 쪽이 이어서
-     * {@link EnforceGuildAllowlistUseCase#leaveIfNotAllowed} 를 부른다. 나가기를 이 트랜잭션 밖에서 하기 위해서다
-     * (ADR 0033).
+     * 허용 목록에서 뺀다. 뺐으면 이 트랜잭션이 커밋된 뒤
+     * {@link io.github.phs314.quicktts.bot.guild.domain.event.GuildDisallowed} 를 받는 쪽이 봇을 그 디스코드 서버에서
+     * 내보내므로, 부르는 쪽은 나가기를 따로 부르지 않는다. 나가기는 되돌릴 수 없어서 트랜잭션 밖에서 한다 (ADR 0033).
      *
      * @return 목록에서 뺐으면 true, 원래 없었으면 false
      */
