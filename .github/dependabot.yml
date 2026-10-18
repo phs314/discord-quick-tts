@@ -1,0 +1,29 @@
+# 라이브러리와 GitHub Actions 의 새 버전을 일주일에 한 번 PR 로 알린다.
+# JDA, jdave, LavaPlayer 는 디스코드 음성 프로토콜이 바뀌면 따라가야 해서 늦게 알면 봇이 소리를 못 낸다.
+#
+# 커밋 제목 검사(scripts/check-commit-msg.sh)와 PR 타입 라벨(release-drafter.yml)을 통과하도록
+# 제목 앞에 "🔧 [chore]" 를 붙이고, 업데이트를 한 PR 로 묶어 제목이 "Bump the gradle group with 3 updates" 처럼 짧게 한다.
+# 라벨은 PR 제목의 타입으로만 단다.
+version: 2
+updates:
+  - package-ecosystem: gradle
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      gradle:
+        patterns: ['*']
+    commit-message:
+      prefix: '🔧 [chore]'
+    labels: []
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      actions:
+        patterns: ['*']
+    commit-message:
+      prefix: '🔧 [chore]'
+    labels: []
