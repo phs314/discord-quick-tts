@@ -7,7 +7,7 @@ import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQui
 import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindMyVoiceChannelQuery;
 import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.FindMyVoiceChannelUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.SpeakQuickChatUseCase;
-import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
+import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import io.github.phs314.quicktts.common.QuickChatRequest;
 import io.github.phs314.quicktts.common.QuickTtsApi;
 import io.github.phs314.quicktts.common.VoiceChannelResponse;
@@ -38,7 +38,8 @@ public class QuickChatController {
             @RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) String authorization,
             @RequestBody QuickChatRequest request) {
         DiscordUserId speaker = authenticatedUser(authorization);
-        speakQuickChatUseCase.speak(new SpeakQuickChatCommand(speaker, new QuickChatMessage(request.text())));
+        SpeakQuickChatCommand command = QuickChatWebMapper.toCommand(speaker, request);
+        speakQuickChatUseCase.speak(command);
         return ResponseEntity.accepted().build();
     }
 
@@ -46,17 +47,20 @@ public class QuickChatController {
     public ResponseEntity<VoiceChannelResponse> myVoiceChannel(
             @RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) String authorization) {
         DiscordUserId user = authenticatedUser(authorization);
-        return findMyVoiceChannelUseCase.findMyVoiceChannel(new FindMyVoiceChannelQuery(user))
-                .map(details -> ResponseEntity.ok(new VoiceChannelResponse(
-                        details.guildName(), details.guildIconUrl(), details.channelName())))
-                .orElseGet(() -> ResponseEntity.noContent().build());
+        FindMyVoiceChannelQuery query = QuickChatWebMapper.toQuery(user);
+        Optional<VoiceChannelDetails> details = findMyVoiceChannelUseCase.findMyVoiceChannel(query);
+        if (details.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        VoiceChannelResponse response = QuickChatWebMapper.toResponse(details.get());
+        return ResponseEntity.ok(response);
     }
 
     /** 기기 토큰의 주인. 토큰이 없거나 해제된 기기면 401 로 끝난다. */
     private DiscordUserId authenticatedUser(String authorization) {
-        return bearerToken(authorization)
-                .flatMap(token -> authenticateDeviceUseCase.authenticate(new AuthenticateDeviceQuery(token)))
-                .orElseThrow(DeviceUnauthorizedException::new);
+        String token = bearerToken(authorization).orElseThrow(DeviceUnauthorizedException::new);
+        AuthenticateDeviceQuery query = QuickChatWebMapper.toQuery(token);
+        return authenticateDeviceUseCase.authenticate(query).orElseThrow(DeviceUnauthorizedException::new);
     }
 
     private static Optional<String> bearerToken(String authorization) {

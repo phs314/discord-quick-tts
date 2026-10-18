@@ -1,0 +1,29 @@
+# 웹 요청·응답 변환은 컨트롤러 옆 웹 매퍼가 맡는다
+
+컨트롤러가 웹 요청을 Command·Query 로, 유스케이스 결과를 웹 응답으로 직접 바꾸고 있었습니다. 변환이 한두 줄이라 매퍼 클래스는 두지 않기로 했었지만, 그러다 보니 컨트롤러마다 변환과 흐름(누구인지 확인하고, 유스케이스를 부르고, 상태 코드를 고르는 것)이 섞여 있었고, 변환 코드를 어디에 둘지가 컨트롤러마다 달라질 수 있었습니다. 웹 요청·응답 record 는 클라이언트와 함께 쓰는 common 모듈에 있어서, 그 record 에 `toCommand` 를 붙일 수도 없습니다.
+
+## 결정
+
+1. **컨트롤러마다 웹 매퍼 하나를 같은 패키지(`<컨텍스트>/adapter/in/web`)에 둡니다.** 이름은 컨트롤러 이름에서 `Controller` 를 뺀 것 + `WebMapper` 입니다: `DeviceController` → `DeviceWebMapper`, `QuickChatController` → `QuickChatWebMapper`.
+2. 웹 매퍼는 상태 없는 `final` 클래스이고 `static` 메서드만 둡니다. 스프링 빈이 아니고 패키지 밖에 공개하지 않습니다.
+3. 메서드는 만드는 것에 따라 `toCommand`, `toQuery`, `toResponse` 입니다. 같은 이름이 둘이면 받는 타입으로 나뉩니다(`toQuery(String deviceToken)`, `toQuery(DiscordUserId user)`).
+4. 웹 요청 본문에 없는 값은 따로 받습니다. 보낸 사람은 `Authorization` 헤더의 기기 토큰으로 알아낸 값이라 `toCommand(DiscordUserId speaker, QuickChatRequest request)` 처럼 받습니다. 헤더에서 토큰을 꺼내는 일은 변환이 아니라 인증이라 컨트롤러에 남깁니다.
+5. 컨트롤러는 Command, Query, 웹 응답을 직접 만들지 않습니다. 컨트롤러에는 인증, 유스케이스 부르기, 상태 코드 고르기만 남습니다. 단계마다 변수에 담아 한 줄씩 씁니다(Command 만들기 → 유스케이스 부르기 → 응답 만들기). 호출을 한 줄에 겹쳐 쓰지 않아서 흐름이 위에서 아래로 읽힙니다.
+6. 다른 자리의 변환은 지금처럼 둡니다.
+   - 애그리거트 → 유스케이스 결과 Dto 는 Dto 의 `from(...)` 이 합니다(ADR 0010). Dto 의 필드와 변환이 한 파일에 있어서 같이 고치게 됩니다.
+   - DB 행 → 애그리거트는 저장소 어댑터 안에서 합니다. JdbcClient 로 행을 바로 애그리거트로 만들어서 따로 둘 엔티티 클래스가 없습니다.
+   - 디스코드 슬래시 명령 리스너는 JDA 이벤트에서 옵션을 꺼내는 코드와 변환이 붙어 있어서 매퍼를 두지 않습니다.
+
+## 결과
+
+- `DeviceWebMapper`, `QuickChatWebMapper` 를 더하고 두 컨트롤러가 변환을 맡기게 했습니다. 웹 경로와 JSON 은 바뀌지 않습니다.
+- `ArchitectureTest` 가 확인합니다. `...WebMapper` 는 `adapter.in.web` 에만 있고(`webMappersLiveNextToTheirController`), `@RestController` 는 `port.in.command`, `port.in.query`, common 모듈의 클래스를 직접 만들지 않습니다(`controllersLeaveConversionToWebMappers`).
+- 2026-10-09 에 정한 "매퍼 클래스는 두지 않는다" 는 웹 어댑터에 한해 바뀝니다. 서비스 쪽(ADR 0010 의 `from`)은 그대로입니다.
+
+## 고르지 않은 것
+
+- 변환을 컨트롤러에 그대로 두기: 지금은 짧지만, 컨트롤러마다 변환과 흐름이 섞이는 정도가 달라집니다.
+- 최상위 `mapper` 패키지 하나: 여러 컨텍스트의 타입을 한 곳이 알게 되어 컨텍스트 경계(ADR 0026)를 넘습니다.
+- 매퍼를 스프링 빈으로 두기: 상태도 바꿔 끼울 구현도 없어서 주입할 이유가 없습니다.
+- 애플리케이션 매퍼(`DeviceMapper.toDto(device)`)도 함께 두기: Dto 가 몇 개뿐이고 `from` 이 한두 줄이라 파일만 늘어납니다.
+- `@Valid` 로 요청 검사하기: 값 객체가 이미 검사하고 실패하면 `invalid-value` 로 400 을 돌려줍니다. 같은 규칙이 두 곳에 생기고, 클라이언트도 쓰는 common 모듈이 `jakarta.validation` 에 의존하게 됩니다.
