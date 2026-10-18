@@ -61,7 +61,7 @@ class MultiEngineSpeechSynthesizerTest {
     }
 
     private static TtsProperties defaultVoice(String voice) {
-        return new TtsProperties(voice, null);
+        return new TtsProperties(voice, "143.0.3650.75");
     }
 
     private static String text(Speech speech) {
