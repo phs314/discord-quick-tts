@@ -17,7 +17,6 @@ class ApiExceptionHandlerTest {
                 ErrorKind.UNAUTHENTICATED, HttpStatus.UNAUTHORIZED,
                 ErrorKind.FORBIDDEN, HttpStatus.FORBIDDEN,
                 ErrorKind.CONFLICT, HttpStatus.CONFLICT,
-                ErrorKind.IN_USE, HttpStatus.LOCKED,
                 ErrorKind.EXTERNAL_FAILURE, HttpStatus.BAD_GATEWAY);
 
         assertThat(expected).containsOnlyKeys(ErrorKind.values());

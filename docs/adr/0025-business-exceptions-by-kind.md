@@ -16,11 +16,11 @@
   | `INVALID_INPUT` | 요청 값이 규칙에 맞지 않음 | 400 |
   | `UNAUTHENTICATED` | 누가 보냈는지 모름 | 401 |
   | `FORBIDDEN` | 누군지는 알지만 할 수 없음 | 403 |
-  | `CONFLICT` | 지금 상태에서는 할 수 없음 | 409 |
-  | `IN_USE` | 다른 사람이 쓰고 있음 | 423 |
+  | `CONFLICT` | 지금 상태에서는 할 수 없음 (음성 채널에 없음, 봇이 다른 음성 채널에서 쓰이고 있음) | 409 |
   | `EXTERNAL_FAILURE` | 바깥 서비스가 실패함 (로그를 남김) | 502 |
 
   이미 나간 응답의 상태 코드는 하나도 바뀌지 않습니다. 쓰지 않는 종류(예: 없음 404)는 처음 필요할 때 더합니다.
+  처음에는 다른 사람이 쓰고 있음을 뜻하는 `IN_USE`(423 Locked)도 있었지만, 423 은 WebDAV 용 상태 코드이고 클라이언트는 상태 코드가 아니라 오류 코드로 가리므로(ADR 0013) `CONFLICT`(409)로 합쳤습니다. 오류 코드 `voice-channel-in-use` 는 그대로라 배포된 클라이언트도 똑같이 안내합니다.
 - **웹**: `shared/adapter/in/web/ApiExceptionHandler` 하나가 종류로 상태를 정하고 `code` 를 실어 보냅니다. 상태를 고르는 `switch` 는 enum 을 빠짐없이 다뤄야 컴파일되므로, 종류를 더하면 여기를 잊을 수 없습니다. 컨텍스트별 처리기 셋은 없앴습니다.
 - **웹의 나머지 실패도 같은 모양**: `ApiExceptionHandler` 는 `ResponseEntityExceptionHandler` 를 상속해서, 스프링이 잡는 요청 실패(깨진 JSON, 없는 경로, 맞지 않는 메서드 등)도 스프링이 고른 상태 그대로 ProblemDetail 로 돌려주고 `invalid-request` 코드를 싣습니다. 예상하지 못한 예외는 로그를 남기고 500 과 `unexpected-failure` 로 답하며, 원인은 응답에 싣지 않습니다. 디스코드의 "잠시 뒤에 다시 해 주세요" 와 짝입니다. 그래서 웹 API 의 실패 응답은 어떤 경우든 ProblemDetail + `code` 하나뿐입니다.
 - **디스코드**: `DiscordCommandRegistrar` 가 슬래시 명령마다 `FailureReplyingListener` 로 감싸 등록합니다. 명령이 잡지 않은 `BusinessException` 에는 그 문구로, 그 밖의 예외에는 "처리하다가 문제가 생겼어요. 잠시 뒤에 다시 해 주세요." 로 답하고 로그를 남깁니다. 이미 답한 뒤면 다시 답하지 않습니다. 명령은 문구를 바꾸고 싶은 예외만 직접 잡습니다(`/목소리` 의 없는 목소리, `/허용목록` 의 봇 주인 아님과 서버 ID 형식).

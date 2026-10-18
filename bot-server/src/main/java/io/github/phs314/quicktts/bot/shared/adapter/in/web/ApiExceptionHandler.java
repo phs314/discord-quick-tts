@@ -60,7 +60,6 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
             case UNAUTHENTICATED -> HttpStatus.UNAUTHORIZED;
             case FORBIDDEN -> HttpStatus.FORBIDDEN;
             case CONFLICT -> HttpStatus.CONFLICT;
-            case IN_USE -> HttpStatus.LOCKED;
             case EXTERNAL_FAILURE -> HttpStatus.BAD_GATEWAY;
         };
     }
