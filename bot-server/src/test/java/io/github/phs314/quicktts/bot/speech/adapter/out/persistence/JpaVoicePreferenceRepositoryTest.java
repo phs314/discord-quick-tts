@@ -5,27 +5,39 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
 import io.github.phs314.quicktts.bot.support.TestDatabase;
+import io.github.phs314.quicktts.bot.support.TestJpa;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.Parameter;
 import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 @ParameterizedClass
 @EnumSource(TestDatabase.class)
-class JdbcVoicePreferenceRepositoryTest {
+class JpaVoicePreferenceRepositoryTest {
 
     @Parameter
     TestDatabase database;
 
     private static final DiscordUserId USER = new DiscordUserId(123456789012345678L);
 
-    private JdbcVoicePreferenceRepository repository;
+    private AnnotationConfigApplicationContext context;
+    private JpaVoicePreferenceRepository repository;
 
     @BeforeEach
     void setUp() {
-        repository = new JdbcVoicePreferenceRepository(JdbcClient.create(database.dataSource()));
+        context = TestJpa.context(database.dataSource(), JpaVoicePreferenceRepository.class);
+        repository = context.getBean(JpaVoicePreferenceRepository.class);
+    }
+
+    @AfterEach
+    void tearDown() {
+        // Docker 가 없어 MySQL 쪽을 건너뛰면 문맥을 만들기 전에 끝난다.
+        if (context != null) {
+            context.close();
+        }
     }
 
     @Test

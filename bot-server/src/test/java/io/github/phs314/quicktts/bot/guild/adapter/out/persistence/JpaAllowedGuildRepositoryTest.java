@@ -7,22 +7,23 @@ import static org.assertj.core.groups.Tuple.tuple;
 import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.support.TestDatabase;
+import io.github.phs314.quicktts.bot.support.TestJpa;
 import java.time.Instant;
 import java.util.List;
-import javax.sql.DataSource;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.Parameter;
 import org.junit.jupiter.params.ParameterizedClass;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.core.simple.JdbcClient;
-import org.springframework.jdbc.support.JdbcTransactionManager;
+import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
 @ParameterizedClass
 @EnumSource(TestDatabase.class)
-class JdbcAllowedGuildRepositoryTest {
+class JpaAllowedGuildRepositoryTest {
 
     @Parameter
     TestDatabase database;
@@ -32,15 +33,24 @@ class JdbcAllowedGuildRepositoryTest {
     private static final Instant EARLIER = Instant.parse("2026-10-11T00:00:00Z");
     private static final Instant LATER = Instant.parse("2026-10-11T01:00:00Z");
 
-    private JdbcAllowedGuildRepository repository;
+    private AnnotationConfigApplicationContext context;
+    private JpaAllowedGuildRepository repository;
     /** 유스케이스의 {@code @Transactional} 대신 트랜잭션을 연다. */
     private TransactionTemplate transaction;
 
     @BeforeEach
     void setUp() {
-        DataSource dataSource = database.dataSource();
-        repository = new JdbcAllowedGuildRepository(JdbcClient.create(dataSource));
-        transaction = new TransactionTemplate(new JdbcTransactionManager(dataSource));
+        context = TestJpa.context(database.dataSource(), JpaAllowedGuildRepository.class);
+        repository = context.getBean(JpaAllowedGuildRepository.class);
+        transaction = new TransactionTemplate(context.getBean(PlatformTransactionManager.class));
+    }
+
+    @AfterEach
+    void tearDown() {
+        // Docker 가 없어 MySQL 쪽을 건너뛰면 문맥을 만들기 전에 끝난다.
+        if (context != null) {
+            context.close();
+        }
     }
 
     @Test
@@ -75,7 +85,7 @@ class JdbcAllowedGuildRepositoryTest {
 
         assertThatThrownBy(() -> transaction.executeWithoutResult(status -> repository.saveAll(
                 List.of(AllowedGuild.allow(FIRST, LATER), AllowedGuild.allow(SECOND, LATER)))))
-                .isInstanceOf(DuplicateKeyException.class);
+                .isInstanceOf(DataIntegrityViolationException.class);
 
         // 일부만 남으면 다음에 켤 때 목록이 비어 있지 않아서 남은 디스코드 서버에서 나가게 된다.
         assertThat(repository.findAll()).extracting(AllowedGuild::guildId).containsExactly(SECOND);

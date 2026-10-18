@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.phs314.quicktts.bot.guild.adapter.in.event.GuildDisallowedListener;
 import io.github.phs314.quicktts.bot.guild.adapter.out.event.SpringGuildAllowlistEvent;
-import io.github.phs314.quicktts.bot.guild.adapter.out.persistence.JdbcAllowedGuildRepository;
+import io.github.phs314.quicktts.bot.guild.adapter.out.persistence.JpaAllowedGuildRepository;
 import io.github.phs314.quicktts.bot.guild.application.port.in.command.DisallowGuildCommand;
 import io.github.phs314.quicktts.bot.guild.application.port.in.usecase.EnforceGuildAllowlistUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.usecase.ManageGuildAllowlistUseCase;
@@ -15,6 +15,7 @@ import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.support.TestDatabase;
+import io.github.phs314.quicktts.bot.support.TestJpa;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -30,13 +31,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.core.simple.JdbcClient;
-import org.springframework.jdbc.support.JdbcTransactionManager;
+import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringJUnitConfig;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
@@ -60,19 +58,19 @@ class GuildAllowlistTransactionTest {
     ManageGuildAllowlistUseCase manageGuildAllowlistUseCase;
 
     @Autowired
-    JdbcAllowedGuildRepository repository;
+    JpaAllowedGuildRepository repository;
 
     @Autowired
     TransactionRecordingJoinedGuildPort joinedGuildPort;
 
     @Test
     void 처음_채우다_실패하면_하나도_넣지_않는다() {
-        // 같은 디스코드 서버가 두 번 나오게 해서, 앞의 둘을 넣은 뒤 세 번째 넣기가 DB 오류(중복 키)로 실패하게 한다.
+        // 같은 디스코드 서버가 두 번 나오게 해서, 앞의 둘을 넣은 뒤 세 번째 넣기가 같은 기본 키로 실패하게 한다.
         joinedGuildPort.join(MINE);
         joinedGuildPort.join(STRANGER);
         joinedGuildPort.join(MINE);
 
-        assertThatThrownBy(enforceGuildAllowlistUseCase::fillIfEmpty).isInstanceOf(DuplicateKeyException.class);
+        assertThatThrownBy(enforceGuildAllowlistUseCase::fillIfEmpty).isInstanceOf(DataIntegrityViolationException.class);
 
         // 일부만 남았다면 다음에 켤 때 목록이 비어 있지 않아서 남은 디스코드 서버에서 나가게 된다.
         assertThat(repository.findAll()).isEmpty();
@@ -151,22 +149,12 @@ class GuildAllowlistTransactionTest {
     }
 
     @Configuration
-    @EnableTransactionManagement
+    @Import({TestJpa.Config.class, JpaAllowedGuildRepository.class})
     static class Config {
 
         @Bean
         DataSource dataSource() {
             return TestDatabase.H2.dataSource();
-        }
-
-        @Bean
-        PlatformTransactionManager transactionManager(DataSource dataSource) {
-            return new JdbcTransactionManager(dataSource);
-        }
-
-        @Bean
-        JdbcAllowedGuildRepository repository(DataSource dataSource) {
-            return new JdbcAllowedGuildRepository(JdbcClient.create(dataSource));
         }
 
         @Bean
@@ -176,14 +164,14 @@ class GuildAllowlistTransactionTest {
 
         @Bean
         EnforceGuildAllowlistService enforceGuildAllowlistService(
-                JdbcAllowedGuildRepository repository, TransactionRecordingJoinedGuildPort joinedGuildPort) {
+                JpaAllowedGuildRepository repository, TransactionRecordingJoinedGuildPort joinedGuildPort) {
             return new EnforceGuildAllowlistService(repository, joinedGuildPort,
                     new FakeGuildAllowlistSettingPort(), Clock.fixed(NOW, ZoneOffset.UTC));
         }
 
         @Bean
         ManageGuildAllowlistService manageGuildAllowlistService(
-                JdbcAllowedGuildRepository repository, ApplicationEventPublisher applicationEventPublisher) {
+                JpaAllowedGuildRepository repository, ApplicationEventPublisher applicationEventPublisher) {
             return new ManageGuildAllowlistService(() -> OWNER, repository, new FakeGuildAllowlistSettingPort(),
                     new SpringGuildAllowlistEvent(applicationEventPublisher), Clock.fixed(NOW, ZoneOffset.UTC));
         }

@@ -93,9 +93,10 @@
 
 | ADR | 제목 | 상태 |
 | --- | --- | --- |
-| [0016](0016-mysql-and-flyway.md) | 배포 서버는 MySQL, 스키마는 Flyway 로 관리한다 | 채택 |
+| [0016](0016-mysql-and-flyway.md) | 배포 서버는 MySQL, 스키마는 Flyway 로 관리한다 | 일부 대체됨 (ADR 0038) |
 | [0028](0028-one-aggregate-per-write.md) | 한 번에 함께 저장하는 것은 애그리거트 하나다 | 일부 대체됨 (ADR 0033) |
 | [0033](0033-transactional-on-writing-use-cases.md) | DB 에 쓰는 유스케이스에는 @Transactional 을 붙인다 | 채택 |
+| [0038](0038-jpa-entities-with-persistence-mappers.md) | 저장소 어댑터는 JPA 엔티티를 도메인과 따로 두고 매퍼로 옮긴다 | 채택 |
 
 ### 웹 API
 
@@ -104,7 +105,7 @@
 | [0005](0005-device-token-pairing.md) | PC 는 /연결 코드로 받은 기기 토큰으로 인증한다 | 일부 대체됨 (ADR 0031) |
 | [0013](0013-api-versioning-and-error-codes.md) | API 경로에 버전을 붙이고, 오류는 코드로 구분한다 | 일부 대체됨 (ADR 0025) |
 | [0017](0017-api-integration-test.md) | API 통합 테스트는 디스코드와 TTS 엔진만 출력 포트 대역으로 바꾼다 | 채택 |
-| [0030](0030-web-mappers.md) | 웹 요청·응답 변환은 컨트롤러 옆 웹 매퍼가 맡는다 | 일부 대체됨 (ADR 0031, ADR 0032) |
+| [0030](0030-web-mappers.md) | 웹 요청·응답 변환은 컨트롤러 옆 웹 매퍼가 맡는다 | 일부 대체됨 (ADR 0031, ADR 0032, ADR 0038) |
 | [0031](0031-device-token-authentication-with-spring-security.md) | 기기 토큰 인증은 스프링 시큐리티 필터가 맡는다 | 일부 대체됨 (ADR 0036) |
 
 ### 디스코드와 음성

@@ -9,7 +9,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     // 기기 토큰 인증. 토큰으로 사람을 알아내는 필터만 우리가 쓰고 나머지는 스프링 시큐리티 기본을 따른다.
     implementation("org.springframework.boot:spring-boot-starter-security")
-    implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    // 저장소 어댑터는 JPA 엔티티를 도메인과 따로 두고 매퍼로 옮긴다 (ADR 0038).
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     // 설정 값(@ConfigurationProperties)의 필수 값을 켜질 때 검사한다.
     implementation("org.springframework.boot:spring-boot-starter-validation")
     // 스키마는 Flyway 마이그레이션(resources/db/migration)으로 관리한다.
