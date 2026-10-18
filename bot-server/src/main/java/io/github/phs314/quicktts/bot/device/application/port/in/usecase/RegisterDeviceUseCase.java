@@ -2,7 +2,6 @@ package io.github.phs314.quicktts.bot.device.application.port.in.usecase;
 
 import io.github.phs314.quicktts.bot.device.application.port.in.command.RegisterDeviceCommand;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceToken;
-import io.github.phs314.quicktts.bot.device.domain.vo.PairingCode;
 
 /**
  * 연결 코드를 쓰고 그 PC 전용 기기 토큰을 발급한다. 코드는 한 번만 쓸 수 있다.
