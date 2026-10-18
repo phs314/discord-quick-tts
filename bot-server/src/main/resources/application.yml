@@ -17,6 +17,12 @@ spring:
   flyway:
     # Flyway 전에 schema.sql 로 만든 DB 는 테이블이 이미 있으므로, 처음 한 번 V1 을 건너뛰고 그 위부터 쌓는다.
     baseline-on-migrate: true
+  cache:
+    # 같은 목소리, 같은 문장의 음성을 기억해 비공식 TTS 를 덜 부른다. mp3 한 개가 20KB 안팎이라 500개면 10MB 정도다.
+    # 실패한 결과는 기억하지 않는다. 적중률은 /actuator/metrics/cache.gets 로 본다.
+    cache-names: speech
+    caffeine:
+      spec: maximumSize=500,expireAfterAccess=1d,recordStats
 
 server:
   port: ${QUICKTTS_PORT:8080}

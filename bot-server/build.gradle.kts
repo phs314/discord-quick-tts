@@ -16,6 +16,9 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-flyway")
     // 상태 확인(/actuator/health)과 지표(Micrometer).
     implementation("org.springframework.boot:spring-boot-starter-actuator")
+    // 같은 문장의 음성을 기억해 두는 캐시.
+    implementation("org.springframework.boot:spring-boot-starter-cache")
+    implementation("com.github.ben-manes.caffeine:caffeine")
     implementation("org.flywaydb:flyway-mysql")
     // 배포 서버는 MySQL, 이 PC 에서 띄우는 서버(개발, exe)는 설치가 필요 없는 H2 파일 DB.
     runtimeOnly("com.mysql:mysql-connector-j")

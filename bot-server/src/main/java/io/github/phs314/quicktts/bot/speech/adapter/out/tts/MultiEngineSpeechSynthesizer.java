@@ -70,7 +70,7 @@ public class MultiEngineSpeechSynthesizer implements SpeechSynthesizerPort {
         }
     }
 
-    /** 엔진이 음성을 내놓는 데 걸린 시간을 목소리와 결과(success, failure)별로 잰다. */
+    /** 엔진이 음성을 내놓는 데 걸린 시간을 목소리와 결과(success, failure)별로 잰다. 캐시에서 꺼낸 것도 센다. */
     private Speech timed(VoiceId voiceId, Supplier<Speech> synthesis) {
         Timer.Sample sample = Timer.start(meterRegistry);
         String outcome = "failure";
