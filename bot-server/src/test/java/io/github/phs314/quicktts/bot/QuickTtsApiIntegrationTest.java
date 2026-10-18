@@ -3,7 +3,7 @@ package io.github.phs314.quicktts.bot;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
-import io.github.phs314.quicktts.bot.config.DiscordCommandRegistrar;
+import io.github.phs314.quicktts.bot.config.DiscordListenerRegistrar;
 import io.github.phs314.quicktts.bot.device.application.port.in.command.IssuePairingCodeCommand;
 import io.github.phs314.quicktts.bot.device.application.port.in.command.UnlinkAllDevicesCommand;
 import io.github.phs314.quicktts.bot.device.application.port.in.usecase.IssuePairingCodeUseCase;
@@ -55,7 +55,7 @@ import org.springframework.test.web.servlet.client.RestTestClient;
         "spring.datasource.password="
 })
 // 진짜 JDA 를 만들면 디스코드에 로그인하므로 빈 껍데기로 바꾸고, 켜질 때 디스코드를 부르는 빈도 함께 바꾼다.
-@MockitoBean(types = {JDA.class, DiscordCommandRegistrar.class, BotOwnerPort.class, JoinedGuildPort.class})
+@MockitoBean(types = {JDA.class, DiscordListenerRegistrar.class, BotOwnerPort.class, JoinedGuildPort.class})
 class QuickTtsApiIntegrationTest {
 
     private static final FakeVoiceChannelLocatorPort VOICE_CHANNELS = new FakeVoiceChannelLocatorPort();

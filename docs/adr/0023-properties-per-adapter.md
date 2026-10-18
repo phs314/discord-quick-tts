@@ -10,7 +10,7 @@
   - `speech/adapter/out/tts/TtsProperties` (`quicktts.tts`): 기본 목소리, Edge 브라우저 버전
   - `guild/adapter/out/settings/GuildAllowlistProperties` (`quicktts.guild-allowlist`): 허용 목록을 쓸지
 - `config` 에는 JDA 를 만드는 데 필요한 `DiscordProperties` (`quicktts.discord`, 봇 토큰)만 남깁니다. 토큰이 비어 있으면 켜질 때 멈추는 것도 그대로입니다.
-- 어댑터는 `config` 의 설정이나 빈을 쓰지 않습니다. `ArchitectureTest` 의 `adaptersDoNotUseConfig` 가 확인합니다. `config` 가 어댑터를 쓰는 것(예: `DiscordCommandRegistrar` 가 슬래시 명령을 모으는 것)은 조립 코드라 괜찮습니다.
+- 어댑터는 `config` 의 설정이나 빈을 쓰지 않습니다. `ArchitectureTest` 의 `adaptersDoNotUseConfig` 가 확인합니다. `config` 가 어댑터를 쓰는 것(예: `DiscordListenerRegistrar` 가 디스코드 리스너를 모으는 것)은 조립 코드라 괜찮습니다.
 
 ## 고르지 않은 것
 

@@ -103,7 +103,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │       ├── out/persistence/    허용 목록 저장소 (JdbcClient)
 │       └── out/settings/       허용 목록을 쓸지 설정 값 (GuildAllowlistProperties)
 ├── shared/                     공유 커널(domain/vo 의 DiscordUserId, GuildId, 예외 공통 부모 BusinessException)과 웹·디스코드 공통 예외 처리
-└── config/                     디스코드 토큰, JDA, 시계, 슬래시 명령 등록, 웹 보안 규칙
+└── config/                     디스코드 토큰, JDA, 시계, 디스코드 리스너와 슬래시 명령 등록, 웹 보안 규칙
 ```
 
 `ArchitectureTest`(ArchUnit)가 빌드 때마다 다음 규칙을 확인합니다.
