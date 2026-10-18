@@ -12,12 +12,17 @@ import io.github.phs314.quicktts.bot.speech.application.exception.BotCannotJoinV
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
+import jakarta.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Stream;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
@@ -29,19 +34,37 @@ import org.springframework.stereotype.Component;
 
 /**
  * 디스코드 음성 채널에 들어가고 나가며, 음성을 임시 파일로 저장한 뒤 LavaPlayer 로 재생한다.
+ * 임시 파일은 시스템 임시 폴더 아래 {@code quicktts} 폴더에 두고, 다 읽으면 지운다. 봇 서버가 강제로 꺼져 남은 파일은
+ * 다음에 켜질 때 지운다.
  */
 @Component
 public class LavaPlayerSpeechPlayer implements SpeechPlayerPort {
 
     private static final Logger log = LoggerFactory.getLogger(LavaPlayerSpeechPlayer.class);
 
+    /** 켜질 때 이보다 오래된 임시 파일만 지운다. 같은 PC 에서 도는 다른 봇 서버가 읽고 있는 파일은 건드리지 않기 위해서다. */
+    static final Duration LEFTOVER_AGE = Duration.ofHours(1);
+
     private final JDA jda;
     private final AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
     private final Map<GuildId, GuildSpeechQueue> queues = new ConcurrentHashMap<>();
+    private final Path audioDirectory = Path.of(System.getProperty("java.io.tmpdir"), "quicktts");
 
-    public LavaPlayerSpeechPlayer(JDA jda) {
+    public LavaPlayerSpeechPlayer(JDA jda, Clock clock) {
         this.jda = jda;
         AudioSourceManagers.registerLocalSource(playerManager);
+        try {
+            Files.createDirectories(audioDirectory);
+        } catch (IOException e) {
+            throw new UncheckedIOException("임시 음성 파일 폴더를 만들지 못했습니다: " + audioDirectory, e);
+        }
+        deleteLeftovers(audioDirectory, clock.instant().minus(LEFTOVER_AGE));
+    }
+
+    /** 봇 서버가 꺼질 때 LavaPlayer 의 재생 스레드를 멈춘다. */
+    @PreDestroy
+    void shutdown() {
+        playerManager.shutdown();
     }
 
     @Override
@@ -114,12 +137,29 @@ public class LavaPlayerSpeechPlayer implements SpeechPlayerPort {
         return queues.computeIfAbsent(guildId, id -> new GuildSpeechQueue(playerManager.createPlayer()));
     }
 
-    private static Path writeTempFile(Speech speech) {
+    private Path writeTempFile(Speech speech) {
         try {
-            Path file = Files.createTempFile("quicktts-", "." + speech.fileExtension());
+            Path file = Files.createTempFile(audioDirectory, "speech-", "." + speech.fileExtension());
             return Files.write(file, speech.audio());
         } catch (IOException e) {
             throw new UncheckedIOException("임시 음성 파일을 만들지 못했습니다.", e);
+        }
+    }
+
+    /** 폴더 안에서 {@code before} 전에 마지막으로 고친 파일을 지운다. */
+    static void deleteLeftovers(Path directory, Instant before) {
+        try (Stream<Path> files = Files.list(directory)) {
+            files.filter(file -> isModifiedBefore(file, before)).forEach(LavaPlayerSpeechPlayer::deleteQuietly);
+        } catch (IOException e) {
+            log.warn("남은 임시 음성 파일을 확인하지 못했습니다: {}", directory, e);
+        }
+    }
+
+    private static boolean isModifiedBefore(Path file, Instant before) {
+        try {
+            return Files.isRegularFile(file) && Files.getLastModifiedTime(file).toInstant().isBefore(before);
+        } catch (IOException e) {
+            return false;
         }
     }
 
