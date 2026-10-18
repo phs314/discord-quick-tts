@@ -280,3 +280,5 @@ git push origin v0.2.0
 ```bash
 git config core.hooksPath .githooks
 ```
+
+라이브러리와 GitHub Actions 의 새 버전은 Dependabot 이 일주일에 한 번 `🔧 [chore] Bump ...` PR 로 묶어 올립니다(`.github/dependabot.yml`). 본문은 Dependabot 이 영어로 채웁니다.
