@@ -16,7 +16,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 
 @ParameterizedClass
 @EnumSource(TestDatabase.class)
-class JpaVoicePreferenceRepositoryTest {
+class VoicePreferencePersistenceAdapterTest {
 
     @Parameter
     TestDatabase database;
@@ -24,12 +24,12 @@ class JpaVoicePreferenceRepositoryTest {
     private static final DiscordUserId USER = new DiscordUserId(123456789012345678L);
 
     private AnnotationConfigApplicationContext context;
-    private JpaVoicePreferenceRepository repository;
+    private VoicePreferencePersistenceAdapter repository;
 
     @BeforeEach
     void setUp() {
-        context = TestJpa.context(database.dataSource(), JpaVoicePreferenceRepository.class);
-        repository = context.getBean(JpaVoicePreferenceRepository.class);
+        context = TestJpa.context(database.dataSource(), VoicePreferencePersistenceAdapter.class);
+        repository = context.getBean(VoicePreferencePersistenceAdapter.class);
     }
 
     @AfterEach

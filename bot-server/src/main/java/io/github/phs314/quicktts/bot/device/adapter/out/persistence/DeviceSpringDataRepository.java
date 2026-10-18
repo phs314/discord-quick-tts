@@ -8,9 +8,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * {@link DeviceJpaEntity} 를 읽고 쓰는 Spring Data 저장소. {@link JpaDeviceRepository} 만 쓴다.
+ * {@link DeviceJpaEntity} 를 읽고 쓰는 Spring Data 저장소. {@link DevicePersistenceAdapter} 만 쓴다.
  */
-interface SpringDataDeviceRepository extends JpaRepository<DeviceJpaEntity, String> {
+interface DeviceSpringDataRepository extends JpaRepository<DeviceJpaEntity, String> {
 
     Optional<DeviceJpaEntity> findByDeviceId(String deviceId);
 

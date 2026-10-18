@@ -23,13 +23,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
-class JdaJoinedGuildTest {
+class JoinedGuildDiscordAdapterTest {
 
     private static final GuildId GUILD_ID = new GuildId(100L);
 
     private final JDA jda = mock(JDA.class);
     private final Guild guild = mock(Guild.class, RETURNS_DEEP_STUBS);
-    private final JdaJoinedGuild joinedGuild = new JdaJoinedGuild(jda);
+    private final JoinedGuildDiscordAdapter joinedGuild = new JoinedGuildDiscordAdapter(jda);
 
     @BeforeEach
     void setUp() {

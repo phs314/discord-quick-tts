@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class PropertiesGuildAllowlistSetting implements GuildAllowlistSettingPort {
+public class GuildAllowlistSettingAdapter implements GuildAllowlistSettingPort {
 
     private final GuildAllowlistProperties properties;
 

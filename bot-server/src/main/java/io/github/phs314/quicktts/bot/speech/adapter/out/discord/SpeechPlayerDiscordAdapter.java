@@ -38,9 +38,9 @@ import org.springframework.stereotype.Component;
  * 다음에 켜질 때 지운다.
  */
 @Component
-public class LavaPlayerSpeechPlayer implements SpeechPlayerPort {
+public class SpeechPlayerDiscordAdapter implements SpeechPlayerPort {
 
-    private static final Logger log = LoggerFactory.getLogger(LavaPlayerSpeechPlayer.class);
+    private static final Logger log = LoggerFactory.getLogger(SpeechPlayerDiscordAdapter.class);
 
     /** 켜질 때 이보다 오래된 임시 파일만 지운다. 같은 PC 에서 도는 다른 봇 서버가 읽고 있는 파일은 건드리지 않기 위해서다. */
     static final Duration LEFTOVER_AGE = Duration.ofHours(1);
@@ -50,7 +50,7 @@ public class LavaPlayerSpeechPlayer implements SpeechPlayerPort {
     private final Map<GuildId, GuildSpeechQueue> queues = new ConcurrentHashMap<>();
     private final Path audioDirectory = Path.of(System.getProperty("java.io.tmpdir"), "quicktts");
 
-    public LavaPlayerSpeechPlayer(JDA jda, Clock clock) {
+    public SpeechPlayerDiscordAdapter(JDA jda, Clock clock) {
         this.jda = jda;
         AudioSourceManagers.registerLocalSource(playerManager);
         try {
@@ -149,7 +149,7 @@ public class LavaPlayerSpeechPlayer implements SpeechPlayerPort {
     /** 폴더 안에서 {@code before} 전에 마지막으로 고친 파일을 지운다. */
     static void deleteLeftovers(Path directory, Instant before) {
         try (Stream<Path> files = Files.list(directory)) {
-            files.filter(file -> isModifiedBefore(file, before)).forEach(LavaPlayerSpeechPlayer::deleteQuietly);
+            files.filter(file -> isModifiedBefore(file, before)).forEach(SpeechPlayerDiscordAdapter::deleteQuietly);
         } catch (IOException e) {
             log.warn("남은 임시 음성 파일을 확인하지 못했습니다: {}", directory, e);
         }

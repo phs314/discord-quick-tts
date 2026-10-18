@@ -23,7 +23,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 @ParameterizedClass
 @EnumSource(TestDatabase.class)
-class JpaAllowedGuildRepositoryTest {
+class AllowedGuildPersistenceAdapterTest {
 
     @Parameter
     TestDatabase database;
@@ -34,14 +34,14 @@ class JpaAllowedGuildRepositoryTest {
     private static final Instant LATER = Instant.parse("2026-10-11T01:00:00Z");
 
     private AnnotationConfigApplicationContext context;
-    private JpaAllowedGuildRepository repository;
+    private AllowedGuildPersistenceAdapter repository;
     /** 유스케이스의 {@code @Transactional} 대신 트랜잭션을 연다. */
     private TransactionTemplate transaction;
 
     @BeforeEach
     void setUp() {
-        context = TestJpa.context(database.dataSource(), JpaAllowedGuildRepository.class);
-        repository = context.getBean(JpaAllowedGuildRepository.class);
+        context = TestJpa.context(database.dataSource(), AllowedGuildPersistenceAdapter.class);
+        repository = context.getBean(AllowedGuildPersistenceAdapter.class);
         transaction = new TransactionTemplate(context.getBean(PlatformTransactionManager.class));
     }
 

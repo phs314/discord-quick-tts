@@ -70,8 +70,9 @@
 
 | ADR | 제목 | 상태 |
 | --- | --- | --- |
-| [0004](0004-output-port-naming.md) | 출력 포트 이름은 Repository 대신 ...Port 로 끝낸다 | 일부 대체됨 (ADR 0032) |
-| [0027](0027-naming-rules.md) | 이름 규칙을 한곳에 모은다 | 일부 대체됨 (ADR 0032) |
+| [0004](0004-output-port-naming.md) | 출력 포트 이름은 Repository 대신 ...Port 로 끝낸다 | 일부 대체됨 (ADR 0032, ADR 0039) |
+| [0027](0027-naming-rules.md) | 이름 규칙을 한곳에 모은다 | 일부 대체됨 (ADR 0032, ADR 0039) |
+| [0039](0039-outbound-adapters-end-with-adapter.md) | 출력 포트를 구현한 어댑터는 이름을 Adapter 로 끝낸다 | 채택 |
 
 ### 서비스와 유스케이스 입출력
 
@@ -96,7 +97,7 @@
 | [0016](0016-mysql-and-flyway.md) | 배포 서버는 MySQL, 스키마는 Flyway 로 관리한다 | 일부 대체됨 (ADR 0038) |
 | [0028](0028-one-aggregate-per-write.md) | 한 번에 함께 저장하는 것은 애그리거트 하나다 | 일부 대체됨 (ADR 0033) |
 | [0033](0033-transactional-on-writing-use-cases.md) | DB 에 쓰는 유스케이스에는 @Transactional 을 붙인다 | 채택 |
-| [0038](0038-jpa-entities-with-persistence-mappers.md) | 저장소 어댑터는 JPA 엔티티를 도메인과 따로 두고 매퍼로 옮긴다 | 채택 |
+| [0038](0038-jpa-entities-with-persistence-mappers.md) | 저장소 어댑터는 JPA 엔티티를 도메인과 따로 두고 매퍼로 옮긴다 | 일부 대체됨 (ADR 0039) |
 
 ### 웹 API
 

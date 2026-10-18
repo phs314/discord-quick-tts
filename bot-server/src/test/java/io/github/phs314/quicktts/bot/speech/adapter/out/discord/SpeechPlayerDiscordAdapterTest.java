@@ -10,7 +10,7 @@ import java.time.Instant;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
-class LavaPlayerSpeechPlayerTest {
+class SpeechPlayerDiscordAdapterTest {
 
     private static final Instant NOW = Instant.parse("2026-10-18T12:00:00Z");
 
@@ -19,10 +19,10 @@ class LavaPlayerSpeechPlayerTest {
 
     @Test
     void 켜질_때_오래된_임시_음성_파일만_지운다() throws IOException {
-        Path leftover = fileModifiedAt("speech-old.mp3", NOW.minus(LavaPlayerSpeechPlayer.LEFTOVER_AGE).minusSeconds(1));
+        Path leftover = fileModifiedAt("speech-old.mp3", NOW.minus(SpeechPlayerDiscordAdapter.LEFTOVER_AGE).minusSeconds(1));
         Path playing = fileModifiedAt("speech-new.mp3", NOW.minusSeconds(10));
 
-        LavaPlayerSpeechPlayer.deleteLeftovers(directory, NOW.minus(LavaPlayerSpeechPlayer.LEFTOVER_AGE));
+        SpeechPlayerDiscordAdapter.deleteLeftovers(directory, NOW.minus(SpeechPlayerDiscordAdapter.LEFTOVER_AGE));
 
         assertThat(leftover).doesNotExist();
         assertThat(playing).exists();

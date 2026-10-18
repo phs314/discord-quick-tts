@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class InMemoryPairingRepository implements PairingPort {
+public class PairingMemoryAdapter implements PairingPort {
 
     private final Map<PairingCode, Pairing> pairings = new ConcurrentHashMap<>();
     private final Clock clock;

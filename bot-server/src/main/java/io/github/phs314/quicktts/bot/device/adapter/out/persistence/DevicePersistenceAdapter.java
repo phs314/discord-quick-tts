@@ -15,41 +15,41 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class JpaDeviceRepository implements DevicePort {
+public class DevicePersistenceAdapter implements DevicePort {
 
-    private final SpringDataDeviceRepository springDataDeviceRepository;
+    private final DeviceSpringDataRepository deviceSpringDataRepository;
 
     @Override
     public void save(Device device) {
-        springDataDeviceRepository.save(DevicePersistenceMapper.toEntity(device));
+        deviceSpringDataRepository.save(DevicePersistenceMapper.toEntity(device));
     }
 
     @Override
     public Optional<Device> findByTokenHash(DeviceTokenHash tokenHash) {
-        return springDataDeviceRepository.findById(tokenHash.value())
+        return deviceSpringDataRepository.findById(tokenHash.value())
                 .map(DevicePersistenceMapper::toDomain);
     }
 
     @Override
     public List<Device> findByOwner(DiscordUserId owner) {
-        return springDataDeviceRepository.findByDiscordUserIdOrderByRegisteredAt(owner.value()).stream()
+        return deviceSpringDataRepository.findByDiscordUserIdOrderByRegisteredAt(owner.value()).stream()
                 .map(DevicePersistenceMapper::toDomain)
                 .toList();
     }
 
     @Override
     public Optional<Device> findById(DeviceId id) {
-        return springDataDeviceRepository.findByDeviceId(id.value())
+        return deviceSpringDataRepository.findByDeviceId(id.value())
                 .map(DevicePersistenceMapper::toDomain);
     }
 
     @Override
     public boolean delete(DeviceId id) {
-        return springDataDeviceRepository.deleteByDeviceId(id.value()) > 0;
+        return deviceSpringDataRepository.deleteByDeviceId(id.value()) > 0;
     }
 
     @Override
     public int deleteAllByOwner(DiscordUserId owner) {
-        return springDataDeviceRepository.deleteByDiscordUserId(owner.value());
+        return deviceSpringDataRepository.deleteByDiscordUserId(owner.value());
     }
 }

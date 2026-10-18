@@ -21,19 +21,19 @@ import org.springframework.stereotype.Component;
  * 비공식 엔진이 막히면 이 두 숫자가 먼저 바뀐다.
  */
 @Component
-public class MultiEngineSpeechSynthesizer implements SpeechSynthesizerPort {
+public class SpeechSynthesizerAdapter implements SpeechSynthesizerPort {
 
     static final String SYNTHESIS_METRIC = "quicktts.tts.synthesis";
     static final String FALLBACK_METRIC = "quicktts.tts.fallback";
 
-    private static final Logger log = LoggerFactory.getLogger(MultiEngineSpeechSynthesizer.class);
+    private static final Logger log = LoggerFactory.getLogger(SpeechSynthesizerAdapter.class);
 
     private final List<TtsEngine> engines;
     private final List<Voice> voices;
     private final VoiceId defaultVoice;
     private final MeterRegistry meterRegistry;
 
-    MultiEngineSpeechSynthesizer(List<TtsEngine> engines, TtsProperties properties, MeterRegistry meterRegistry) {
+    SpeechSynthesizerAdapter(List<TtsEngine> engines, TtsProperties properties, MeterRegistry meterRegistry) {
         this.engines = engines;
         this.meterRegistry = meterRegistry;
         this.voices = engines.stream().flatMap(engine -> engine.voices().stream()).toList();

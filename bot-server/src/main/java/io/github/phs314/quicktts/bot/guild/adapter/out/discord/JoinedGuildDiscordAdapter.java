@@ -16,9 +16,9 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class JdaJoinedGuild implements JoinedGuildPort {
+public class JoinedGuildDiscordAdapter implements JoinedGuildPort {
 
-    private static final Logger log = LoggerFactory.getLogger(JdaJoinedGuild.class);
+    private static final Logger log = LoggerFactory.getLogger(JoinedGuildDiscordAdapter.class);
 
     private final JDA jda;
 
