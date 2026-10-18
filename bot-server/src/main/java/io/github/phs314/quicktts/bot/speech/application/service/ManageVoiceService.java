@@ -1,12 +1,12 @@
 package io.github.phs314.quicktts.bot.speech.application.service;
 
-import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
+import io.github.phs314.quicktts.bot.speech.application.port.in.command.ChangeVoiceCommand;
+import io.github.phs314.quicktts.bot.speech.application.port.in.query.GetCurrentVoiceQuery;
 import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.ManageVoiceUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoicePreferencePort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceCatalog;
-import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,14 +24,14 @@ public class ManageVoiceService implements ManageVoiceUseCase {
     }
 
     @Override
-    public Voice getCurrentVoice(DiscordUserId user) {
-        return catalog().chosenOrDefault(voicePreferencePort.findVoice(user));
+    public Voice getCurrentVoice(GetCurrentVoiceQuery query) {
+        return catalog().chosenOrDefault(voicePreferencePort.findVoice(query.user()));
     }
 
     @Override
-    public Voice changeVoice(DiscordUserId user, VoiceId voiceId) {
-        Voice voice = catalog().choose(voiceId);
-        voicePreferencePort.saveVoice(user, voice.id());
+    public Voice changeVoice(ChangeVoiceCommand command) {
+        Voice voice = catalog().choose(command.voiceId());
+        voicePreferencePort.saveVoice(command.user(), voice.id());
         return voice;
     }
 

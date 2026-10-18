@@ -1,6 +1,6 @@
 package io.github.phs314.quicktts.bot.speech.application.port.in.usecase;
 
-import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
+import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindMyVoiceChannelQuery;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import java.util.Optional;
 
@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface FindMyVoiceChannelUseCase {
 
     /** 봇이 있는 서버의 음성 채널에 없으면 비어 있다. */
-    Optional<VoiceChannelDetails> findMyVoiceChannel(DiscordUserId user);
+    Optional<VoiceChannelDetails> findMyVoiceChannel(FindMyVoiceChannelQuery query);
 }

@@ -1,8 +1,9 @@
 package io.github.phs314.quicktts.bot.device.application.port.in.usecase;
 
+import io.github.phs314.quicktts.bot.device.application.port.in.command.UnlinkAllDevicesCommand;
+import io.github.phs314.quicktts.bot.device.application.port.in.command.UnlinkDeviceCommand;
 import io.github.phs314.quicktts.bot.device.application.port.in.dto.DeviceDto;
-import io.github.phs314.quicktts.bot.device.domain.vo.DeviceId;
-import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
+import io.github.phs314.quicktts.bot.device.application.port.in.query.GetDevicesQuery;
 import java.util.List;
 
 /**
@@ -10,11 +11,11 @@ import java.util.List;
  */
 public interface ManageOwnDevicesUseCase {
 
-    List<DeviceDto> getDevices(DiscordUserId owner);
+    List<DeviceDto> getDevices(GetDevicesQuery query);
 
     /** 그 사용자의 기기가 아니거나 이미 해제됐으면 false. */
-    boolean unlink(DiscordUserId owner, DeviceId id);
+    boolean unlink(UnlinkDeviceCommand command);
 
     /** 해제한 기기 수를 돌려준다. */
-    int unlinkAll(DiscordUserId owner);
+    int unlinkAll(UnlinkAllDevicesCommand command);
 }

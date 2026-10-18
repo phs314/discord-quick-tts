@@ -1,6 +1,9 @@
 package io.github.phs314.quicktts.bot.device.adapter.in.discord;
 
+import io.github.phs314.quicktts.bot.device.application.port.in.command.UnlinkAllDevicesCommand;
+import io.github.phs314.quicktts.bot.device.application.port.in.command.UnlinkDeviceCommand;
 import io.github.phs314.quicktts.bot.device.application.port.in.dto.DeviceDto;
+import io.github.phs314.quicktts.bot.device.application.port.in.query.GetDevicesQuery;
 import io.github.phs314.quicktts.bot.device.application.port.in.usecase.ManageOwnDevicesUseCase;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceId;
 import io.github.phs314.quicktts.bot.shared.adapter.in.discord.DiscordSlashCommand;
@@ -49,7 +52,8 @@ public class UnlinkCommandListener extends ListenerAdapter implements DiscordSla
         if (!COMMAND_NAME.equals(event.getName())) {
             return;
         }
-        List<DeviceDto> devices = manageOwnDevicesUseCase.getDevices(ownerOf(event.getUser().getIdLong()));
+        List<DeviceDto> devices = manageOwnDevicesUseCase.getDevices(
+                new GetDevicesQuery(ownerOf(event.getUser().getIdLong())));
         if (devices.isEmpty()) {
             event.reply("연결된 PC 가 없습니다.").setEphemeral(true).queue();
             return;
@@ -77,8 +81,8 @@ public class UnlinkCommandListener extends ListenerAdapter implements DiscordSla
 
         String result;
         if (ALL_DEVICES.equals(selected)) {
-            result = "PC " + manageOwnDevicesUseCase.unlinkAll(owner) + "대의 연결을 끊었습니다.";
-        } else if (manageOwnDevicesUseCase.unlink(owner, new DeviceId(selected))) {
+            result = "PC " + manageOwnDevicesUseCase.unlinkAll(new UnlinkAllDevicesCommand(owner)) + "대의 연결을 끊었습니다.";
+        } else if (manageOwnDevicesUseCase.unlink(new UnlinkDeviceCommand(owner, new DeviceId(selected)))) {
             result = "연결을 끊었습니다. 그 PC 에서 다시 쓰려면 `/연결` 로 코드를 받으세요.";
         } else {
             result = "이미 끊긴 PC 입니다.";

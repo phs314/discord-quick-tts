@@ -3,6 +3,7 @@ package io.github.phs314.quicktts.bot.device.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import io.github.phs314.quicktts.bot.device.application.port.in.command.RegisterDeviceCommand;
 import io.github.phs314.quicktts.bot.device.application.port.out.FakeDevicePort;
 import io.github.phs314.quicktts.bot.device.application.port.out.FakePairingPort;
 import io.github.phs314.quicktts.bot.device.domain.InvalidPairingCodeException;
@@ -29,7 +30,7 @@ class RegisterDeviceServiceTest {
     void 연결_코드로_등록한_기기는_코드를_받은_사용자의_것이다() {
         Pairing pairing = issuedPairing();
 
-        DeviceToken token = serviceAt(NOW.plusSeconds(30)).register(pairing.code(), PC);
+        DeviceToken token = serviceAt(NOW.plusSeconds(30)).register(new RegisterDeviceCommand(pairing.code(), PC));
 
         assertThat(devices.findByTokenHash(token.hash()))
                 .hasValueSatisfying(device -> {
@@ -41,9 +42,9 @@ class RegisterDeviceServiceTest {
     @Test
     void 연결_코드는_한_번만_쓸_수_있다() {
         Pairing pairing = issuedPairing();
-        serviceAt(NOW).register(pairing.code(), PC);
+        serviceAt(NOW).register(new RegisterDeviceCommand(pairing.code(), PC));
 
-        assertThatThrownBy(() -> serviceAt(NOW).register(pairing.code(), PC))
+        assertThatThrownBy(() -> serviceAt(NOW).register(new RegisterDeviceCommand(pairing.code(), PC)))
                 .isInstanceOf(InvalidPairingCodeException.class);
     }
 
@@ -52,14 +53,14 @@ class RegisterDeviceServiceTest {
         Pairing pairing = issuedPairing();
         Instant afterExpiry = NOW.plus(Pairing.VALID_FOR).plus(Duration.ofSeconds(1));
 
-        assertThatThrownBy(() -> serviceAt(afterExpiry).register(pairing.code(), PC))
+        assertThatThrownBy(() -> serviceAt(afterExpiry).register(new RegisterDeviceCommand(pairing.code(), PC)))
                 .isInstanceOf(InvalidPairingCodeException.class);
         assertThat(devices.saved()).isEmpty();
     }
 
     @Test
     void 서버에는_토큰_원문이_아니라_해시만_저장한다() {
-        DeviceToken token = serviceAt(NOW).register(issuedPairing().code(), PC);
+        DeviceToken token = serviceAt(NOW).register(new RegisterDeviceCommand(issuedPairing().code(), PC));
 
         assertThat(devices.saved()).containsOnlyKeys(token.hash());
         assertThat(devices.saved().values().stream().map(device -> device.tokenHash().value()))

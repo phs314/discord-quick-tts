@@ -1,8 +1,11 @@
 package io.github.phs314.quicktts.bot.guild.adapter.in.discord;
 
 import io.github.phs314.quicktts.bot.guild.application.exception.NotBotOwnerException;
+import io.github.phs314.quicktts.bot.guild.application.port.in.command.AllowGuildCommand;
+import io.github.phs314.quicktts.bot.guild.application.port.in.command.DisallowGuildCommand;
 import io.github.phs314.quicktts.bot.guild.application.port.in.dto.AllowedGuildDto;
 import io.github.phs314.quicktts.bot.guild.application.port.in.dto.GuildAllowlistDto;
+import io.github.phs314.quicktts.bot.guild.application.port.in.query.GetAllowlistQuery;
 import io.github.phs314.quicktts.bot.guild.application.port.in.usecase.ManageGuildAllowlistUseCase;
 import io.github.phs314.quicktts.bot.shared.adapter.in.discord.DiscordSlashCommand;
 import io.github.phs314.quicktts.bot.shared.domain.InvalidDomainValueException;
@@ -96,7 +99,7 @@ public class AllowlistCommandListener extends ListenerAdapter implements Discord
     }
 
     private String add(DiscordUserId requester, GuildId guildId) {
-        String result = manageGuildAllowlistUseCase.allow(requester, guildId)
+        String result = manageGuildAllowlistUseCase.allow(new AllowGuildCommand(requester, guildId))
                 ? "허용 목록에 넣었어요: **" + guildName(guildId) + "**"
                 : "이미 허용 목록에 있어요: **" + guildName(guildId) + "**";
         if (jda.getGuildById(guildId.value()) != null) {
@@ -107,13 +110,13 @@ public class AllowlistCommandListener extends ListenerAdapter implements Discord
 
     private String remove(DiscordUserId requester, GuildId guildId) {
         String name = guildName(guildId);
-        return manageGuildAllowlistUseCase.disallow(requester, guildId)
+        return manageGuildAllowlistUseCase.disallow(new DisallowGuildCommand(requester, guildId))
                 ? "허용 목록에서 뺐어요: **" + name + "**\n봇이 그 서버에 있었다면 안내를 남기고 나가요."
                 : "허용 목록에 없는 서버예요: **" + name + "**";
     }
 
     private String list(DiscordUserId requester) {
-        GuildAllowlistDto allowlist = manageGuildAllowlistUseCase.getAllowlist(requester);
+        GuildAllowlistDto allowlist = manageGuildAllowlistUseCase.getAllowlist(new GetAllowlistQuery(requester));
         String header = allowlist.enabled()
                 ? "허용 목록을 쓰는 중이에요. 여기 없는 서버에 초대되면 봇이 안내를 남기고 나가요."
                 : "허용 목록이 꺼져 있어서 어느 서버에나 들어가요.";

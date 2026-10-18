@@ -35,7 +35,7 @@ class QuickChatControllerTest {
     private static final String TOKEN = "good-token";
     private static final DiscordUserId SPEAKER = new DiscordUserId(42L);
     private static final AuthenticateDeviceUseCase AUTHENTICATE =
-            raw -> raw.equals(TOKEN) ? Optional.of(SPEAKER) : Optional.empty();
+            query -> query.rawDeviceToken().equals(TOKEN) ? Optional.of(SPEAKER) : Optional.empty();
 
     private SpeakQuickChatUseCase speak = command -> { };
 
@@ -136,7 +136,7 @@ class QuickChatControllerTest {
     }
 
     private MockMvc mockMvc() {
-        QuickChatController controller = new QuickChatController(AUTHENTICATE, speak, user -> Optional.empty());
+        QuickChatController controller = new QuickChatController(AUTHENTICATE, speak, query -> Optional.empty());
         return MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new ApiExceptionHandler())
                 .build();

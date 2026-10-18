@@ -4,12 +4,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
 import io.github.phs314.quicktts.bot.config.DiscordCommandRegistrar;
+import io.github.phs314.quicktts.bot.device.application.port.in.command.IssuePairingCodeCommand;
+import io.github.phs314.quicktts.bot.device.application.port.in.command.UnlinkAllDevicesCommand;
 import io.github.phs314.quicktts.bot.device.application.port.in.usecase.IssuePairingCodeUseCase;
 import io.github.phs314.quicktts.bot.device.application.port.in.usecase.ManageOwnDevicesUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.out.BotOwnerPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.JoinedGuildPort;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
+import io.github.phs314.quicktts.bot.speech.application.port.in.command.ChangeVoiceCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.ManageVoiceUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechSynthesizerPort;
@@ -117,7 +120,7 @@ class QuickTtsApiIntegrationTest {
 
     @Test
     void 한_번_쓴_연결_코드는_400_과_invalid_pairing_code() {
-        String code = issuePairingCodeUseCase.issue(newUser()).code().display();
+        String code = issuePairingCodeUseCase.issue(new IssuePairingCodeCommand(newUser())).code().display();
         postDevice(code).expectStatus().isCreated();
 
         postDevice(code)
@@ -154,7 +157,7 @@ class QuickTtsApiIntegrationTest {
         String token = registerDevice(user);
         VoiceChannel channel = newChannel(newGuild());
         VOICE_CHANNELS.enter(user, details(channel, "게임"));
-        manageVoiceUseCase.changeVoice(user, FakeSpeechSynthesizerPort.INJOON.id());
+        manageVoiceUseCase.changeVoice(new ChangeVoiceCommand(user, FakeSpeechSynthesizerPort.INJOON.id()));
 
         sendQuickChat(token, "안녕").expectStatus().isAccepted();
 
@@ -176,7 +179,7 @@ class QuickTtsApiIntegrationTest {
         DiscordUserId user = newUser();
         String token = registerDevice(user);
         VOICE_CHANNELS.enter(user, details(newChannel(newGuild()), "게임"));
-        manageOwnDevicesUseCase.unlinkAll(user);
+        manageOwnDevicesUseCase.unlinkAll(new UnlinkAllDevicesCommand(user));
 
         sendQuickChat(token, "안녕")
                 .expectStatus().isUnauthorized()
@@ -244,7 +247,7 @@ class QuickTtsApiIntegrationTest {
 
     /** 디스코드 /연결 로 코드를 받아 클라이언트 첫 실행처럼 등록하고 기기 토큰을 돌려준다. */
     private String registerDevice(DiscordUserId owner) {
-        String code = issuePairingCodeUseCase.issue(owner).code().display();
+        String code = issuePairingCodeUseCase.issue(new IssuePairingCodeCommand(owner)).code().display();
         DeviceRegistrationResponse response = postDevice(code)
                 .expectStatus().isCreated()
                 .expectBody(DeviceRegistrationResponse.class)

@@ -1,5 +1,6 @@
 package io.github.phs314.quicktts.bot.guild.adapter.in.discord;
 
+import io.github.phs314.quicktts.bot.guild.application.port.in.command.LeaveIfNotAllowedCommand;
 import io.github.phs314.quicktts.bot.guild.application.port.in.usecase.EnforceGuildAllowlistUseCase;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import jakarta.annotation.PostConstruct;
@@ -34,6 +35,7 @@ public class GuildJoinListener extends ListenerAdapter {
 
     @Override
     public void onGuildJoin(GuildJoinEvent event) {
-        enforceGuildAllowlistUseCase.leaveIfNotAllowed(new GuildId(event.getGuild().getIdLong()));
+        GuildId guildId = new GuildId(event.getGuild().getIdLong());
+        enforceGuildAllowlistUseCase.leaveIfNotAllowed(new LeaveIfNotAllowedCommand(guildId));
     }
 }

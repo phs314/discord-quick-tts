@@ -8,11 +8,13 @@ import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideInAnyP
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.resideOutsideOfPackages;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.classes;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.fields;
+import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.methods;
 import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 import static com.tngtech.archunit.library.Architectures.onionArchitecture;
 
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaField;
+import com.tngtech.archunit.core.domain.JavaMethod;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
@@ -171,7 +173,7 @@ class ArchitectureTest {
             .that().resideInAPackage("..bot.*.adapter.out..").and().areTopLevelClasses()
             .should(beNamedTechnologyPlusPort());
 
-    /** port.in 바로 아래에는 클래스를 두지 않고 usecase, command, dto 폴더로 나눈다 (ADR 0012). */
+    /** port.in 바로 아래에는 클래스를 두지 않고 usecase, command, query, dto 폴더로 나눈다 (ADR 0012, 0029). */
     @ArchTest
     static final ArchRule inputPortPackageHasOnlySubpackages = noClasses()
             .should().resideInAPackage("..bot.*.application.port.in");
@@ -183,11 +185,26 @@ class ArchitectureTest {
             .should().beInterfaces()
             .andShould().haveSimpleNameEndingWith("UseCase");
 
-    /** command 폴더에는 유스케이스로 들어가는 값만 두고 이름은 Command 로 끝낸다 (ADR 0012). */
+    /** command 폴더에는 상태를 바꾸는 유스케이스로 들어가는 값만 두고 이름은 Command 로 끝낸다 (ADR 0012, 0029). */
     @ArchTest
     static final ArchRule commandsAreNamedCommand = classes()
             .that().resideInAPackage("..bot.*.application.port.in.command..").and().areTopLevelClasses()
             .should().haveSimpleNameEndingWith("Command");
+
+    /** query 폴더에는 조회 유스케이스로 들어가는 값만 두고 이름은 Query 로 끝낸다 (ADR 0029). */
+    @ArchTest
+    static final ArchRule queriesAreNamedQuery = classes()
+            .that().resideInAPackage("..bot.*.application.port.in.query..").and().areTopLevelClasses()
+            .should().haveSimpleNameEndingWith("Query");
+
+    /**
+     * 유스케이스 메서드는 Command 나 Query 하나만 받는다. 받을 값이 없으면 인자 없이 둔다 (ADR 0029).
+     * 상태를 바꾸는지 조회인지는 리뷰로 본다.
+     */
+    @ArchTest
+    static final ArchRule useCaseMethodsTakeOneCommandOrQuery = methods()
+            .that().areDeclaredInClassesThat().resideInAPackage("..bot.*.application.port.in.usecase..")
+            .should(takeNothingOrOneCommandOrQuery());
 
     /** dto 폴더에는 유스케이스가 돌려주는 값만 두고 이름은 Dto 로 끝낸다 (ADR 0010, 0012). */
     @ArchTest
@@ -284,6 +301,21 @@ class ArchitectureTest {
                 if (!field.getName().equals(expected)) {
                     events.add(SimpleConditionEvent.violated(field, field.getOwner().getSimpleName() + "."
                             + field.getName() + " 의 이름은 " + expected + " 이어야 합니다."));
+                }
+            }
+        };
+    }
+
+    private static ArchCondition<JavaMethod> takeNothingOrOneCommandOrQuery() {
+        return new ArchCondition<>("take nothing or exactly one Command or Query") {
+            @Override
+            public void check(JavaMethod method, ConditionEvents events) {
+                List<JavaClass> parameters = method.getRawParameterTypes();
+                boolean ok = parameters.isEmpty() || parameters.size() == 1 && parameters.getFirst()
+                        .getPackageName().matches(".*\\.application\\.port\\.in\\.(command|query)");
+                if (!ok) {
+                    events.add(SimpleConditionEvent.violated(method, method.getFullName()
+                            + " 는 Command 나 Query 하나만 받거나, 아무것도 받지 않아야 합니다."));
                 }
             }
         };

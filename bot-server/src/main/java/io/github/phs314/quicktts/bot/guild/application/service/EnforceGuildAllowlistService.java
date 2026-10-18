@@ -1,5 +1,6 @@
 package io.github.phs314.quicktts.bot.guild.application.service;
 
+import io.github.phs314.quicktts.bot.guild.application.port.in.command.LeaveIfNotAllowedCommand;
 import io.github.phs314.quicktts.bot.guild.application.port.in.usecase.EnforceGuildAllowlistUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.out.AllowedGuildPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.GuildAllowlistSettingPort;
@@ -24,9 +25,9 @@ public class EnforceGuildAllowlistService implements EnforceGuildAllowlistUseCas
     private final Clock clock;
 
     @Override
-    public void leaveIfNotAllowed(GuildId guildId) {
-        if (!currentAllowlist().permits(guildId)) {
-            joinedGuildPort.leaveWithNotice(guildId);
+    public void leaveIfNotAllowed(LeaveIfNotAllowedCommand command) {
+        if (!currentAllowlist().permits(command.guildId())) {
+            joinedGuildPort.leaveWithNotice(command.guildId());
         }
     }
 

@@ -3,6 +3,7 @@ package io.github.phs314.quicktts.bot.speech.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
+import io.github.phs314.quicktts.bot.speech.application.port.in.command.FollowBotMoveCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeBotSeatPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
@@ -23,7 +24,7 @@ class FollowBotMoveServiceTest {
     void 관리자가_봇을_다른_채널로_옮기면_자리도_따라간다() {
         sitIn(GENERAL);
 
-        service.followBotMove(GENERAL, Optional.of(GAME));
+        service.followBotMove(new FollowBotMoveCommand(GENERAL, Optional.of(GAME)));
 
         assertThat(seats.channelOf(GUILD)).contains(GAME);
         assertThat(player.actions()).isEmpty();
@@ -33,7 +34,7 @@ class FollowBotMoveServiceTest {
     void 관리자가_봇의_연결을_끊으면_자리를_비우고_남은_문장을_버린다() {
         sitIn(GENERAL);
 
-        service.followBotMove(GENERAL, Optional.empty());
+        service.followBotMove(new FollowBotMoveCommand(GENERAL, Optional.empty()));
 
         assertThat(seats.channelOf(GUILD)).isEmpty();
         assertThat(player.actions()).containsExactly("leave:1");
@@ -43,7 +44,7 @@ class FollowBotMoveServiceTest {
     void 봇_서버가_이미_다른_채널로_자리를_옮겼으면_늦게_온_소식은_무시한다() {
         sitIn(GAME);
 
-        service.followBotMove(GENERAL, Optional.empty());
+        service.followBotMove(new FollowBotMoveCommand(GENERAL, Optional.empty()));
 
         assertThat(seats.channelOf(GUILD)).contains(GAME);
         assertThat(player.actions()).isEmpty();

@@ -1,5 +1,6 @@
 package io.github.phs314.quicktts.bot.device.application.service;
 
+import io.github.phs314.quicktts.bot.device.application.port.in.query.AuthenticateDeviceQuery;
 import io.github.phs314.quicktts.bot.device.application.port.in.usecase.AuthenticateDeviceUseCase;
 import io.github.phs314.quicktts.bot.device.application.port.out.DevicePort;
 import io.github.phs314.quicktts.bot.device.domain.Device;
@@ -17,7 +18,8 @@ public class AuthenticateDeviceService implements AuthenticateDeviceUseCase {
     private final DevicePort devicePort;
 
     @Override
-    public Optional<DiscordUserId> authenticate(String rawDeviceToken) {
+    public Optional<DiscordUserId> authenticate(AuthenticateDeviceQuery query) {
+        String rawDeviceToken = query.rawDeviceToken();
         if (rawDeviceToken == null || rawDeviceToken.isBlank()) {
             return Optional.empty();
         }

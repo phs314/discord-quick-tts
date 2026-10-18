@@ -1,14 +1,13 @@
 package io.github.phs314.quicktts.bot.device.application.service;
 
+import io.github.phs314.quicktts.bot.device.application.port.in.command.RegisterDeviceCommand;
 import io.github.phs314.quicktts.bot.device.application.port.in.usecase.RegisterDeviceUseCase;
 import io.github.phs314.quicktts.bot.device.application.port.out.DevicePort;
 import io.github.phs314.quicktts.bot.device.application.port.out.PairingPort;
 import io.github.phs314.quicktts.bot.device.domain.Device;
 import io.github.phs314.quicktts.bot.device.domain.InvalidPairingCodeException;
 import io.github.phs314.quicktts.bot.device.domain.Pairing;
-import io.github.phs314.quicktts.bot.device.domain.vo.DeviceName;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceToken;
-import io.github.phs314.quicktts.bot.device.domain.vo.PairingCode;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import java.time.Clock;
 import java.time.Instant;
@@ -24,13 +23,13 @@ public class RegisterDeviceService implements RegisterDeviceUseCase {
     private final Clock clock;
 
     @Override
-    public DeviceToken register(PairingCode code, DeviceName name) {
+    public DeviceToken register(RegisterDeviceCommand command) {
         Instant now = clock.instant();
-        Pairing pairing = pairingPort.findAndDelete(code).orElseThrow(InvalidPairingCodeException::new);
+        Pairing pairing = pairingPort.findAndDelete(command.code()).orElseThrow(InvalidPairingCodeException::new);
         DiscordUserId owner = pairing.redeem(now);
 
         DeviceToken token = DeviceToken.generate();
-        devicePort.save(Device.register(token, owner, name, now));
+        devicePort.save(Device.register(token, owner, command.name(), now));
         return token;
     }
 }

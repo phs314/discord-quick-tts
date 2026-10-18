@@ -1,8 +1,10 @@
 package io.github.phs314.quicktts.bot.speech.adapter.in.web;
 
+import io.github.phs314.quicktts.bot.device.application.port.in.query.AuthenticateDeviceQuery;
 import io.github.phs314.quicktts.bot.device.application.port.in.usecase.AuthenticateDeviceUseCase;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
+import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindMyVoiceChannelQuery;
 import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.FindMyVoiceChannelUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.SpeakQuickChatUseCase;
 import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
@@ -44,7 +46,7 @@ public class QuickChatController {
     public ResponseEntity<VoiceChannelResponse> myVoiceChannel(
             @RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) String authorization) {
         DiscordUserId user = authenticatedUser(authorization);
-        return findMyVoiceChannelUseCase.findMyVoiceChannel(user)
+        return findMyVoiceChannelUseCase.findMyVoiceChannel(new FindMyVoiceChannelQuery(user))
                 .map(details -> ResponseEntity.ok(new VoiceChannelResponse(
                         details.guildName(), details.guildIconUrl(), details.channelName())))
                 .orElseGet(() -> ResponseEntity.noContent().build());
@@ -53,7 +55,7 @@ public class QuickChatController {
     /** 기기 토큰의 주인. 토큰이 없거나 해제된 기기면 401 로 끝난다. */
     private DiscordUserId authenticatedUser(String authorization) {
         return bearerToken(authorization)
-                .flatMap(authenticateDeviceUseCase::authenticate)
+                .flatMap(token -> authenticateDeviceUseCase.authenticate(new AuthenticateDeviceQuery(token)))
                 .orElseThrow(DeviceUnauthorizedException::new);
     }
 
