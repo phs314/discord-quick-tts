@@ -55,9 +55,10 @@
 | [0002](0002-bounded-contexts.md) | 봇 서버를 speech, device, shared 컨텍스트로 나눈다 | 일부 대체됨 (ADR 0015, ADR 0025, ADR 0031) |
 | [0012](0012-application-subpackages.md) | application 의 유스케이스, Command, Dto, 예외를 폴더로 나눈다 | 일부 대체됨 (ADR 0024, ADR 0029, ADR 0032, ADR 0041) |
 | [0023](0023-properties-per-adapter.md) | 설정 값은 그 값을 쓰는 어댑터 패키지에 둔다 | 채택 |
-| [0026](0026-calls-between-contexts.md) | 컨텍스트 사이 호출은 컨텍스트 지도와 공개 입구로만 한다 | 일부 대체됨 (ADR 0031, ADR 0033) |
+| [0026](0026-calls-between-contexts.md) | 컨텍스트 사이 호출은 컨텍스트 지도와 공개 입구로만 한다 | 일부 대체됨 (ADR 0031, ADR 0033, ADR 0040) |
 | [0032](0032-archunit-checks-dependencies-only.md) | ArchUnit 은 의존 방향만 검사한다 | 일부 대체됨 (ADR 0035) |
 | [0035](0035-archunit-patterns-and-domain-allowlist.md) | 도메인과 애플리케이션이 어댑터를 모르는지는 폴더 이름과 상관없이 검사하고, 도메인은 써도 되는 것만 적는다 | 채택 |
+| [0040](0040-inbound-adapters-do-not-call-other-contexts.md) | 인바운드 어댑터는 다른 컨텍스트의 유스케이스를 부르지 않는다 | 채택 |
 | [0041](0041-use-cases-directly-in-port-in.md) | 입력 포트(...UseCase)는 port/in 바로 아래에 둔다 | 채택 |
 
 ### 도메인 모델

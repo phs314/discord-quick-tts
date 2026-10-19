@@ -43,8 +43,8 @@ class ArchitectureTest {
     /** 컨텍스트가 아닌 맨 위 패키지. shared 는 공유 커널, config 는 조립 코드다. */
     private static final Set<String> NON_CONTEXT_PACKAGES = Set.of("shared", "config");
 
-    /** 다른 컨텍스트를 부르는 어댑터(인바운드 어댑터와 adapter.out.상대)가 그 컨텍스트의 공개 입구를 쓰는 의존. 계층 규칙에서는 빼고 아래 컨텍스트 규칙이 따로 본다. */
-    private static final String ADAPTERS = "..bot.*.adapter..";
+    /** 다른 컨텍스트를 부르는 출력 어댑터(adapter.out.상대)가 그 컨텍스트의 공개 입구를 쓰는 의존. 계층 규칙에서는 빼고 아래 컨텍스트 규칙이 따로 본다. */
+    private static final String OUTBOUND_ADAPTERS = "..bot.*.adapter.out..";
     private static final String PUBLIC_ENTRANCES = "..bot.*.application.port.in..";
 
     @ArchTest
@@ -60,7 +60,7 @@ class ArchitectureTest {
             .withOptionalLayers(true)
             // config 는 포트와 어댑터를 이어 붙이는 조립 코드라서 계층 규칙에서 뺀다.
             .ignoreDependency(resideInAPackage("..bot.config.."), alwaysTrue())
-            .ignoreDependency(resideInAPackage(ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES));
+            .ignoreDependency(resideInAPackage(OUTBOUND_ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES));
 
     @ArchTest
     static final ArchRule deviceIsHexagonal = onionArchitecture()
@@ -72,7 +72,7 @@ class ArchitectureTest {
             .adapter("memory", "..bot.device.adapter.out.memory..")
             .withOptionalLayers(true)
             .ignoreDependency(resideInAPackage("..bot.config.."), alwaysTrue())
-            .ignoreDependency(resideInAPackage(ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES));
+            .ignoreDependency(resideInAPackage(OUTBOUND_ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES));
 
     @ArchTest
     static final ArchRule guildIsHexagonal = onionArchitecture()
@@ -86,7 +86,7 @@ class ArchitectureTest {
             .adapter("settings", "..bot.guild.adapter.out.settings..")
             .withOptionalLayers(true)
             .ignoreDependency(resideInAPackage("..bot.config.."), alwaysTrue())
-            .ignoreDependency(resideInAPackage(ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES));
+            .ignoreDependency(resideInAPackage(OUTBOUND_ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES));
 
     /** bot 바로 아래 패키지는 컨텍스트 지도에 있는 컨텍스트이거나 shared, config 다. 지도에 없는 컨텍스트는 아래 규칙을 빠져나가기 때문이다. */
     @ArchTest
@@ -105,13 +105,13 @@ class ArchitectureTest {
 
     /**
      * 다른 컨텍스트는 컨텍스트 지도에 있을 때만, 그 공개 입구(application.port.in)로만 부른다.
-     * 부르는 쪽은 인바운드 어댑터이거나, 서비스가 내 출력 포트로 부탁한 일을 하는 adapter.out.상대 다 (ADR 0026).
-     * 서비스와 도메인은 다른 컨텍스트를 모른다. guild 처럼 지도에 상대가 없는 컨텍스트는 다른 컨텍스트와 서로 모른다 (ADR 0015).
+     * 부르는 쪽은 서비스가 내 출력 포트로 부탁한 일을 하는 adapter.out.상대 하나뿐이다 (ADR 0026, ADR 0040).
+     * 인바운드 어댑터, 서비스, 도메인은 다른 컨텍스트를 모른다. guild 처럼 지도에 상대가 없는 컨텍스트는 다른 컨텍스트와 서로 모른다 (ADR 0015).
      */
     @ArchTest
     static final ArchRule contextsMeetOnlyAtPublicEntrances = classes()
             .that().resideInAPackage("..bot.*..")
-            .should(new ArchCondition<>("call other contexts only through their input ports, from an adapter, as the context map allows") {
+            .should(new ArchCondition<>("call other contexts only through their input ports, from adapter.out.<context>, as the context map allows") {
                 @Override
                 public void check(JavaClass javaClass, ConditionEvents events) {
                     String from = topPackage(javaClass);
@@ -126,8 +126,7 @@ class ArchitectureTest {
                         }
                         String caller = javaClass.getPackageName();
                         boolean allowed = CONTEXT_MAP.get(from).contains(to)
-                                && (caller.startsWith(contextPackage(from) + ".adapter.in")
-                                        || caller.startsWith(contextPackage(from) + ".adapter.out." + to))
+                                && caller.startsWith(contextPackage(from) + ".adapter.out." + to)
                                 && target.getPackageName().startsWith(contextPackage(to) + ".application.port.in");
                         if (!allowed) {
                             events.add(SimpleConditionEvent.violated(javaClass, dependency.getDescription()));
