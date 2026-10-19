@@ -113,7 +113,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 `ArchitectureTest`(ArchUnit)가 빌드 때마다 다음 의존 규칙을 확인합니다. ArchUnit 은 무엇이 무엇을 알아도 되는지만 봅니다 ([ADR 0032](docs/adr/0032-archunit-checks-dependencies-only.md)).
 
 - 각 컨텍스트의 `domain` 은 자바 표준 라이브러리와 도메인, `common` 의 오류 코드만 쓰고, `application` 은 스프링 중 `@Service`, `@Transactional` 만 씁니다 ([ADR 0009](docs/adr/0009-spring-annotations-on-services.md), [ADR 0035](docs/adr/0035-archunit-patterns-and-domain-allowlist.md)). `domain` 과 `application` 은 어떤 어댑터 폴더도 모르고, 어댑터끼리도 서로 모릅니다.
-- 컨텍스트끼리는 컨텍스트 지도(`ArchitectureTest.CONTEXT_MAP`)에 적힌 대로만, 상대의 공개 입구(`application.port.in`)로만 부릅니다. 부르는 자리는 인바운드 어댑터나 `adapter/out/<상대>` 이고, 서비스와 도메인은 다른 컨텍스트를 모릅니다. 지금은 서로 부르는 컨텍스트가 없고(`guild` 는 다른 컨텍스트와 서로 모름), `shared` 는 어느 컨텍스트도 모릅니다 ([ADR 0026](docs/adr/0026-calls-between-contexts.md)).
+- 컨텍스트끼리는 컨텍스트 지도(`ArchitectureTest.CONTEXT_MAP`)에 적힌 대로만, 상대의 공개 입구(`application.port.in`)로만 부릅니다. 부르는 자리는 서비스의 출력 포트를 구현한 `adapter/out/<상대>` 하나이고, 인바운드 어댑터와 서비스, 도메인은 다른 컨텍스트를 모릅니다. 지금은 서로 부르는 컨텍스트가 없고(`guild` 는 다른 컨텍스트와 서로 모름), `shared` 는 어느 컨텍스트도 모릅니다 ([ADR 0026](docs/adr/0026-calls-between-contexts.md), [ADR 0040](docs/adr/0040-inbound-adapters-do-not-call-other-contexts.md)).
 - 인바운드 어댑터는 입력 포트로만 애플리케이션을 부르고, 애그리거트(`Device`, `Pairing`, `BotSeat`)를 직접 쓰지 않고 입력 포트가 돌려주는 `...Dto` 로만 봅니다 ([ADR 0010](docs/adr/0010-use-cases-return-dtos.md)).
 - 서비스는 다른 서비스의 입력 포트(`...UseCase`)를 쓰지 않고 출력 포트와 도메인만 씁니다 ([ADR 0008](docs/adr/0008-one-service-per-use-case.md)).
 - 설정 값은 그 값을 쓰는 어댑터 패키지에 두고(`TtsProperties`, `GuildAllowlistProperties`), 어댑터는 `config` 를 쓰지 않습니다. 기본값은 `application.yml` 에, 꼭 있어야 하는 값은 `@Validated` 와 제약으로 적습니다 ([ADR 0023](docs/adr/0023-properties-per-adapter.md)).
