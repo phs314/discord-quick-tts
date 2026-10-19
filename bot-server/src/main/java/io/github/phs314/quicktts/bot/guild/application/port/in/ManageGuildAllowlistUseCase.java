@@ -1,4 +1,4 @@
-package io.github.phs314.quicktts.bot.guild.application.port.in.usecase;
+package io.github.phs314.quicktts.bot.guild.application.port.in;
 
 import io.github.phs314.quicktts.bot.guild.application.port.in.command.AllowGuildCommand;
 import io.github.phs314.quicktts.bot.guild.application.port.in.command.DisallowGuildCommand;

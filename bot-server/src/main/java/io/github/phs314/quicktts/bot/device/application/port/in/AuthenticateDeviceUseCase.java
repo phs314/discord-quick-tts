@@ -1,4 +1,4 @@
-package io.github.phs314.quicktts.bot.device.application.port.in.usecase;
+package io.github.phs314.quicktts.bot.device.application.port.in;
 
 import io.github.phs314.quicktts.bot.device.application.port.in.query.AuthenticateDeviceQuery;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;

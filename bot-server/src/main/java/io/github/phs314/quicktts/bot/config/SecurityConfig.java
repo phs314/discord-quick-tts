@@ -2,7 +2,7 @@ package io.github.phs314.quicktts.bot.config;
 
 import io.github.phs314.quicktts.bot.device.adapter.in.web.DeviceTokenAuthenticationEntryPoint;
 import io.github.phs314.quicktts.bot.device.adapter.in.web.DeviceTokenAuthenticationFilter;
-import io.github.phs314.quicktts.bot.device.application.port.in.usecase.AuthenticateDeviceUseCase;
+import io.github.phs314.quicktts.bot.device.application.port.in.AuthenticateDeviceUseCase;
 import io.github.phs314.quicktts.common.QuickTtsApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;

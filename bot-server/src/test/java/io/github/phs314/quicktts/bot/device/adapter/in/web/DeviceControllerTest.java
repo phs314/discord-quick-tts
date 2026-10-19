@@ -7,8 +7,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.github.phs314.quicktts.bot.config.SecurityConfig;
-import io.github.phs314.quicktts.bot.device.application.port.in.usecase.AuthenticateDeviceUseCase;
-import io.github.phs314.quicktts.bot.device.application.port.in.usecase.RegisterDeviceUseCase;
+import io.github.phs314.quicktts.bot.device.application.port.in.AuthenticateDeviceUseCase;
+import io.github.phs314.quicktts.bot.device.application.port.in.RegisterDeviceUseCase;
 import io.github.phs314.quicktts.bot.device.domain.InvalidPairingCodeException;
 import io.github.phs314.quicktts.common.ApiErrorCode;
 import io.github.phs314.quicktts.common.QuickTtsApi;

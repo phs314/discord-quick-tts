@@ -1,4 +1,4 @@
-package io.github.phs314.quicktts.bot.device.application.port.in.usecase;
+package io.github.phs314.quicktts.bot.device.application.port.in;
 
 import io.github.phs314.quicktts.bot.device.application.port.in.command.RegisterDeviceCommand;
 import io.github.phs314.quicktts.bot.device.domain.vo.DeviceToken;

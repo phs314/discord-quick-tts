@@ -1,7 +1,7 @@
 package io.github.phs314.quicktts.bot.guild.adapter.in.discord;
 
+import io.github.phs314.quicktts.bot.guild.application.port.in.EnforceGuildAllowlistUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.command.LeaveIfNotAllowedCommand;
-import io.github.phs314.quicktts.bot.guild.application.port.in.usecase.EnforceGuildAllowlistUseCase;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;

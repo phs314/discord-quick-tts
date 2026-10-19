@@ -60,7 +60,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │   │   └── vo/                 QuickChatMessage, VoiceChannel, Speech, Voice, VoiceCatalog (값 객체)
 │   ├── application/
 │   │   ├── exception/          SpeakerNotInVoiceChannel, VoiceChannelInUse, BotCannotJoinVoiceChannel, SpeechSynthesis 예외
-│   │   ├── port/in/usecase/    SpeakQuickChat, FindMyVoiceChannel, ManageVoice, LeaveEmptyVoiceChannel, FollowBotMove
+│   │   ├── port/in/            SpeakQuickChat, FindMyVoiceChannel, ManageVoice, LeaveEmptyVoiceChannel, FollowBotMove (...UseCase)
 │   │   ├── port/in/command/    SpeakQuickChat, ChangeVoice, LeaveIfEmpty, FollowBotMove (...Command)
 │   │   ├── port/in/query/      FindMyVoiceChannel, GetCurrentVoice (...Query)
 │   │   ├── port/out/           SpeechSynthesizerPort, VoiceChannelLocatorPort, SpeechPlayerPort, VoicePreferencePort, BotSeatPort
@@ -76,7 +76,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │   ├── domain/                 Pairing, Device (엔티티), InvalidPairingCodeException
 │   │   └── vo/                 PairingCode, DeviceToken, DeviceId, DeviceName (값 객체)
 │   ├── application/
-│   │   ├── port/in/usecase/    IssuePairingCode, RegisterDevice, AuthenticateDevice, ManageOwnDevices (port/in 전체가 공개 입구)
+│   │   ├── port/in/            IssuePairingCode, RegisterDevice, AuthenticateDevice, ManageOwnDevices (...UseCase, port/in 전체가 공개 입구)
 │   │   ├── port/in/command/    IssuePairingCode, RegisterDevice, UnlinkDevice, UnlinkAllDevices (...Command)
 │   │   ├── port/in/query/      AuthenticateDevice, GetDevices (...Query)
 │   │   ├── port/in/dto/        DeviceDto, IssuedPairingCodeDto
@@ -93,7 +93,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │   │   └── event/              GuildDisallowed (허용 목록에서 뺐다)
 │   ├── application/
 │   │   ├── exception/          NotBotOwnerException
-│   │   ├── port/in/usecase/    ManageGuildAllowlist, EnforceGuildAllowlist
+│   │   ├── port/in/            ManageGuildAllowlist, EnforceGuildAllowlist (...UseCase)
 │   │   ├── port/in/command/    AllowGuild, DisallowGuild, LeaveIfNotAllowed (...Command)
 │   │   ├── port/in/query/      GetAllowlist (...Query)
 │   │   ├── port/in/dto/        AllowedGuildDto, GuildAllowlistDto
@@ -122,7 +122,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 
 - 서비스는 입력 포트(`...UseCase`) 하나만 구현하고 이름은 `...Service` 입니다 ([ADR 0008](docs/adr/0008-one-service-per-use-case.md)).
 - `port/in` 에는 `...UseCase`, `...Command`, `...Query`, `...Dto` 만 둡니다 ([ADR 0010](docs/adr/0010-use-cases-return-dtos.md)).
-- `port/in` 은 `usecase` / `command` / `query` / `dto` 폴더로 나누고, 애플리케이션 예외는 `application/exception` 에 모읍니다 ([ADR 0012](docs/adr/0012-application-subpackages.md)).
+- 입력 포트(`...UseCase`)는 `port/in` 바로 아래에 두고, `...Command` / `...Query` / `...Dto` 는 `command` / `query` / `dto` 폴더로 나눕니다. 애플리케이션 예외는 `application/exception` 에 모읍니다 ([ADR 0012](docs/adr/0012-application-subpackages.md), [ADR 0041](docs/adr/0041-use-cases-directly-in-port-in.md)).
 - 유스케이스 메서드는 상태를 바꾸면 `...Command`, 조회면 `...Query` 하나를 받고, 받을 값이 없으면 인자 없이 둡니다 ([ADR 0029](docs/adr/0029-commands-and-queries.md)).
 - 컨트롤러는 웹 요청·응답을 직접 바꾸지 않고, 같은 패키지의 웹 매퍼(`DeviceWebMapper`)에 맡깁니다 ([ADR 0030](docs/adr/0030-web-mappers.md)).
 - 저장소 어댑터는 Spring Data JPA 를 쓰고, JPA 엔티티(`DeviceJpaEntity`)를 도메인과 따로 둡니다. 엔티티와 애그리거트는 같은 패키지의 퍼시스턴스 매퍼(`DevicePersistenceMapper`)가 옮기고, 도메인 클래스에는 JPA 애너테이션을 붙이지 않습니다 ([ADR 0038](docs/adr/0038-jpa-entities-with-persistence-mappers.md)).

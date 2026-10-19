@@ -1,7 +1,7 @@
 package io.github.phs314.quicktts.bot.speech.application.service;
 
+import io.github.phs314.quicktts.bot.speech.application.port.in.FollowBotMoveUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.FollowBotMoveCommand;
-import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.FollowBotMoveUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.out.BotSeatPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;

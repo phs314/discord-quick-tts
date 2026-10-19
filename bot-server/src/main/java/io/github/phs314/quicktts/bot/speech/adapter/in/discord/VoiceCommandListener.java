@@ -2,9 +2,9 @@ package io.github.phs314.quicktts.bot.speech.adapter.in.discord;
 
 import io.github.phs314.quicktts.bot.shared.adapter.in.discord.DiscordSlashCommand;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
+import io.github.phs314.quicktts.bot.speech.application.port.in.ManageVoiceUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.ChangeVoiceCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.in.query.GetCurrentVoiceQuery;
-import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.ManageVoiceUseCase;
 import io.github.phs314.quicktts.bot.speech.domain.UnknownVoiceException;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Voice;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;

@@ -1,8 +1,8 @@
 package io.github.phs314.quicktts.bot.device.application.service;
 
+import io.github.phs314.quicktts.bot.device.application.port.in.IssuePairingCodeUseCase;
 import io.github.phs314.quicktts.bot.device.application.port.in.command.IssuePairingCodeCommand;
 import io.github.phs314.quicktts.bot.device.application.port.in.dto.IssuedPairingCodeDto;
-import io.github.phs314.quicktts.bot.device.application.port.in.usecase.IssuePairingCodeUseCase;
 import io.github.phs314.quicktts.bot.device.application.port.out.PairingPort;
 import io.github.phs314.quicktts.bot.device.domain.Pairing;
 import java.time.Clock;

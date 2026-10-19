@@ -14,17 +14,17 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import io.github.phs314.quicktts.bot.config.SecurityConfig;
+import io.github.phs314.quicktts.bot.device.application.port.in.AuthenticateDeviceUseCase;
 import io.github.phs314.quicktts.bot.device.application.port.in.query.AuthenticateDeviceQuery;
-import io.github.phs314.quicktts.bot.device.application.port.in.usecase.AuthenticateDeviceUseCase;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.application.exception.BotCannotJoinVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.exception.SpeakerNotInVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.exception.VoiceChannelInUseException;
+import io.github.phs314.quicktts.bot.speech.application.port.in.FindMyVoiceChannelUseCase;
+import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindMyVoiceChannelQuery;
-import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.FindMyVoiceChannelUseCase;
-import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.SpeakQuickChatUseCase;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import io.github.phs314.quicktts.common.ApiErrorCode;

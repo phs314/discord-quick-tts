@@ -1,7 +1,7 @@
 package io.github.phs314.quicktts.bot.guild.adapter.in.event;
 
+import io.github.phs314.quicktts.bot.guild.application.port.in.EnforceGuildAllowlistUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.command.LeaveIfNotAllowedCommand;
-import io.github.phs314.quicktts.bot.guild.application.port.in.usecase.EnforceGuildAllowlistUseCase;
 import io.github.phs314.quicktts.bot.guild.domain.event.GuildDisallowed;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

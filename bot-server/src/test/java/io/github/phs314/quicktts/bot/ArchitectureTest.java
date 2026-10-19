@@ -169,7 +169,7 @@ class ArchitectureTest {
     @ArchTest
     static final ArchRule servicesDoNotUseOtherUseCases = fields()
             .that().areDeclaredInClassesThat().resideInAPackage("..bot.*.application.service..")
-            .should().notHaveRawType(resideInAPackage("..bot.*.application.port.in.usecase.."));
+            .should().notHaveRawType(resideInAPackage("..bot.*.application.port.in"));
 
     /**
      * 위의 계층 규칙은 적어 둔 어댑터 폴더만 본다. 어댑터 폴더를 새로 만들어도 도메인과 애플리케이션은 어댑터를 모른다 (ADR 0035).
