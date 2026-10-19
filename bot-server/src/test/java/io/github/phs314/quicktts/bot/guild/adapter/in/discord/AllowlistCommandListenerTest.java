@@ -11,7 +11,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.github.phs314.quicktts.bot.guild.application.exception.NotBotOwnerException;
-import io.github.phs314.quicktts.bot.guild.application.port.in.ManageGuildAllowlistUseCase;
+import io.github.phs314.quicktts.bot.guild.application.port.in.AllowGuildUseCase;
+import io.github.phs314.quicktts.bot.guild.application.port.in.DisallowGuildUseCase;
+import io.github.phs314.quicktts.bot.guild.application.port.in.GetAllowlistUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.command.AllowGuildCommand;
 import io.github.phs314.quicktts.bot.guild.application.port.in.command.DisallowGuildCommand;
 import io.github.phs314.quicktts.bot.guild.application.port.in.dto.AllowedGuildDto;
@@ -36,8 +38,11 @@ class AllowlistCommandListenerTest {
     private static final GuildId NOT_JOINED = new GuildId(200L);
 
     private final JDA jda = mock(JDA.class, RETURNS_DEEP_STUBS);
-    private final ManageGuildAllowlistUseCase manageGuildAllowlistUseCase = mock(ManageGuildAllowlistUseCase.class);
-    private final AllowlistCommandListener listener = new AllowlistCommandListener(jda, manageGuildAllowlistUseCase);
+    private final GetAllowlistUseCase getAllowlistUseCase = mock(GetAllowlistUseCase.class);
+    private final AllowGuildUseCase allowGuildUseCase = mock(AllowGuildUseCase.class);
+    private final DisallowGuildUseCase disallowGuildUseCase = mock(DisallowGuildUseCase.class);
+    private final AllowlistCommandListener listener =
+            new AllowlistCommandListener(jda, getAllowlistUseCase, allowGuildUseCase, disallowGuildUseCase);
     private final ReplyCallbackAction reply = mock(ReplyCallbackAction.class, RETURNS_SELF);
     /** 가장 최근에 만든 명령 이벤트. {@link #replied()} 가 여기에 간 답을 꺼낸다. */
     private SlashCommandInteractionEvent event;
@@ -53,7 +58,7 @@ class AllowlistCommandListenerTest {
 
     @Test
     void 봇이_있는_서버를_넣으면_이름만_알린다() {
-        when(manageGuildAllowlistUseCase.allow(new AllowGuildCommand(OWNER, JOINED))).thenReturn(true);
+        when(allowGuildUseCase.allow(new AllowGuildCommand(OWNER, JOINED))).thenReturn(true);
 
         listener.onSlashCommandInteraction(command("add", String.valueOf(JOINED.value())));
 
@@ -63,7 +68,7 @@ class AllowlistCommandListenerTest {
 
     @Test
     void 봇이_없는_서버를_넣으면_그_서버가_골라진_초대_링크를_준다() {
-        when(manageGuildAllowlistUseCase.allow(new AllowGuildCommand(OWNER, NOT_JOINED))).thenReturn(false);
+        when(allowGuildUseCase.allow(new AllowGuildCommand(OWNER, NOT_JOINED))).thenReturn(false);
 
         listener.onSlashCommandInteraction(command("add", " 200 "));
 
@@ -77,12 +82,12 @@ class AllowlistCommandListenerTest {
         listener.onSlashCommandInteraction(command("add", "우리 서버"));
 
         assertThat(replied()).startsWith("디스코드 서버 ID 는 숫자예요.");
-        verify(manageGuildAllowlistUseCase, never()).allow(any());
+        verify(allowGuildUseCase, never()).allow(any());
     }
 
     @Test
     void 봇_주인이_아니면_쓸_수_없다고_답한다() {
-        when(manageGuildAllowlistUseCase.disallow(new DisallowGuildCommand(OWNER, JOINED)))
+        when(disallowGuildUseCase.disallow(new DisallowGuildCommand(OWNER, JOINED)))
                 .thenThrow(new NotBotOwnerException(OWNER));
 
         listener.onSlashCommandInteraction(command("remove", String.valueOf(JOINED.value())));
@@ -92,7 +97,7 @@ class AllowlistCommandListenerTest {
 
     @Test
     void 목록에_없는_서버를_빼면_없다고_답한다() {
-        when(manageGuildAllowlistUseCase.disallow(new DisallowGuildCommand(OWNER, NOT_JOINED))).thenReturn(false);
+        when(disallowGuildUseCase.disallow(new DisallowGuildCommand(OWNER, NOT_JOINED))).thenReturn(false);
 
         listener.onSlashCommandInteraction(command("remove", String.valueOf(NOT_JOINED.value())));
 
@@ -101,7 +106,7 @@ class AllowlistCommandListenerTest {
 
     @Test
     void 보기는_켜짐_여부와_서버_이름_ID_를_보여_준다() {
-        when(manageGuildAllowlistUseCase.getAllowlist(new GetAllowlistQuery(OWNER))).thenReturn(new GuildAllowlistDto(true,
+        when(getAllowlistUseCase.getAllowlist(new GetAllowlistQuery(OWNER))).thenReturn(new GuildAllowlistDto(true,
                 List.of(allowed(JOINED), allowed(NOT_JOINED))));
 
         listener.onSlashCommandInteraction(command("list", null));
@@ -113,7 +118,7 @@ class AllowlistCommandListenerTest {
 
     @Test
     void 허용_목록이_꺼져_있고_비어_있으면_그렇게_알린다() {
-        when(manageGuildAllowlistUseCase.getAllowlist(new GetAllowlistQuery(OWNER)))
+        when(getAllowlistUseCase.getAllowlist(new GetAllowlistQuery(OWNER)))
                 .thenReturn(new GuildAllowlistDto(false, List.of()));
 
         listener.onSlashCommandInteraction(command("list", null));

@@ -1,6 +1,8 @@
 package io.github.phs314.quicktts.bot.device.adapter.in.discord;
 
-import io.github.phs314.quicktts.bot.device.application.port.in.ManageOwnDevicesUseCase;
+import io.github.phs314.quicktts.bot.device.application.port.in.GetDevicesUseCase;
+import io.github.phs314.quicktts.bot.device.application.port.in.UnlinkAllDevicesUseCase;
+import io.github.phs314.quicktts.bot.device.application.port.in.UnlinkDeviceUseCase;
 import io.github.phs314.quicktts.bot.device.application.port.in.command.UnlinkAllDevicesCommand;
 import io.github.phs314.quicktts.bot.device.application.port.in.command.UnlinkDeviceCommand;
 import io.github.phs314.quicktts.bot.device.application.port.in.dto.DeviceDto;
@@ -38,7 +40,9 @@ public class UnlinkCommandListener extends ListenerAdapter implements DiscordSla
     private static final DateTimeFormatter REGISTERED_AT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm 등록").withZone(ZoneId.of("Asia/Seoul"));
 
-    private final ManageOwnDevicesUseCase manageOwnDevicesUseCase;
+    private final GetDevicesUseCase getDevicesUseCase;
+    private final UnlinkDeviceUseCase unlinkDeviceUseCase;
+    private final UnlinkAllDevicesUseCase unlinkAllDevicesUseCase;
 
     @Override
     public SlashCommandData definition() {
@@ -52,7 +56,7 @@ public class UnlinkCommandListener extends ListenerAdapter implements DiscordSla
         if (!COMMAND_NAME.equals(event.getName())) {
             return;
         }
-        List<DeviceDto> devices = manageOwnDevicesUseCase.getDevices(
+        List<DeviceDto> devices = getDevicesUseCase.getDevices(
                 new GetDevicesQuery(ownerOf(event.getUser().getIdLong())));
         if (devices.isEmpty()) {
             event.reply("연결된 PC 가 없습니다.").setEphemeral(true).queue();
@@ -81,8 +85,8 @@ public class UnlinkCommandListener extends ListenerAdapter implements DiscordSla
 
         String result;
         if (ALL_DEVICES.equals(selected)) {
-            result = "PC " + manageOwnDevicesUseCase.unlinkAll(new UnlinkAllDevicesCommand(owner)) + "대의 연결을 끊었습니다.";
-        } else if (manageOwnDevicesUseCase.unlink(new UnlinkDeviceCommand(owner, new DeviceId(selected)))) {
+            result = "PC " + unlinkAllDevicesUseCase.unlinkAll(new UnlinkAllDevicesCommand(owner)) + "대의 연결을 끊었습니다.";
+        } else if (unlinkDeviceUseCase.unlink(new UnlinkDeviceCommand(owner, new DeviceId(selected)))) {
             result = "연결을 끊었습니다. 그 PC 에서 다시 쓰려면 `/연결` 로 코드를 받으세요.";
         } else {
             result = "이미 끊긴 PC 입니다.";

@@ -60,7 +60,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │   │   └── vo/                 QuickChatMessage, VoiceChannel, Speech, Voice, VoiceCatalog (값 객체)
 │   ├── application/
 │   │   ├── exception/          SpeakerNotInVoiceChannel, VoiceChannelInUse, BotCannotJoinVoiceChannel, SpeechSynthesis 예외
-│   │   ├── port/in/            SpeakQuickChat, FindMyVoiceChannel, ManageVoice, LeaveEmptyVoiceChannel, FollowBotMove (...UseCase)
+│   │   ├── port/in/            SpeakQuickChat, FindMyVoiceChannel, GetVoices, GetCurrentVoice, ChangeVoice, LeaveEmptyVoiceChannel, FollowBotMove (...UseCase, 메서드 하나씩)
 │   │   ├── port/in/command/    SpeakQuickChat, ChangeVoice, LeaveIfEmpty, FollowBotMove (...Command)
 │   │   ├── port/in/query/      FindMyVoiceChannel, GetCurrentVoice (...Query)
 │   │   ├── port/out/           SpeechSynthesizerPort, VoiceChannelLocatorPort, SpeechPlayerPort, VoicePreferencePort, BotSeatPort
@@ -76,7 +76,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │   ├── domain/                 Pairing, Device (엔티티), InvalidPairingCodeException
 │   │   └── vo/                 PairingCode, DeviceToken, DeviceId, DeviceName (값 객체)
 │   ├── application/
-│   │   ├── port/in/            IssuePairingCode, RegisterDevice, AuthenticateDevice, ManageOwnDevices (...UseCase, port/in 전체가 공개 입구)
+│   │   ├── port/in/            IssuePairingCode, RegisterDevice, AuthenticateDevice, GetDevices, UnlinkDevice, UnlinkAllDevices (...UseCase, port/in 전체가 공개 입구)
 │   │   ├── port/in/command/    IssuePairingCode, RegisterDevice, UnlinkDevice, UnlinkAllDevices (...Command)
 │   │   ├── port/in/query/      AuthenticateDevice, GetDevices (...Query)
 │   │   ├── port/in/dto/        DeviceDto, IssuedPairingCodeDto
@@ -93,7 +93,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │   │   └── event/              GuildDisallowed (허용 목록에서 뺐다)
 │   ├── application/
 │   │   ├── exception/          NotBotOwnerException
-│   │   ├── port/in/            ManageGuildAllowlist, EnforceGuildAllowlist (...UseCase)
+│   │   ├── port/in/            GetAllowlist, AllowGuild, DisallowGuild, LeaveNotAllowedGuild, FillEmptyAllowlist, LeaveAllNotAllowedGuilds (...UseCase)
 │   │   ├── port/in/command/    AllowGuild, DisallowGuild, LeaveIfNotAllowed (...Command)
 │   │   ├── port/in/query/      GetAllowlist (...Query)
 │   │   ├── port/in/dto/        AllowedGuildDto, GuildAllowlistDto
@@ -120,7 +120,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 
 다음은 이름과 자리에 관한 약속입니다. 빌드가 아니라 리뷰로 지킵니다 ([ADR 0032](docs/adr/0032-archunit-checks-dependencies-only.md)).
 
-- 서비스는 입력 포트(`...UseCase`) 하나만 구현하고 이름은 `...Service` 입니다 ([ADR 0008](docs/adr/0008-one-service-per-use-case.md)).
+- 입력 포트(`...UseCase`) 하나에는 메서드 하나만 둡니다. 서비스는 입력 포트 하나만 구현하고 이름은 `...Service` 입니다. 한 슬래시 명령이 여러 일을 하면 리스너가 유스케이스를 여럿 받습니다 ([ADR 0008](docs/adr/0008-one-service-per-use-case.md), [ADR 0042](docs/adr/0042-one-method-per-use-case.md)).
 - `port/in` 에는 `...UseCase`, `...Command`, `...Query`, `...Dto` 만 둡니다 ([ADR 0010](docs/adr/0010-use-cases-return-dtos.md)).
 - 입력 포트(`...UseCase`)는 `port/in` 바로 아래에 두고, `...Command` / `...Query` / `...Dto` 는 `command` / `query` / `dto` 폴더로 나눕니다. 애플리케이션 예외는 `application/exception` 에 모읍니다 ([ADR 0012](docs/adr/0012-application-subpackages.md), [ADR 0041](docs/adr/0041-use-cases-directly-in-port-in.md)).
 - 유스케이스 메서드는 상태를 바꾸면 `...Command`, 조회면 `...Query` 하나를 받고, 받을 값이 없으면 인자 없이 둡니다 ([ADR 0029](docs/adr/0029-commands-and-queries.md)).

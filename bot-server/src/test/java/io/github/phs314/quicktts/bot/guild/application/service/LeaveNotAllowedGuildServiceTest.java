@@ -8,12 +8,10 @@ import io.github.phs314.quicktts.bot.guild.application.port.out.FakeGuildAllowli
 import io.github.phs314.quicktts.bot.guild.application.port.out.FakeJoinedGuildPort;
 import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
-import java.time.Clock;
 import java.time.Instant;
-import java.time.ZoneOffset;
 import org.junit.jupiter.api.Test;
 
-class EnforceGuildAllowlistServiceTest {
+class LeaveNotAllowedGuildServiceTest {
 
     private static final Instant NOW = Instant.parse("2026-10-11T00:00:00Z");
     private static final GuildId MINE = new GuildId(1L);
@@ -23,8 +21,8 @@ class EnforceGuildAllowlistServiceTest {
     private final FakeAllowedGuildPort allowedGuilds = new FakeAllowedGuildPort();
     private final FakeJoinedGuildPort joinedGuilds = new FakeJoinedGuildPort(MINE, STRANGER);
     private final FakeGuildAllowlistSettingPort setting = new FakeGuildAllowlistSettingPort();
-    private final EnforceGuildAllowlistService service = new EnforceGuildAllowlistService(
-            allowedGuilds, joinedGuilds, setting, Clock.fixed(NOW, ZoneOffset.UTC));
+    private final LeaveNotAllowedGuildService service =
+            new LeaveNotAllowedGuildService(allowedGuilds, joinedGuilds, setting);
 
     @Test
     void 허용_목록에_없는_서버에_초대되면_나간다() {
@@ -52,47 +50,7 @@ class EnforceGuildAllowlistServiceTest {
         allowedGuilds.saveIfAbsent(AllowedGuild.allow(MINE, NOW));
 
         service.leaveIfNotAllowed(new LeaveIfNotAllowedCommand(STRANGER));
-        service.fillIfEmpty();
-        service.leaveAllNotAllowed();
 
         assertThat(joinedGuilds.left()).isEmpty();
-        assertThat(allowedGuilds.findAll()).containsExactly(AllowedGuild.allow(MINE, NOW));
-    }
-
-    @Test
-    void 켜질_때_꺼져_있는_동안_초대된_서버에서_나간다() {
-        allowedGuilds.saveIfAbsent(AllowedGuild.allow(MINE, NOW));
-
-        service.fillIfEmpty();
-        service.leaveAllNotAllowed();
-
-        assertThat(joinedGuilds.left()).containsExactly(STRANGER);
-        assertThat(joinedGuilds.joinedGuilds()).containsExactly(MINE);
-    }
-
-    @Test
-    void 허용_목록이_비어_있으면_지금_있는_서버를_모두_허용한다() {
-        service.fillIfEmpty();
-        service.leaveAllNotAllowed();
-
-        assertThat(joinedGuilds.left()).isEmpty();
-        assertThat(allowedGuilds.findAll()).extracting(AllowedGuild::guildId).containsExactly(MINE, STRANGER);
-    }
-
-    @Test
-    void 채우기_전에는_켜질_때_아무_데서도_나가지_않는다() {
-        service.leaveAllNotAllowed();
-
-        assertThat(joinedGuilds.left()).isEmpty();
-        assertThat(allowedGuilds.findAll()).isEmpty();
-    }
-
-    @Test
-    void 허용_목록이_있으면_다시_채우지_않는다() {
-        allowedGuilds.saveIfAbsent(AllowedGuild.allow(MINE, NOW));
-
-        service.fillIfEmpty();
-
-        assertThat(allowedGuilds.findAll()).containsExactly(AllowedGuild.allow(MINE, NOW));
     }
 }

@@ -10,7 +10,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import io.github.phs314.quicktts.bot.device.application.port.in.ManageOwnDevicesUseCase;
+import io.github.phs314.quicktts.bot.device.application.port.in.GetDevicesUseCase;
+import io.github.phs314.quicktts.bot.device.application.port.in.UnlinkAllDevicesUseCase;
+import io.github.phs314.quicktts.bot.device.application.port.in.UnlinkDeviceUseCase;
 import io.github.phs314.quicktts.bot.device.application.port.in.command.UnlinkAllDevicesCommand;
 import io.github.phs314.quicktts.bot.device.application.port.in.command.UnlinkDeviceCommand;
 import io.github.phs314.quicktts.bot.device.application.port.in.dto.DeviceDto;
@@ -36,14 +38,17 @@ class UnlinkCommandListenerTest {
 
     private static final DiscordUserId OWNER = new DiscordUserId(42L);
 
-    private final ManageOwnDevicesUseCase manageOwnDevicesUseCase = mock(ManageOwnDevicesUseCase.class);
-    private final UnlinkCommandListener listener = new UnlinkCommandListener(manageOwnDevicesUseCase);
+    private final GetDevicesUseCase getDevicesUseCase = mock(GetDevicesUseCase.class);
+    private final UnlinkDeviceUseCase unlinkDeviceUseCase = mock(UnlinkDeviceUseCase.class);
+    private final UnlinkAllDevicesUseCase unlinkAllDevicesUseCase = mock(UnlinkAllDevicesUseCase.class);
+    private final UnlinkCommandListener listener =
+            new UnlinkCommandListener(getDevicesUseCase, unlinkDeviceUseCase, unlinkAllDevicesUseCase);
 
     @Test
     void 연결된_PC_가_없으면_없다고만_답한다() {
         ReplyCallbackAction reply = mock(ReplyCallbackAction.class, RETURNS_SELF);
         SlashCommandInteractionEvent event = slashCommand(reply);
-        when(manageOwnDevicesUseCase.getDevices(new GetDevicesQuery(OWNER))).thenReturn(List.of());
+        when(getDevicesUseCase.getDevices(new GetDevicesQuery(OWNER))).thenReturn(List.of());
 
         listener.onSlashCommandInteraction(event);
 
@@ -57,7 +62,7 @@ class UnlinkCommandListenerTest {
         ReplyCallbackAction reply = mock(ReplyCallbackAction.class, RETURNS_SELF);
         SlashCommandInteractionEvent event = slashCommand(reply);
         List<DeviceDto> devices = IntStream.rangeClosed(1, 30).mapToObj(UnlinkCommandListenerTest::device).toList();
-        when(manageOwnDevicesUseCase.getDevices(new GetDevicesQuery(OWNER))).thenReturn(devices);
+        when(getDevicesUseCase.getDevices(new GetDevicesQuery(OWNER))).thenReturn(devices);
 
         listener.onSlashCommandInteraction(event);
 
@@ -83,7 +88,7 @@ class UnlinkCommandListenerTest {
     @Test
     void 모두_해제를_고르면_끊은_PC_수를_알린다() {
         MessageEditCallbackAction edit = mock(MessageEditCallbackAction.class, RETURNS_SELF);
-        when(manageOwnDevicesUseCase.unlinkAll(new UnlinkAllDevicesCommand(OWNER))).thenReturn(3);
+        when(unlinkAllDevicesUseCase.unlinkAll(new UnlinkAllDevicesCommand(OWNER))).thenReturn(3);
 
         StringSelectInteractionEvent event = selected("*", edit);
 
@@ -96,7 +101,7 @@ class UnlinkCommandListenerTest {
     @Test
     void 고른_PC_의_연결을_끊는다() {
         MessageEditCallbackAction edit = mock(MessageEditCallbackAction.class, RETURNS_SELF);
-        when(manageOwnDevicesUseCase.unlink(new UnlinkDeviceCommand(OWNER, new DeviceId("device-1")))).thenReturn(true);
+        when(unlinkDeviceUseCase.unlink(new UnlinkDeviceCommand(OWNER, new DeviceId("device-1")))).thenReturn(true);
 
         StringSelectInteractionEvent event = selected("device-1", edit);
 
@@ -109,7 +114,7 @@ class UnlinkCommandListenerTest {
     @Test
     void 메뉴를_띄운_사이에_이미_끊긴_PC_면_그렇게_알린다() {
         MessageEditCallbackAction edit = mock(MessageEditCallbackAction.class, RETURNS_SELF);
-        when(manageOwnDevicesUseCase.unlink(new UnlinkDeviceCommand(OWNER, new DeviceId("device-1")))).thenReturn(false);
+        when(unlinkDeviceUseCase.unlink(new UnlinkDeviceCommand(OWNER, new DeviceId("device-1")))).thenReturn(false);
 
         StringSelectInteractionEvent event = selected("device-1", edit);
 
