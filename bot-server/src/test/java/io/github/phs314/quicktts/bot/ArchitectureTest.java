@@ -32,7 +32,7 @@ class ArchitectureTest {
     private static final String BOT_PACKAGE = "io.github.phs314.quicktts.bot";
 
     /**
-     * 컨텍스트 지도. 왼쪽 컨텍스트가 오른쪽 컨텍스트의 공개 입구(application.port.in)를 부를 수 있다 (ADR 0026).
+     * 컨텍스트 지도. 왼쪽 컨텍스트가 오른쪽 컨텍스트의 공개 입구(application.port.in)를 부르거나 공개 이벤트를 받을 수 있다 (ADR 0026, ADR 0040).
      * 컨텍스트를 새로 만들면 여기에 넣어야 빌드가 통과한다.
      */
     private static final Map<String, Set<String>> CONTEXT_MAP = Map.of(
@@ -47,6 +47,10 @@ class ArchitectureTest {
     private static final String OUTBOUND_ADAPTERS = "..bot.*.adapter.out..";
     private static final String PUBLIC_ENTRANCES = "..bot.*.application.port.in..";
 
+    /** 다른 컨텍스트가 낸 공개 이벤트(application.port.in.event)를 받는 이벤트 리스너(adapter.in.event)의 의존. 이것도 아래 컨텍스트 규칙이 따로 본다. */
+    private static final String EVENT_LISTENERS = "..bot.*.adapter.in.event..";
+    private static final String PUBLIC_EVENTS = "..bot.*.application.port.in.event..";
+
     @ArchTest
     static final ArchRule speechIsHexagonal = onionArchitecture()
             .domainModels("..bot.speech.domain..")
@@ -60,7 +64,8 @@ class ArchitectureTest {
             .withOptionalLayers(true)
             // config 는 포트와 어댑터를 이어 붙이는 조립 코드라서 계층 규칙에서 뺀다.
             .ignoreDependency(resideInAPackage("..bot.config.."), alwaysTrue())
-            .ignoreDependency(resideInAPackage(OUTBOUND_ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES));
+            .ignoreDependency(resideInAPackage(OUTBOUND_ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES))
+            .ignoreDependency(resideInAPackage(EVENT_LISTENERS), resideInAPackage(PUBLIC_EVENTS));
 
     @ArchTest
     static final ArchRule deviceIsHexagonal = onionArchitecture()
@@ -72,7 +77,8 @@ class ArchitectureTest {
             .adapter("memory", "..bot.device.adapter.out.memory..")
             .withOptionalLayers(true)
             .ignoreDependency(resideInAPackage("..bot.config.."), alwaysTrue())
-            .ignoreDependency(resideInAPackage(OUTBOUND_ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES));
+            .ignoreDependency(resideInAPackage(OUTBOUND_ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES))
+            .ignoreDependency(resideInAPackage(EVENT_LISTENERS), resideInAPackage(PUBLIC_EVENTS));
 
     @ArchTest
     static final ArchRule guildIsHexagonal = onionArchitecture()
@@ -86,7 +92,8 @@ class ArchitectureTest {
             .adapter("settings", "..bot.guild.adapter.out.settings..")
             .withOptionalLayers(true)
             .ignoreDependency(resideInAPackage("..bot.config.."), alwaysTrue())
-            .ignoreDependency(resideInAPackage(OUTBOUND_ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES));
+            .ignoreDependency(resideInAPackage(OUTBOUND_ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES))
+            .ignoreDependency(resideInAPackage(EVENT_LISTENERS), resideInAPackage(PUBLIC_EVENTS));
 
     /** bot 바로 아래 패키지는 컨텍스트 지도에 있는 컨텍스트이거나 shared, config 다. 지도에 없는 컨텍스트는 아래 규칙을 빠져나가기 때문이다. */
     @ArchTest
@@ -106,12 +113,13 @@ class ArchitectureTest {
     /**
      * 다른 컨텍스트는 컨텍스트 지도에 있을 때만, 그 공개 입구(application.port.in)로만 부른다.
      * 부르는 쪽은 서비스가 내 출력 포트로 부탁한 일을 하는 adapter.out.상대 하나뿐이다 (ADR 0026, ADR 0040).
-     * 인바운드 어댑터, 서비스, 도메인은 다른 컨텍스트를 모른다. guild 처럼 지도에 상대가 없는 컨텍스트는 다른 컨텍스트와 서로 모른다 (ADR 0015).
+     * 예외는 상대가 낸 공개 이벤트(application.port.in.event)를 받는 adapter.in.event 하나다. 그 리스너는 이벤트만 알고
+     * 상대의 유스케이스는 부르지 않는다. 그 밖의 인바운드 어댑터, 서비스, 도메인은 다른 컨텍스트를 모른다. guild 처럼 지도에 상대가 없는 컨텍스트는 다른 컨텍스트와 서로 모른다 (ADR 0015).
      */
     @ArchTest
     static final ArchRule contextsMeetOnlyAtPublicEntrances = classes()
             .that().resideInAPackage("..bot.*..")
-            .should(new ArchCondition<>("call other contexts only through their input ports, from adapter.out.<context>, as the context map allows") {
+            .should(new ArchCondition<>("call other contexts only through their input ports from adapter.out.<context>, or receive their public events in adapter.in.event, as the context map allows") {
                 @Override
                 public void check(JavaClass javaClass, ConditionEvents events) {
                     String from = topPackage(javaClass);
@@ -125,9 +133,12 @@ class ArchitectureTest {
                             return;
                         }
                         String caller = javaClass.getPackageName();
-                        boolean allowed = CONTEXT_MAP.get(from).contains(to)
-                                && caller.startsWith(contextPackage(from) + ".adapter.out." + to)
-                                && target.getPackageName().startsWith(contextPackage(to) + ".application.port.in");
+                        String targetPackage = target.getPackageName();
+                        boolean callsPublicEntrance = caller.startsWith(contextPackage(from) + ".adapter.out." + to)
+                                && targetPackage.startsWith(contextPackage(to) + ".application.port.in");
+                        boolean receivesPublicEvent = caller.startsWith(contextPackage(from) + ".adapter.in.event")
+                                && targetPackage.startsWith(contextPackage(to) + ".application.port.in.event");
+                        boolean allowed = CONTEXT_MAP.get(from).contains(to) && (callsPublicEntrance || receivesPublicEvent);
                         if (!allowed) {
                             events.add(SimpleConditionEvent.violated(javaClass, dependency.getDescription()));
                         }
