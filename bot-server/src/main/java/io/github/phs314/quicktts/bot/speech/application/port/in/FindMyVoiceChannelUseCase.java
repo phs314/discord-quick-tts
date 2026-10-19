@@ -1,4 +1,4 @@
-package io.github.phs314.quicktts.bot.speech.application.port.in.usecase;
+package io.github.phs314.quicktts.bot.speech.application.port.in;
 
 import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindMyVoiceChannelQuery;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;

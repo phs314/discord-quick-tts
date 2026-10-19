@@ -1,8 +1,8 @@
 package io.github.phs314.quicktts.bot.device.adapter.in.discord;
 
+import io.github.phs314.quicktts.bot.device.application.port.in.IssuePairingCodeUseCase;
 import io.github.phs314.quicktts.bot.device.application.port.in.command.IssuePairingCodeCommand;
 import io.github.phs314.quicktts.bot.device.application.port.in.dto.IssuedPairingCodeDto;
-import io.github.phs314.quicktts.bot.device.application.port.in.usecase.IssuePairingCodeUseCase;
 import io.github.phs314.quicktts.bot.shared.adapter.in.discord.DiscordSlashCommand;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import lombok.RequiredArgsConstructor;

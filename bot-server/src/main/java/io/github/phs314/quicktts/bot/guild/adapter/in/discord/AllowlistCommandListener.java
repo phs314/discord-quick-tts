@@ -1,12 +1,12 @@
 package io.github.phs314.quicktts.bot.guild.adapter.in.discord;
 
 import io.github.phs314.quicktts.bot.guild.application.exception.NotBotOwnerException;
+import io.github.phs314.quicktts.bot.guild.application.port.in.ManageGuildAllowlistUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.command.AllowGuildCommand;
 import io.github.phs314.quicktts.bot.guild.application.port.in.command.DisallowGuildCommand;
 import io.github.phs314.quicktts.bot.guild.application.port.in.dto.AllowedGuildDto;
 import io.github.phs314.quicktts.bot.guild.application.port.in.dto.GuildAllowlistDto;
 import io.github.phs314.quicktts.bot.guild.application.port.in.query.GetAllowlistQuery;
-import io.github.phs314.quicktts.bot.guild.application.port.in.usecase.ManageGuildAllowlistUseCase;
 import io.github.phs314.quicktts.bot.shared.adapter.in.discord.DiscordSlashCommand;
 import io.github.phs314.quicktts.bot.shared.domain.InvalidDomainValueException;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;

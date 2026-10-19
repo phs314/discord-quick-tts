@@ -53,11 +53,12 @@
 | --- | --- | --- |
 | [0001](0001-hexagonal-bot-server.md) | 봇 서버는 헥사고날 구조로 짓고 ArchUnit 으로 지킨다 | 일부 대체됨 (ADR 0009) |
 | [0002](0002-bounded-contexts.md) | 봇 서버를 speech, device, shared 컨텍스트로 나눈다 | 일부 대체됨 (ADR 0015, ADR 0025, ADR 0031) |
-| [0012](0012-application-subpackages.md) | application 의 유스케이스, Command, Dto, 예외를 폴더로 나눈다 | 일부 대체됨 (ADR 0024, ADR 0029, ADR 0032) |
+| [0012](0012-application-subpackages.md) | application 의 유스케이스, Command, Dto, 예외를 폴더로 나눈다 | 일부 대체됨 (ADR 0024, ADR 0029, ADR 0032, ADR 0041) |
 | [0023](0023-properties-per-adapter.md) | 설정 값은 그 값을 쓰는 어댑터 패키지에 둔다 | 채택 |
 | [0026](0026-calls-between-contexts.md) | 컨텍스트 사이 호출은 컨텍스트 지도와 공개 입구로만 한다 | 일부 대체됨 (ADR 0031, ADR 0033) |
 | [0032](0032-archunit-checks-dependencies-only.md) | ArchUnit 은 의존 방향만 검사한다 | 일부 대체됨 (ADR 0035) |
 | [0035](0035-archunit-patterns-and-domain-allowlist.md) | 도메인과 애플리케이션이 어댑터를 모르는지는 폴더 이름과 상관없이 검사하고, 도메인은 써도 되는 것만 적는다 | 채택 |
+| [0041](0041-use-cases-directly-in-port-in.md) | 입력 포트(...UseCase)는 port/in 바로 아래에 둔다 | 채택 |
 
 ### 도메인 모델
 
@@ -70,7 +71,7 @@
 
 | ADR | 제목 | 상태 |
 | --- | --- | --- |
-| [0004](0004-output-port-naming.md) | 출력 포트 이름은 Repository 대신 ...Port 로 끝낸다 | 일부 대체됨 (ADR 0032, ADR 0039) |
+| [0004](0004-output-port-naming.md) | 출력 포트 이름은 Repository 대신 ...Port 로 끝낸다 | 일부 대체됨 (ADR 0032, ADR 0039, ADR 0041) |
 | [0027](0027-naming-rules.md) | 이름 규칙을 한곳에 모은다 | 일부 대체됨 (ADR 0032, ADR 0039) |
 | [0039](0039-outbound-adapters-end-with-adapter.md) | 출력 포트를 구현한 어댑터는 이름을 Adapter 로 끝낸다 | 채택 |
 
@@ -80,7 +81,7 @@
 | --- | --- | --- |
 | [0008](0008-one-service-per-use-case.md) | 서비스는 유스케이스(입력 포트) 하나만 구현한다 | 일부 대체됨 (ADR 0014, ADR 0032) |
 | [0009](0009-spring-annotations-on-services.md) | 서비스에는 @Service, @RequiredArgsConstructor 를 붙이고 @Transactional 은 필요한 곳에만 쓴다 | 일부 대체됨 (ADR 0011, ADR 0028, ADR 0033) |
-| [0010](0010-use-cases-return-dtos.md) | 유스케이스는 애그리거트 대신 Dto 를 돌려준다 | 일부 대체됨 (ADR 0030, ADR 0032) |
+| [0010](0010-use-cases-return-dtos.md) | 유스케이스는 애그리거트 대신 Dto 를 돌려준다 | 일부 대체됨 (ADR 0030, ADR 0032, ADR 0041) |
 | [0011](0011-lombok-constructors-for-beans.md) | 필드 주입만 하는 스프링 빈은 모두 @RequiredArgsConstructor 를 쓴다 | 채택 |
 | [0029](0029-commands-and-queries.md) | 유스케이스는 Command 나 Query 하나를 받는다 | 일부 대체됨 (ADR 0031, ADR 0032) |
 

@@ -1,7 +1,7 @@
 package io.github.phs314.quicktts.bot.guild.application.service;
 
+import io.github.phs314.quicktts.bot.guild.application.port.in.EnforceGuildAllowlistUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.command.LeaveIfNotAllowedCommand;
-import io.github.phs314.quicktts.bot.guild.application.port.in.usecase.EnforceGuildAllowlistUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.out.AllowedGuildPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.GuildAllowlistSettingPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.JoinedGuildPort;

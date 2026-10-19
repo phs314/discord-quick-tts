@@ -7,10 +7,10 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
+import io.github.phs314.quicktts.bot.speech.application.port.in.FollowBotMoveUseCase;
+import io.github.phs314.quicktts.bot.speech.application.port.in.LeaveEmptyVoiceChannelUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.FollowBotMoveCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.LeaveIfEmptyCommand;
-import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.FollowBotMoveUseCase;
-import io.github.phs314.quicktts.bot.speech.application.port.in.usecase.LeaveEmptyVoiceChannelUseCase;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import java.util.Optional;
 import net.dv8tion.jda.api.entities.channel.unions.AudioChannelUnion;

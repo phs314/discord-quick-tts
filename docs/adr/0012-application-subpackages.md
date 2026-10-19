@@ -4,6 +4,7 @@
   - 도메인 예외는 `application/exception` 대신 각 컨텍스트 `domain` 에 → ADR 0024
   - 모든 컨텍스트에 `command`, `query` 폴더 → ADR 0029
   - 폴더 규칙은 리뷰로 지킴 → ADR 0032
+  - 입력 포트는 `port/in/usecase` 대신 `port/in` 바로 아래 → ADR 0041
 - 날짜: 2026-10-11
 
 `port/in` 한 폴더에 입력 포트(`...UseCase`), 들어가는 값(`...Command`), 나오는 값(`...Dto`)이 섞여 있었고, 애플리케이션 예외는 `application` 바로 아래에 `port`, `service` 폴더와 나란히 놓여 있었습니다. 이름 끝(ADR 0004, 0010)으로 구분은 됐지만, 폴더를 열었을 때 한눈에 나뉘어 보이지 않았고 새 파일을 어디 둘지도 이름 규칙을 떠올려야 알 수 있었습니다.
