@@ -1,7 +1,6 @@
 package io.github.phs314.quicktts.bot.guild.application.service;
 
-import io.github.phs314.quicktts.bot.guild.application.port.in.EnforceGuildAllowlistUseCase;
-import io.github.phs314.quicktts.bot.guild.application.port.in.command.LeaveIfNotAllowedCommand;
+import io.github.phs314.quicktts.bot.guild.application.port.in.FillEmptyAllowlistUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.out.AllowedGuildPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.GuildAllowlistSettingPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.JoinedGuildPort;
@@ -16,24 +15,17 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class EnforceGuildAllowlistService implements EnforceGuildAllowlistUseCase {
+public class FillEmptyAllowlistService implements FillEmptyAllowlistUseCase {
 
     private final AllowedGuildPort allowedGuildPort;
     private final JoinedGuildPort joinedGuildPort;
     private final GuildAllowlistSettingPort guildAllowlistSettingPort;
     private final Clock clock;
 
-    @Override
-    public void leaveIfNotAllowed(LeaveIfNotAllowedCommand command) {
-        if (!currentAllowlist().permits(command.guildId())) {
-            joinedGuildPort.leaveWithNotice(command.guildId());
-        }
-    }
-
     /**
      * 봇이 들어가 있는 디스코드 서버를 한 트랜잭션으로 넣는다. 일부만 남으면 다음에 켤 때 목록이 비어 있지 않아서
      * 나머지 디스코드 서버에서 나가게 되기 때문이다. 디스코드 서버 나가기는 이 트랜잭션에 넣지 않고
-     * {@link #leaveAllNotAllowed()} 에서 따로 한다 (ADR 0033).
+     * {@link LeaveAllNotAllowedGuildsService} 에서 따로 한다 (ADR 0033).
      */
     @Override
     @Transactional
@@ -45,15 +37,6 @@ public class EnforceGuildAllowlistService implements EnforceGuildAllowlistUseCas
         allowedGuildPort.saveAll(joinedGuildPort.joinedGuilds().stream()
                 .map(guildId -> AllowedGuild.allow(guildId, now))
                 .toList());
-    }
-
-    @Override
-    public void leaveAllNotAllowed() {
-        GuildAllowlist allowlist = currentAllowlist();
-        if (allowlist.needsFirstFill()) {
-            return;
-        }
-        allowlist.notPermitted(joinedGuildPort.joinedGuilds()).forEach(joinedGuildPort::leaveWithNotice);
     }
 
     private GuildAllowlist currentAllowlist() {

@@ -1,6 +1,6 @@
 package io.github.phs314.quicktts.bot.guild.adapter.in.event;
 
-import io.github.phs314.quicktts.bot.guild.application.port.in.EnforceGuildAllowlistUseCase;
+import io.github.phs314.quicktts.bot.guild.application.port.in.LeaveNotAllowedGuildUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.command.LeaveIfNotAllowedCommand;
 import io.github.phs314.quicktts.bot.guild.domain.event.GuildDisallowed;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +15,10 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 public class GuildDisallowedListener {
 
-    private final EnforceGuildAllowlistUseCase enforceGuildAllowlistUseCase;
+    private final LeaveNotAllowedGuildUseCase leaveNotAllowedGuildUseCase;
 
     @TransactionalEventListener
     void leave(GuildDisallowed event) {
-        enforceGuildAllowlistUseCase.leaveIfNotAllowed(new LeaveIfNotAllowedCommand(event.guildId()));
+        leaveNotAllowedGuildUseCase.leaveIfNotAllowed(new LeaveIfNotAllowedCommand(event.guildId()));
     }
 }

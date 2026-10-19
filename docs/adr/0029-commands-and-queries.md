@@ -3,6 +3,7 @@
 - 상태: 일부 대체됨
   - `AuthenticateDeviceQuery` 가 문자열을 받는 이유가 바뀜(다른 컨텍스트가 부르지 않음) → ADR 0031
   - 이름·인자 규칙은 리뷰로 지킴 → ADR 0032
+  - 한 유스케이스에 메서드가 여럿인 경우가 없어짐(유스케이스마다 메서드 하나) → ADR 0042
 - 날짜: 2026-10-18
 
 유스케이스 입력을 언제 `...Command` 로 감싸는지는 "인자 3개 이상이면" 이라는 말로만 정해져 있었고 ADR 에는 없었습니다. 그런데 유일한 Command 인 `SpeakQuickChatCommand(speaker, message)` 는 인자가 둘이라 그 기준에도 맞지 않았습니다. 나머지 유스케이스는 `allow(DiscordUserId requester, GuildId guildId)` 처럼 값 객체를 그대로 받았습니다. 숫자 기준은 근거가 없어서, 새 유스케이스를 만들 때마다 감쌀지 말지를 다시 고민해야 했습니다.

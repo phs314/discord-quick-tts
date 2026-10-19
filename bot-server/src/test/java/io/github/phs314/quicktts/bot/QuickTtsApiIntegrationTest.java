@@ -6,14 +6,14 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 
 import io.github.phs314.quicktts.bot.config.DiscordListenerRegistrar;
 import io.github.phs314.quicktts.bot.device.application.port.in.IssuePairingCodeUseCase;
-import io.github.phs314.quicktts.bot.device.application.port.in.ManageOwnDevicesUseCase;
+import io.github.phs314.quicktts.bot.device.application.port.in.UnlinkAllDevicesUseCase;
 import io.github.phs314.quicktts.bot.device.application.port.in.command.IssuePairingCodeCommand;
 import io.github.phs314.quicktts.bot.device.application.port.in.command.UnlinkAllDevicesCommand;
 import io.github.phs314.quicktts.bot.guild.application.port.out.BotOwnerPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.JoinedGuildPort;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
-import io.github.phs314.quicktts.bot.speech.application.port.in.ManageVoiceUseCase;
+import io.github.phs314.quicktts.bot.speech.application.port.in.ChangeVoiceUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.ChangeVoiceCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechSynthesizerPort;
@@ -82,10 +82,10 @@ class QuickTtsApiIntegrationTest {
     IssuePairingCodeUseCase issuePairingCodeUseCase;
 
     @Autowired
-    ManageOwnDevicesUseCase manageOwnDevicesUseCase;
+    UnlinkAllDevicesUseCase unlinkAllDevicesUseCase;
 
     @Autowired
-    ManageVoiceUseCase manageVoiceUseCase;
+    ChangeVoiceUseCase changeVoiceUseCase;
 
     @Autowired
     JDA jda;
@@ -161,7 +161,7 @@ class QuickTtsApiIntegrationTest {
         String token = registerDevice(user);
         VoiceChannel channel = newChannel(newGuild());
         VOICE_CHANNELS.enter(user, details(channel, "게임"));
-        manageVoiceUseCase.changeVoice(new ChangeVoiceCommand(user, FakeSpeechSynthesizerPort.INJOON.id()));
+        changeVoiceUseCase.changeVoice(new ChangeVoiceCommand(user, FakeSpeechSynthesizerPort.INJOON.id()));
 
         sendQuickChat(token, "안녕").expectStatus().isAccepted();
 
@@ -191,7 +191,7 @@ class QuickTtsApiIntegrationTest {
         DiscordUserId user = newUser();
         String token = registerDevice(user);
         VOICE_CHANNELS.enter(user, details(newChannel(newGuild()), "게임"));
-        manageOwnDevicesUseCase.unlinkAll(new UnlinkAllDevicesCommand(user));
+        unlinkAllDevicesUseCase.unlinkAll(new UnlinkAllDevicesCommand(user));
 
         sendQuickChat(token, "안녕")
                 .expectStatus().isUnauthorized()

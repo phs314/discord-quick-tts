@@ -1,26 +1,17 @@
 package io.github.phs314.quicktts.bot.device.application.service;
 
-import io.github.phs314.quicktts.bot.device.application.port.in.ManageOwnDevicesUseCase;
-import io.github.phs314.quicktts.bot.device.application.port.in.command.UnlinkAllDevicesCommand;
+import io.github.phs314.quicktts.bot.device.application.port.in.UnlinkDeviceUseCase;
 import io.github.phs314.quicktts.bot.device.application.port.in.command.UnlinkDeviceCommand;
-import io.github.phs314.quicktts.bot.device.application.port.in.dto.DeviceDto;
-import io.github.phs314.quicktts.bot.device.application.port.in.query.GetDevicesQuery;
 import io.github.phs314.quicktts.bot.device.application.port.out.DevicePort;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class ManageOwnDevicesService implements ManageOwnDevicesUseCase {
+public class UnlinkDeviceService implements UnlinkDeviceUseCase {
 
     private final DevicePort devicePort;
-
-    @Override
-    public List<DeviceDto> getDevices(GetDevicesQuery query) {
-        return devicePort.findByOwner(query.owner()).stream().map(DeviceDto::from).toList();
-    }
 
     @Override
     @Transactional
@@ -30,11 +21,5 @@ public class ManageOwnDevicesService implements ManageOwnDevicesUseCase {
                 .filter(device -> device.isOwnedBy(command.owner()))
                 .map(device -> devicePort.delete(device.id()))
                 .orElse(false);
-    }
-
-    @Override
-    @Transactional
-    public int unlinkAll(UnlinkAllDevicesCommand command) {
-        return devicePort.deleteAllByOwner(command.owner());
     }
 }

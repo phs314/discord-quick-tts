@@ -38,7 +38,7 @@ class SpeakQuickChatServiceTest {
     private final FakeBotSeatPort seats = new FakeBotSeatPort();
     private final FakeSpeechSynthesizerPort synthesizer = new FakeSpeechSynthesizerPort();
     private final FakeVoicePreferencePort preferences = new FakeVoicePreferencePort();
-    private final ManageVoiceService voices = new ManageVoiceService(synthesizer, preferences);
+    private final ChangeVoiceService voices = new ChangeVoiceService(synthesizer, preferences);
     private final SpeakQuickChatService service =
             new SpeakQuickChatService(discord, synthesizer, player, seats, preferences);
 

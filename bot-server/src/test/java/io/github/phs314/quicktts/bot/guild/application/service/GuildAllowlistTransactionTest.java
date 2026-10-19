@@ -6,8 +6,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import io.github.phs314.quicktts.bot.guild.adapter.in.event.GuildDisallowedListener;
 import io.github.phs314.quicktts.bot.guild.adapter.out.event.GuildAllowlistEventAdapter;
 import io.github.phs314.quicktts.bot.guild.adapter.out.persistence.AllowedGuildPersistenceAdapter;
-import io.github.phs314.quicktts.bot.guild.application.port.in.EnforceGuildAllowlistUseCase;
-import io.github.phs314.quicktts.bot.guild.application.port.in.ManageGuildAllowlistUseCase;
+import io.github.phs314.quicktts.bot.guild.application.port.in.DisallowGuildUseCase;
+import io.github.phs314.quicktts.bot.guild.application.port.in.FillEmptyAllowlistUseCase;
+import io.github.phs314.quicktts.bot.guild.application.port.in.LeaveAllNotAllowedGuildsUseCase;
+import io.github.phs314.quicktts.bot.guild.application.port.in.LeaveNotAllowedGuildUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.command.DisallowGuildCommand;
 import io.github.phs314.quicktts.bot.guild.application.port.out.FakeGuildAllowlistSettingPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.FakeJoinedGuildPort;
@@ -52,10 +54,13 @@ class GuildAllowlistTransactionTest {
     private static final GuildId STRANGER = new GuildId(2L);
 
     @Autowired
-    EnforceGuildAllowlistUseCase enforceGuildAllowlistUseCase;
+    FillEmptyAllowlistUseCase fillEmptyAllowlistUseCase;
 
     @Autowired
-    ManageGuildAllowlistUseCase manageGuildAllowlistUseCase;
+    LeaveAllNotAllowedGuildsUseCase leaveAllNotAllowedGuildsUseCase;
+
+    @Autowired
+    DisallowGuildUseCase disallowGuildUseCase;
 
     @Autowired
     AllowedGuildPersistenceAdapter repository;
@@ -70,7 +75,7 @@ class GuildAllowlistTransactionTest {
         joinedGuildPort.join(STRANGER);
         joinedGuildPort.join(MINE);
 
-        assertThatThrownBy(enforceGuildAllowlistUseCase::fillIfEmpty).isInstanceOf(DataIntegrityViolationException.class);
+        assertThatThrownBy(fillEmptyAllowlistUseCase::fillIfEmpty).isInstanceOf(DataIntegrityViolationException.class);
 
         // 일부만 남았다면 다음에 켤 때 목록이 비어 있지 않아서 남은 디스코드 서버에서 나가게 된다.
         assertThat(repository.findAll()).isEmpty();
@@ -82,8 +87,8 @@ class GuildAllowlistTransactionTest {
         joinedGuildPort.join(MINE);
         joinedGuildPort.join(STRANGER);
 
-        enforceGuildAllowlistUseCase.fillIfEmpty();
-        enforceGuildAllowlistUseCase.leaveAllNotAllowed();
+        fillEmptyAllowlistUseCase.fillIfEmpty();
+        leaveAllNotAllowedGuildsUseCase.leaveAllNotAllowed();
 
         assertThat(joinedGuildPort.left()).containsExactly(STRANGER);
         assertThat(joinedGuildPort.leftInTransaction()).containsExactly(false);
@@ -96,7 +101,7 @@ class GuildAllowlistTransactionTest {
         joinedGuildPort.join(MINE);
         joinedGuildPort.join(STRANGER);
 
-        manageGuildAllowlistUseCase.disallow(new DisallowGuildCommand(OWNER, STRANGER));
+        disallowGuildUseCase.disallow(new DisallowGuildCommand(OWNER, STRANGER));
 
         assertThat(repository.findAll()).extracting(AllowedGuild::guildId).containsExactly(MINE);
         assertThat(joinedGuildPort.left()).containsExactly(STRANGER);
@@ -163,22 +168,34 @@ class GuildAllowlistTransactionTest {
         }
 
         @Bean
-        EnforceGuildAllowlistService enforceGuildAllowlistService(
+        FillEmptyAllowlistService fillEmptyAllowlistService(
                 AllowedGuildPersistenceAdapter repository, TransactionRecordingJoinedGuildPort joinedGuildPort) {
-            return new EnforceGuildAllowlistService(repository, joinedGuildPort,
+            return new FillEmptyAllowlistService(repository, joinedGuildPort,
                     new FakeGuildAllowlistSettingPort(), Clock.fixed(NOW, ZoneOffset.UTC));
         }
 
         @Bean
-        ManageGuildAllowlistService manageGuildAllowlistService(
-                AllowedGuildPersistenceAdapter repository, ApplicationEventPublisher applicationEventPublisher) {
-            return new ManageGuildAllowlistService(() -> OWNER, repository, new FakeGuildAllowlistSettingPort(),
-                    new GuildAllowlistEventAdapter(applicationEventPublisher), Clock.fixed(NOW, ZoneOffset.UTC));
+        LeaveAllNotAllowedGuildsService leaveAllNotAllowedGuildsService(
+                AllowedGuildPersistenceAdapter repository, TransactionRecordingJoinedGuildPort joinedGuildPort) {
+            return new LeaveAllNotAllowedGuildsService(repository, joinedGuildPort, new FakeGuildAllowlistSettingPort());
         }
 
         @Bean
-        GuildDisallowedListener guildDisallowedListener(EnforceGuildAllowlistUseCase enforceGuildAllowlistUseCase) {
-            return new GuildDisallowedListener(enforceGuildAllowlistUseCase);
+        LeaveNotAllowedGuildService leaveNotAllowedGuildService(
+                AllowedGuildPersistenceAdapter repository, TransactionRecordingJoinedGuildPort joinedGuildPort) {
+            return new LeaveNotAllowedGuildService(repository, joinedGuildPort, new FakeGuildAllowlistSettingPort());
+        }
+
+        @Bean
+        DisallowGuildService disallowGuildService(
+                AllowedGuildPersistenceAdapter repository, ApplicationEventPublisher applicationEventPublisher) {
+            return new DisallowGuildService(() -> OWNER, repository,
+                    new GuildAllowlistEventAdapter(applicationEventPublisher));
+        }
+
+        @Bean
+        GuildDisallowedListener guildDisallowedListener(LeaveNotAllowedGuildUseCase leaveNotAllowedGuildUseCase) {
+            return new GuildDisallowedListener(leaveNotAllowedGuildUseCase);
         }
     }
 }
