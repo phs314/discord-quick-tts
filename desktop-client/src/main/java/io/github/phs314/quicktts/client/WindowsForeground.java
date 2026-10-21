@@ -37,7 +37,8 @@ final class WindowsForeground {
         try (Arena arena = Arena.ofConfined()) {
             // INPUT 구조체 하나를 0 으로 채우면 type=INPUT_MOUSE, 이동·버튼 없음이다.
             MemorySegment input = arena.allocate(Win32.INPUT_SIZE);
-            int sent = (int) Win32.SEND_INPUT.invokeExact(1, input, (int) Win32.INPUT_SIZE);
+            // invokeExact 는 돌려받는 타입까지 맞아야 해서 결과를 받되, 쓰지 않으므로 _ 로 버린다.
+            int _ = (int) Win32.SEND_INPUT.invokeExact(1, input, (int) Win32.INPUT_SIZE);
         } catch (Throwable ignored) {
             // 앞으로 못 가져와도 입력창은 뜬다.
         }
@@ -66,11 +67,11 @@ final class WindowsForeground {
             boolean attached = foregroundThread != 0 && foregroundThread != thisThread
                     && (int) Win32.ATTACH_THREAD_INPUT.invokeExact(thisThread, foregroundThread, 1) != 0;
             try {
-                int raised = (int) Win32.BRING_WINDOW_TO_TOP.invokeExact(window);
-                int activated = (int) Win32.SET_FOREGROUND_WINDOW.invokeExact(window);
+                int _ = (int) Win32.BRING_WINDOW_TO_TOP.invokeExact(window);
+                int _ = (int) Win32.SET_FOREGROUND_WINDOW.invokeExact(window);
             } finally {
                 if (attached) {
-                    int detached = (int) Win32.ATTACH_THREAD_INPUT.invokeExact(thisThread, foregroundThread, 0);
+                    int _ = (int) Win32.ATTACH_THREAD_INPUT.invokeExact(thisThread, foregroundThread, 0);
                 }
             }
         } catch (Throwable ignored) {

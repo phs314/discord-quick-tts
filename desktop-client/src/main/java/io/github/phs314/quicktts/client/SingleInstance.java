@@ -63,12 +63,11 @@ final class SingleInstance implements AutoCloseable {
     }
 
     private static boolean askRunningInstanceToShow() {
-        try (Socket socket = new Socket()) {
-            socket.connect(new InetSocketAddress(InetAddress.getLoopbackAddress(), PORT), TIMEOUT_MILLIS);
-            socket.setSoTimeout(TIMEOUT_MILLIS);
-            new PrintWriter(socket.getOutputStream(), true, StandardCharsets.UTF_8).println(SHOW_REQUEST);
-            String reply = reader(socket).readLine();
-            return SHOW_ACCEPTED.equals(reply);
+        try (Socket socket = connectToRunningInstance();
+                PrintWriter writer = writer(socket);
+                BufferedReader reader = reader(socket)) {
+            writer.println(SHOW_REQUEST);
+            return SHOW_ACCEPTED.equals(reader.readLine());
         } catch (IOException e) {
             return false;
         }
@@ -76,16 +75,34 @@ final class SingleInstance implements AutoCloseable {
 
     private void acceptLoop() {
         while (!server.isClosed()) {
-            try (Socket socket = server.accept()) {
+            try (Socket socket = server.accept();
+                    BufferedReader reader = reader(socket);
+                    PrintWriter writer = writer(socket)) {
                 socket.setSoTimeout(TIMEOUT_MILLIS);
-                if (SHOW_REQUEST.equals(reader(socket).readLine())) {
-                    new PrintWriter(socket.getOutputStream(), true, StandardCharsets.UTF_8).println(SHOW_ACCEPTED);
+                if (SHOW_REQUEST.equals(reader.readLine())) {
+                    writer.println(SHOW_ACCEPTED);
                     onShowRequested.run();
                 }
             } catch (IOException e) {
                 // 서버를 닫았거나 이상한 연결이다. 닫혔으면 반복문이 끝난다.
             }
         }
+    }
+
+    private static Socket connectToRunningInstance() throws IOException {
+        Socket socket = new Socket();
+        try {
+            socket.connect(new InetSocketAddress(InetAddress.getLoopbackAddress(), PORT), TIMEOUT_MILLIS);
+            socket.setSoTimeout(TIMEOUT_MILLIS);
+            return socket;
+        } catch (IOException e) {
+            socket.close();
+            throw e;
+        }
+    }
+
+    private static PrintWriter writer(Socket socket) throws IOException {
+        return new PrintWriter(socket.getOutputStream(), true, StandardCharsets.UTF_8);
     }
 
     private static BufferedReader reader(Socket socket) throws IOException {
