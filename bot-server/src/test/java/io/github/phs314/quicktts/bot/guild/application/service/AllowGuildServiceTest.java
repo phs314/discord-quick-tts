@@ -19,7 +19,6 @@ class AllowGuildServiceTest {
     private static final Instant NOW = Instant.parse("2026-10-11T00:00:00Z");
     private static final DiscordUserId OWNER = new DiscordUserId(100L);
     private static final DiscordUserId SOMEONE = new DiscordUserId(200L);
-    private static final GuildId MINE = new GuildId(1L);
     private static final GuildId FRIEND = new GuildId(2L);
 
     private final FakeAllowedGuildPort allowedGuilds = new FakeAllowedGuildPort();
