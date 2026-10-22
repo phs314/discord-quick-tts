@@ -4,7 +4,6 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
-import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
@@ -45,16 +44,12 @@ class GuildSpeechQueue extends AudioEventAdapter {
 
     /** 읽고 있던 문장을 끊고 기다리던 문장도 모두 버린다. */
     synchronized void clear() {
-        AudioTrack track;
-        while ((track = pending.poll()) != null) {
-            deleteAudioFile(track);
-        }
+        pending.clear();
         player.stopTrack();
     }
 
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
-        deleteAudioFile(track);
         if (endReason.mayStartNext) {
             startNextExecutor.execute(this::startNextIfIdle);
         }
@@ -65,12 +60,6 @@ class GuildSpeechQueue extends AudioEventAdapter {
         AudioTrack next = pending.peek();
         if (next != null && player.startTrack(next, true)) {
             pending.poll();
-        }
-    }
-
-    private static void deleteAudioFile(AudioTrack track) {
-        if (track.getUserData() instanceof Path file) {
-            SpeechPlayerDiscordAdapter.deleteQuietly(file);
         }
     }
 }

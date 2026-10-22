@@ -1,28 +1,23 @@
 package io.github.phs314.quicktts.bot.speech.adapter.out.discord;
 
-import com.sedmelluq.discord.lavaplayer.player.AudioLoadResultHandler;
+import com.sedmelluq.discord.lavaplayer.container.MediaContainerDetection;
+import com.sedmelluq.discord.lavaplayer.container.MediaContainerDetectionResult;
+import com.sedmelluq.discord.lavaplayer.container.MediaContainerHints;
+import com.sedmelluq.discord.lavaplayer.container.MediaContainerRegistry;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayerManager;
 import com.sedmelluq.discord.lavaplayer.player.DefaultAudioPlayerManager;
-import com.sedmelluq.discord.lavaplayer.source.AudioSourceManagers;
 import com.sedmelluq.discord.lavaplayer.tools.FriendlyException;
-import com.sedmelluq.discord.lavaplayer.track.AudioPlaylist;
+import com.sedmelluq.discord.lavaplayer.track.AudioReference;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.application.exception.BotCannotJoinVoiceChannelException;
+import io.github.phs314.quicktts.bot.speech.application.exception.SpeechSynthesisException;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import jakarta.annotation.PreDestroy;
-import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.Clock;
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
@@ -33,32 +28,23 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 /**
- * 디스코드 음성 채널에 들어가고 나가며, 음성을 임시 파일로 저장한 뒤 LavaPlayer 로 재생한다.
- * 임시 파일은 시스템 임시 폴더 아래 {@code quicktts} 폴더에 두고, 다 읽으면 지운다. 봇 서버가 강제로 꺼져 남은 파일은
- * 다음에 켜질 때 지운다.
+ * 디스코드 음성 채널에 들어가고 나가며, 음성 바이트를 메모리에서 바로 LavaPlayer 트랙으로 만들어 재생한다.
+ * 파일을 거치지 않으므로 트랙은 부른 자리에서 바로 재생 순서에 들어간다.
  */
 @Component
 public class SpeechPlayerDiscordAdapter implements SpeechPlayerPort {
 
     private static final Logger log = LoggerFactory.getLogger(SpeechPlayerDiscordAdapter.class);
 
-    /** 켜질 때 이보다 오래된 임시 파일만 지운다. 같은 PC 에서 도는 다른 봇 서버가 읽고 있는 파일은 건드리지 않기 위해서다. */
-    static final Duration LEFTOVER_AGE = Duration.ofHours(1);
+    /** 형식을 알아낼 때 LavaPlayer 가 로그와 트랙 정보에 쓰는 이름. 메모리의 음성이라 주소는 없다. */
+    private static final AudioReference SPEECH = new AudioReference("quicktts-speech", "Quick TTS");
 
     private final JDA jda;
     private final AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
     private final Map<GuildId, GuildSpeechQueue> queues = new ConcurrentHashMap<>();
-    private final Path audioDirectory = Path.of(System.getProperty("java.io.tmpdir"), "quicktts");
 
-    public SpeechPlayerDiscordAdapter(JDA jda, Clock clock) {
+    public SpeechPlayerDiscordAdapter(JDA jda) {
         this.jda = jda;
-        AudioSourceManagers.registerLocalSource(playerManager);
-        try {
-            Files.createDirectories(audioDirectory);
-        } catch (IOException e) {
-            throw new UncheckedIOException("임시 음성 파일 폴더를 만들지 못했습니다: " + audioDirectory, e);
-        }
-        deleteLeftovers(audioDirectory, clock.instant().minus(LEFTOVER_AGE));
     }
 
     /** 봇 서버가 꺼질 때 LavaPlayer 의 재생 스레드를 멈춘다. */
@@ -88,36 +74,12 @@ public class SpeechPlayerDiscordAdapter implements SpeechPlayerPort {
         }
     }
 
+    /**
+     * @throws SpeechSynthesisException 음성 바이트가 LavaPlayer 가 읽을 수 있는 형식이 아닐 때
+     */
     @Override
     public void play(GuildId guildId, Speech speech) {
-        GuildSpeechQueue queue = queueOf(guildId);
-        Path audioFile = writeTempFile(speech);
-        // 파일 읽기는 여러 스레드에서 돌므로, 디스코드 서버마다 넣은 순서대로 끝나게 해야 문장 순서가 바뀌지 않는다.
-        playerManager.loadItemOrdered(guildId, audioFile.toString(), new AudioLoadResultHandler() {
-            @Override
-            public void trackLoaded(AudioTrack track) {
-                track.setUserData(audioFile);
-                queue.enqueue(track);
-            }
-
-            @Override
-            public void playlistLoaded(AudioPlaylist playlist) {
-                log.warn("음성 파일이 재생 목록으로 읽혔습니다: {}", audioFile);
-                deleteQuietly(audioFile);
-            }
-
-            @Override
-            public void noMatches() {
-                log.warn("음성 파일을 읽을 수 없습니다: {}", audioFile);
-                deleteQuietly(audioFile);
-            }
-
-            @Override
-            public void loadFailed(FriendlyException e) {
-                log.warn("음성 파일을 불러오지 못했습니다: {}", audioFile, e);
-                deleteQuietly(audioFile);
-            }
-        });
+        queueOf(guildId).enqueue(toTrack(speech));
     }
 
     @Override
@@ -137,37 +99,23 @@ public class SpeechPlayerDiscordAdapter implements SpeechPlayerPort {
         return queues.computeIfAbsent(guildId, id -> new GuildSpeechQueue(playerManager.createPlayer()));
     }
 
-    private Path writeTempFile(Speech speech) {
+    /**
+     * 음성 바이트의 형식(mp3 등)을 알아내 그 형식의 트랙을 만든다. LavaPlayer 의 파일 소스가 하는 일과 같고 스트림만 메모리다.
+     * 형식을 알아낼 때 스트림을 앞에서부터 읽으므로 재생에는 새 스트림을 준다.
+     */
+    static AudioTrack toTrack(Speech speech) {
+        MediaContainerDetectionResult result;
         try {
-            Path file = Files.createTempFile(audioDirectory, "speech-", "." + speech.fileExtension());
-            return Files.write(file, speech.audio());
-        } catch (IOException e) {
-            throw new UncheckedIOException("임시 음성 파일을 만들지 못했습니다.", e);
+            result = new MediaContainerDetection(MediaContainerRegistry.DEFAULT_REGISTRY, SPEECH,
+                    new ByteArraySeekableInputStream(speech.audio()),
+                    MediaContainerHints.from(null, speech.fileExtension())).detectContainer();
+        } catch (FriendlyException e) {
+            throw new SpeechSynthesisException("음성 형식을 알아내지 못했습니다.", e);
         }
-    }
-
-    /** 폴더 안에서 {@code before} 전에 마지막으로 고친 파일을 지운다. */
-    static void deleteLeftovers(Path directory, Instant before) {
-        try (Stream<Path> files = Files.list(directory)) {
-            files.filter(file -> isModifiedBefore(file, before)).forEach(SpeechPlayerDiscordAdapter::deleteQuietly);
-        } catch (IOException e) {
-            log.warn("남은 임시 음성 파일을 확인하지 못했습니다: {}", directory, e);
+        if (!result.isContainerDetected() || result.isReference() || !result.isSupportedFile()) {
+            throw new SpeechSynthesisException("재생할 수 없는 음성 형식입니다: " + speech.fileExtension());
         }
-    }
-
-    private static boolean isModifiedBefore(Path file, Instant before) {
-        try {
-            return Files.isRegularFile(file) && Files.getLastModifiedTime(file).toInstant().isBefore(before);
-        } catch (IOException e) {
-            return false;
-        }
-    }
-
-    static void deleteQuietly(Path file) {
-        try {
-            Files.deleteIfExists(file);
-        } catch (IOException e) {
-            log.warn("임시 음성 파일을 지우지 못했습니다: {}", file, e);
-        }
+        return result.getContainerDescriptor()
+                .createTrack(result.getTrackInfo(), new ByteArraySeekableInputStream(speech.audio()));
     }
 }
