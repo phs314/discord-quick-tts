@@ -91,7 +91,7 @@
 
 | ADR | 제목 | 상태 |
 | --- | --- | --- |
-| [0025](0025-business-exceptions-by-kind.md) | 예상한 실패는 공통 부모와 종류로 나누고, 어댑터마다 한 곳에서 처리한다 | 일부 대체됨 (ADR 0032) |
+| [0025](0025-business-exceptions-by-kind.md) | 예상한 실패는 공통 부모와 종류로 나누고, 어댑터마다 한 곳에서 처리한다 | 일부 대체됨 (ADR 0032, ADR 0043) |
 
 ### 데이터와 동시성
 
@@ -118,9 +118,10 @@
 | --- | --- | --- |
 | [0006](0006-free-tts-engines.md) | TTS 는 무료 비공식 엔진을 쓰고, 실패하면 Google 번역 목소리로 대신 읽는다 | 채택 |
 | [0007](0007-first-come-voice-channel.md) | 같은 디스코드 서버에서는 먼저 쓰고 있는 음성 채널이 우선이다 | 일부 대체됨 (ADR 0013, ADR 0014) |
-| [0014](0014-bot-seat-aggregate.md) | 디스코드 서버별 봇 자리(BotSeat)를 speech 의 애그리거트로 둔다 | 채택 |
+| [0014](0014-bot-seat-aggregate.md) | 디스코드 서버별 봇 자리(BotSeat)를 speech 의 애그리거트로 둔다 | 일부 대체됨 (ADR 0043) |
 | [0015](0015-guild-allowlist.md) | 봇이 머물 디스코드 서버를 허용 목록으로 정한다 (guild 컨텍스트) | 채택 |
 | [0019](0019-spoken-text-cleanup.md) | 문장은 speech 도메인에서 읽기 좋게 다듬은 뒤 엔진에 보낸다 | 채택 |
+| [0043](0043-play-speech-from-memory.md) | 음성은 임시 파일 없이 메모리에서 바로 재생한다 | 채택 |
 
 ### 운영
 

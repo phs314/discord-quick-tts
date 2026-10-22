@@ -17,7 +17,12 @@ public interface SpeechPlayerPort {
      */
     void join(VoiceChannel channel);
 
-    /** 봇이 그 디스코드 서버에서 들어가 있는 채널에서 음성을 재생한다. 앞 음성이 끝난 뒤 다음 음성을 재생한다. */
+    /**
+     * 봇이 그 디스코드 서버에서 들어가 있는 채널에서 음성을 재생한다. 앞 음성이 끝난 뒤 다음 음성을 재생한다.
+     *
+     * @throws io.github.phs314.quicktts.bot.speech.application.exception.SpeechSynthesisException
+     *         음성이 재생할 수 없는 형식일 때
+     */
     void play(GuildId guildId, Speech speech);
 
     /** 읽던 문장과 기다리던 문장을 모두 버리고 음성 채널에서 나간다. */
