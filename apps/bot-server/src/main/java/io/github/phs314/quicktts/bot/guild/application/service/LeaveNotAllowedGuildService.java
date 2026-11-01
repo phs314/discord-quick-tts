@@ -3,7 +3,7 @@ package io.github.phs314.quicktts.bot.guild.application.service;
 import io.github.phs314.quicktts.bot.guild.application.port.in.LeaveNotAllowedGuildUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.command.LeaveNotAllowedGuildCommand;
 import io.github.phs314.quicktts.bot.guild.application.port.out.AllowedGuildPort;
-import io.github.phs314.quicktts.bot.guild.application.port.out.GuildAllowlistSettingPort;
+import io.github.phs314.quicktts.bot.guild.application.port.out.GuildAllowlistConfigPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.JoinedGuildPort;
 import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
 import io.github.phs314.quicktts.bot.guild.domain.vo.GuildAllowlist;
@@ -17,7 +17,7 @@ public class LeaveNotAllowedGuildService implements LeaveNotAllowedGuildUseCase 
 
     private final AllowedGuildPort allowedGuildPort;
     private final JoinedGuildPort joinedGuildPort;
-    private final GuildAllowlistSettingPort guildAllowlistSettingPort;
+    private final GuildAllowlistConfigPort guildAllowlistConfigPort;
 
     @Override
     public void leaveIfNotAllowed(LeaveNotAllowedGuildCommand command) {
@@ -27,7 +27,7 @@ public class LeaveNotAllowedGuildService implements LeaveNotAllowedGuildUseCase 
     }
 
     private GuildAllowlist currentAllowlist() {
-        return new GuildAllowlist(guildAllowlistSettingPort.isEnabled(),
+        return new GuildAllowlist(guildAllowlistConfigPort.isEnabled(),
                 allowedGuildPort.findAll().stream().map(AllowedGuild::guildId).collect(Collectors.toSet()));
     }
 }

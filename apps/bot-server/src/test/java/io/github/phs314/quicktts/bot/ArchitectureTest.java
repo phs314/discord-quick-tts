@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 바운디드 컨텍스트(speech, device, guild) 사이와 각 컨텍스트 안의 헥사고날 의존 방향을 지킨다.
+ * 바운디드 컨텍스트(speech, settings, synthesis, device, guild) 사이와 각 컨텍스트 안의 헥사고날 의존 방향을 지킨다.
  * 이름과 위치 규칙은 ADR 에 적어 두고 리뷰로 지킨다 (ADR 0032).
  */
 @AnalyzeClasses(packages = "io.github.phs314.quicktts.bot", importOptions = ImportOption.DoNotIncludeTests.class)
@@ -36,7 +36,9 @@ class ArchitectureTest {
      * 컨텍스트를 새로 만들면 여기에 넣어야 빌드가 통과한다.
      */
     private static final Map<String, Set<String>> CONTEXT_MAP = Map.of(
-            "speech", Set.of(),
+            "speech", Set.of("settings", "synthesis"),
+            "settings", Set.of("synthesis"),
+            "synthesis", Set.of(),
             "device", Set.of(),
             "guild", Set.of());
 
@@ -57,12 +59,34 @@ class ArchitectureTest {
             .applicationServices("..bot.speech.application..")
             .adapter("web", "..bot.speech.adapter.in.web..")
             .adapter("discord-command", "..bot.speech.adapter.in.discord..")
-            .adapter("tts", "..bot.speech.adapter.out.tts..")
             .adapter("discord", "..bot.speech.adapter.out.discord..")
-            .adapter("persistence", "..bot.speech.adapter.out.persistence..")
             .adapter("memory", "..bot.speech.adapter.out.memory..")
+            .adapter("settings", "..bot.speech.adapter.out.settings..")
+            .adapter("synthesis", "..bot.speech.adapter.out.synthesis..")
             .withOptionalLayers(true)
             // config 는 포트와 어댑터를 이어 붙이는 조립 코드라서 계층 규칙에서 뺀다.
+            .ignoreDependency(resideInAPackage("..bot.config.."), alwaysTrue())
+            .ignoreDependency(resideInAPackage(OUTBOUND_ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES))
+            .ignoreDependency(resideInAPackage(EVENT_LISTENERS), resideInAPackage(PUBLIC_EVENTS));
+
+    @ArchTest
+    static final ArchRule settingsIsHexagonal = onionArchitecture()
+            .domainModels("..bot.settings.domain..")
+            .applicationServices("..bot.settings.application..")
+            .adapter("discord-command", "..bot.settings.adapter.in.discord..")
+            .adapter("persistence", "..bot.settings.adapter.out.persistence..")
+            .adapter("synthesis", "..bot.settings.adapter.out.synthesis..")
+            .withOptionalLayers(true)
+            .ignoreDependency(resideInAPackage("..bot.config.."), alwaysTrue())
+            .ignoreDependency(resideInAPackage(OUTBOUND_ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES))
+            .ignoreDependency(resideInAPackage(EVENT_LISTENERS), resideInAPackage(PUBLIC_EVENTS));
+
+    @ArchTest
+    static final ArchRule synthesisIsHexagonal = onionArchitecture()
+            .domainModels("..bot.synthesis.domain..")
+            .applicationServices("..bot.synthesis.application..")
+            .adapter("tts", "..bot.synthesis.adapter.out.tts..")
+            .withOptionalLayers(true)
             .ignoreDependency(resideInAPackage("..bot.config.."), alwaysTrue())
             .ignoreDependency(resideInAPackage(OUTBOUND_ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES))
             .ignoreDependency(resideInAPackage(EVENT_LISTENERS), resideInAPackage(PUBLIC_EVENTS));
@@ -89,7 +113,7 @@ class ArchitectureTest {
             .adapter("discord", "..bot.guild.adapter.out.discord..")
             .adapter("event", "..bot.guild.adapter.out.event..")
             .adapter("persistence", "..bot.guild.adapter.out.persistence..")
-            .adapter("settings", "..bot.guild.adapter.out.settings..")
+            .adapter("config", "..bot.guild.adapter.out.config..")
             .withOptionalLayers(true)
             .ignoreDependency(resideInAPackage("..bot.config.."), alwaysTrue())
             .ignoreDependency(resideInAPackage(OUTBOUND_ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES))
@@ -149,7 +173,8 @@ class ArchitectureTest {
     @ArchTest
     static final ArchRule sharedKernelDependsOnNoContext = noClasses()
             .that().resideInAPackage("..bot.shared..")
-            .should().dependOnClassesThat().resideInAnyPackage("..bot.speech..", "..bot.device..", "..bot.guild..");
+            .should().dependOnClassesThat().resideInAnyPackage(
+                    "..bot.speech..", "..bot.settings..", "..bot.synthesis..", "..bot.device..", "..bot.guild..");
 
     /** 인바운드 어댑터는 입력 포트로만 애플리케이션을 부른다. 서비스 구현이나 출력 포트를 직접 쓰지 않는다. */
     @ArchTest

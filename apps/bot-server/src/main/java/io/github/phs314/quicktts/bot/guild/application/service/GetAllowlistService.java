@@ -7,7 +7,7 @@ import io.github.phs314.quicktts.bot.guild.application.port.in.dto.GuildAllowlis
 import io.github.phs314.quicktts.bot.guild.application.port.in.query.GetAllowlistQuery;
 import io.github.phs314.quicktts.bot.guild.application.port.out.AllowedGuildPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.BotOwnerPort;
-import io.github.phs314.quicktts.bot.guild.application.port.out.GuildAllowlistSettingPort;
+import io.github.phs314.quicktts.bot.guild.application.port.out.GuildAllowlistConfigPort;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,12 +18,12 @@ public class GetAllowlistService implements GetAllowlistUseCase {
 
     private final BotOwnerPort botOwnerPort;
     private final AllowedGuildPort allowedGuildPort;
-    private final GuildAllowlistSettingPort guildAllowlistSettingPort;
+    private final GuildAllowlistConfigPort guildAllowlistConfigPort;
 
     @Override
     public GuildAllowlistDto getAllowlist(GetAllowlistQuery query) {
         requireOwner(query.requester());
-        return new GuildAllowlistDto(guildAllowlistSettingPort.isEnabled(),
+        return new GuildAllowlistDto(guildAllowlistConfigPort.isEnabled(),
                 allowedGuildPort.findAll().stream().map(AllowedGuildDto::from).toList());
     }
 

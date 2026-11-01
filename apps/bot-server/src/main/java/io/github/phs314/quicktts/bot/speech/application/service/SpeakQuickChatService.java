@@ -1,21 +1,20 @@
 package io.github.phs314.quicktts.bot.speech.application.service;
 
+import io.github.phs314.quicktts.bot.shared.domain.vo.VoiceId;
 import io.github.phs314.quicktts.bot.speech.application.exception.AuthorNotInVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.exception.VoiceChannelInUseException;
 import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.out.BotVoiceStatePort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
-import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizerPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.TextToSpeechPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.UserVoicePort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceStatePort;
-import io.github.phs314.quicktts.bot.speech.application.port.out.VoicePreferencePort;
 import io.github.phs314.quicktts.bot.speech.domain.BotVoiceState;
-import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
+import io.github.phs314.quicktts.bot.speech.domain.vo.Audio;
 import io.github.phs314.quicktts.bot.speech.domain.vo.SpokenText;
-import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceCatalog;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
-import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,10 +23,10 @@ import org.springframework.stereotype.Service;
 public class SpeakQuickChatService implements SpeakQuickChatUseCase {
 
     private final VoiceStatePort voiceStatePort;
-    private final SpeechSynthesizerPort speechSynthesizerPort;
+    private final TextToSpeechPort textToSpeechPort;
     private final SpeechPlayerPort speechPlayerPort;
     private final BotVoiceStatePort botVoiceStatePort;
-    private final VoicePreferencePort voicePreferencePort;
+    private final UserVoicePort userVoicePort;
 
     @Override
     public void speak(SpeakQuickChatCommand command) {
@@ -36,9 +35,8 @@ public class SpeakQuickChatService implements SpeakQuickChatUseCase {
                 .map(VoiceChannelDetails::channel)
                 .orElseThrow(() -> new AuthorNotInVoiceChannelException(command.author()));
 
-        VoiceCatalog catalog = new VoiceCatalog(speechSynthesizerPort.voices(), speechSynthesizerPort.defaultVoice());
-        VoiceId voiceId = catalog.chosenOrDefault(voicePreferencePort.findVoice(command.author())).id();
-        Speech speech = speechSynthesizerPort.synthesize(text, voiceId);
+        VoiceId voiceId = userVoicePort.getVoiceId(command.author());
+        Audio audio = textToSpeechPort.synthesize(text, voiceId);
 
         // 같은 디스코드 서버에서는 채널 정하기와 재생 순서 넣기가 한 번에 하나씩 일어나서 다른 채널의 요청이 끼어들지 못한다.
         botVoiceStatePort.withLockedState(channel.guildId(), state -> {
@@ -48,7 +46,7 @@ public class SpeakQuickChatService implements SpeakQuickChatUseCase {
             // 들어가지 못하면(권한 없음 등) 예외가 나서 상태는 그대로 남는다.
             speechPlayerPort.join(channel);
             state.join(channel, voiceStatePort::hasHumanMembers);
-            speechPlayerPort.play(channel.guildId(), speech);
+            speechPlayerPort.play(channel.guildId(), audio);
         });
     }
 

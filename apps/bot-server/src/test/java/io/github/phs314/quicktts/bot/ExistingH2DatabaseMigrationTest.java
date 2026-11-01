@@ -5,10 +5,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.github.phs314.quicktts.bot.device.adapter.out.persistence.DevicePersistenceAdapter;
 import io.github.phs314.quicktts.bot.guild.adapter.out.persistence.AllowedGuildPersistenceAdapter;
 import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
+import io.github.phs314.quicktts.bot.settings.adapter.out.persistence.UserSettingsPersistenceAdapter;
+import io.github.phs314.quicktts.bot.settings.domain.UserSettings;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
-import io.github.phs314.quicktts.bot.speech.adapter.out.persistence.VoicePreferencePersistenceAdapter;
-import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceId;
+import io.github.phs314.quicktts.bot.shared.domain.vo.VoiceId;
 import io.github.phs314.quicktts.bot.support.TestDatabase;
 import io.github.phs314.quicktts.bot.support.TestJpa;
 import java.time.Instant;
@@ -73,7 +74,7 @@ class ExistingH2DatabaseMigrationTest {
     /** 서버와 같은 JPA 설정으로 저장소 어댑터를 띄운다. 엔티티가 옛 DB 의 테이블과도 맞는지 함께 확인된다. */
     private static AnnotationConfigApplicationContext repositories(DataSource dataSource) {
         return TestJpa.context(dataSource,
-                DevicePersistenceAdapter.class, VoicePreferencePersistenceAdapter.class, AllowedGuildPersistenceAdapter.class);
+                DevicePersistenceAdapter.class, UserSettingsPersistenceAdapter.class, AllowedGuildPersistenceAdapter.class);
     }
 
     private static void insertDeviceAndVoice(JdbcClient jdbc) {
@@ -91,9 +92,10 @@ class ExistingH2DatabaseMigrationTest {
         assertThat(context.getBean(DevicePersistenceAdapter.class).findByUserId(OWNER))
                 .singleElement()
                 .satisfies(device -> assertThat(device.id().value()).isEqualTo("old-device-id"));
-        var voices = context.getBean(VoicePreferencePersistenceAdapter.class);
-        voices.saveVoice(OWNER, new VoiceId("edge:ko-KR-InJoonNeural"));
-        assertThat(voices.findVoice(OWNER)).contains(new VoiceId("edge:ko-KR-InJoonNeural"));
+        var settings = context.getBean(UserSettingsPersistenceAdapter.class);
+        assertThat(settings.find(OWNER).flatMap(UserSettings::voiceId)).contains(new VoiceId("edge:ko-KR-SunHiNeural"));
+        settings.save(new UserSettings(OWNER, new VoiceId("edge:ko-KR-InJoonNeural")));
+        assertThat(settings.find(OWNER).flatMap(UserSettings::voiceId)).contains(new VoiceId("edge:ko-KR-InJoonNeural"));
     }
 
     private static String historyType(JdbcClient jdbc, String version) {
