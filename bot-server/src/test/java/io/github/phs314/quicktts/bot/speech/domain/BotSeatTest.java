@@ -69,6 +69,16 @@ class BotSeatTest {
     }
 
     @Test
+    void 사람이_있어도_자리를_비울_수_있다() {
+        seat.sitIn(GENERAL, NOBODY);
+
+        seat.vacate();
+
+        assertThat(seat.channel()).isEmpty();
+        assertThat(seat.isFreeFor(GAME, Set.of(GENERAL)::contains)).isTrue();
+    }
+
+    @Test
     void 봇이_옮겨지면_앉은_채널일_때만_따라간다() {
         seat.sitIn(GENERAL, NOBODY);
 

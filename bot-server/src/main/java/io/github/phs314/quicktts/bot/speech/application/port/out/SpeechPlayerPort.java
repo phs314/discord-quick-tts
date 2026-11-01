@@ -27,4 +27,10 @@ public interface SpeechPlayerPort {
 
     /** 읽던 문장과 기다리던 문장을 모두 버리고 음성 채널에서 나간다. */
     void leave(GuildId guildId);
+
+    /**
+     * 봇이 그 디스코드 서버에서 나간 뒤에 부른다. 읽던 문장과 기다리던 문장, 그 서버의 플레이어를 모두 버린다.
+     * 디스코드 음성 연결은 이미 끊겼으므로 건드리지 않는다.
+     */
+    void forget(GuildId guildId);
 }

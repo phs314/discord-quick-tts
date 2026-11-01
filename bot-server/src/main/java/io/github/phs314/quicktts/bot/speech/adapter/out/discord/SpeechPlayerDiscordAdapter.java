@@ -95,6 +95,18 @@ public class SpeechPlayerDiscordAdapter implements SpeechPlayerPort {
         }
     }
 
+    /**
+     * 디스코드는 봇이 나간 디스코드 서버의 음성 연결을 닫고 {@link AudioManager} 도 버린다. 다시 초대되면 새 AudioManager 에
+     * 새 플레이어를 붙이므로, 옛 플레이어와 남은 문장은 여기서 버린다. 남겨 두면 다시 들어갔을 때 옛 문장이 읽힌다.
+     */
+    @Override
+    public void forget(GuildId guildId) {
+        GuildSpeechQueue queue = queues.remove(guildId);
+        if (queue != null) {
+            queue.destroy();
+        }
+    }
+
     private GuildSpeechQueue queueOf(GuildId guildId) {
         return queues.computeIfAbsent(guildId, id -> new GuildSpeechQueue(playerManager.createPlayer()));
     }

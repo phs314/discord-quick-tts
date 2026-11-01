@@ -3,6 +3,7 @@ package io.github.phs314.quicktts.bot.speech.adapter.out.memory;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
+import io.github.phs314.quicktts.bot.speech.domain.BotSeat;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
@@ -24,6 +25,39 @@ class BotSeatMemoryAdapterTest {
             assertThat(seat.channel()).isEmpty();
             seat.sitIn(general, channel -> false);
         });
+
+        repository.withLockedSeat(GUILD, seat -> assertThat(seat.channel()).contains(general));
+    }
+
+    @Test
+    void 빈_자리는_기억하지_않는다() {
+        VoiceChannel general = new VoiceChannel(GUILD, 2L);
+        repository.withLockedSeat(GUILD, seat -> seat.sitIn(general, channel -> false));
+        assertThat(repository.remembers(GUILD)).isTrue();
+
+        repository.withLockedSeat(GUILD, BotSeat::vacate);
+        repository.withLockedSeat(OTHER_GUILD, seat -> { });
+
+        assertThat(repository.remembers(GUILD)).isFalse();
+        assertThat(repository.remembers(OTHER_GUILD)).isFalse();
+    }
+
+    @Test
+    void 기다리는_사이에_앞_작업이_자리를_지워도_새_자리에서_이어서_한다() throws Exception {
+        VoiceChannel general = new VoiceChannel(GUILD, 2L);
+        CountDownLatch holding = new CountDownLatch(1);
+        CountDownLatch release = new CountDownLatch(1);
+        CompletableFuture<Void> first = CompletableFuture.runAsync(() -> repository.withLockedSeat(GUILD, seat -> {
+            holding.countDown();
+            await(release);
+        }));
+        assertThat(holding.await(5, TimeUnit.SECONDS)).isTrue();
+
+        CompletableFuture<Void> waiting = CompletableFuture.runAsync(
+                () -> repository.withLockedSeat(GUILD, seat -> seat.sitIn(general, channel -> false)));
+        release.countDown();
+        first.get(5, TimeUnit.SECONDS);
+        waiting.get(5, TimeUnit.SECONDS);
 
         repository.withLockedSeat(GUILD, seat -> assertThat(seat.channel()).contains(general));
     }
