@@ -204,7 +204,7 @@ apps/bot-server/src/main/java/io/github/phs314/quicktts/bot/
 
 단축키는 트레이 아이콘의 **Change Keybind...** 메뉴에서 바꿉니다. 창이 뜨면 새 조합을 직접 누르고 저장하세요. 문장을 치다가 잘못 눌리지 않도록 Ctrl, Alt, Win 중 하나는 같이 눌러야 하고, F1~F24 는 혼자 써도 됩니다. 정한 단축키는 `client.properties` 의 `keybind=` 에 저장되고 (예전 판이 적은 `hotkey=` 는 앱이 처음 켜질 때 `keybind=` 로 옮겨 적습니다), 잘못 적혀 있으면 기본값 `Ctrl+Shift+Space` 로 돌아갑니다.
 
-문장은 읽기 좋게 다듬어서 읽습니다. 링크는 "링크를 보냈어요" 로 읽고, 이모지는 건너뛰고, ㅋ·ㅎ·ㅇ·ㄴ·ㄱ 는 키·히·이응·니은·고 로 읽습니다 (ㅋㅋㅋ → 키키키). 이모지만 보내면 읽을 내용이 없다는 알림이 뜹니다 ([ADR 0019](docs/adr/0019-spoken-text-cleanup.md), 규칙 자리는 [ADR 0049](docs/adr/0049-text-normalizer.md)).
+문장은 읽기 좋게 다듬어서 읽습니다. 링크는 "링크를 보냈어요" 로 읽고, 이모지는 건너뛰고, ㅋ·ㅎ·ㅇ·ㄴ·ㄱ 는 키·히·이응·니은·고 로 읽습니다 (ㅋㅋㅋ → 키키키). 이모지만 보내면 읽을 내용이 없다는 알림이 뜹니다 ([ADR 0019](docs/adr/0019-spoken-text-cleanup.md), 규칙 자리는 [ADR 0051](docs/adr/0051-text-normalizer.md)).
 
 연결한 PC 를 끊으려면 디스코드에서 `/연결해제` 를 입력하고 메뉴에서 PC 를 고르세요. 목록에는 각 PC 의 컴퓨터 이름이 보입니다. 끊긴 PC 의 클라이언트는 다음에 보낼 때 연결 코드를 다시 묻습니다.
 
