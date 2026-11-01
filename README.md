@@ -210,6 +210,8 @@ apps/bot-server/src/main/java/io/github/phs314/quicktts/bot/
 
 읽어 주는 목소리는 사람마다 디스코드에서 `/목소리` 로 바꿀 수 있습니다. 목소리를 고르지 않으면 지금 목소리와 목록을 보여 줍니다. 아무도 고르지 않았을 때의 기본 목소리는 `QUICKTTS_DEFAULT_VOICE` 로 정합니다(기본: 선희).
 
+입력창(단축키로 띄우기, 한글 조합, Enter 보내기, Esc 닫기)은 TestFX 테스트(`QuickChatWindowTest`)가 화면 없이 띄워 확인합니다. `./gradlew :apps:desktop-client:test` 로 돌려도 창이 뜨지 않습니다 ([ADR 0050](docs/adr/0050-desktop-input-ui-tests.md)).
+
 ## 봇을 들일 디스코드 서버 (허용 목록)
 
 봇은 봇 주인(Discord Developer Portal 에서 봇 앱을 만든 사람)이 허용한 디스코드 서버에만 남습니다. 목록에 없는 서버에 초대되면 안내 메시지와 그 서버 ID 를 남기고 나갑니다 ([ADR 0015](docs/adr/0015-guild-allowlist.md)).
