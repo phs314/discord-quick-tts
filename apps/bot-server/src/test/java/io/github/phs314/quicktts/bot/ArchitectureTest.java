@@ -98,7 +98,6 @@ class ArchitectureTest {
             .adapter("web", "..bot.identity.adapter.in.web..")
             .adapter("discord-command", "..bot.identity.adapter.in.discord..")
             .adapter("persistence", "..bot.identity.adapter.out.persistence..")
-            .adapter("memory", "..bot.identity.adapter.out.memory..")
             .withOptionalLayers(true)
             .ignoreDependency(resideInAPackage("..bot.config.."), alwaysTrue())
             .ignoreDependency(resideInAPackage(OUTBOUND_ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES))

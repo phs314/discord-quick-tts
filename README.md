@@ -115,8 +115,7 @@ apps/bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │   └── adapter/
 │       ├── in/web/             기기 등록 REST 컨트롤러와 웹 매퍼, 기기 토큰 인증 필터
 │       ├── in/discord/         /연결 슬래시 명령
-│       ├── out/persistence/    기기 저장소 (JPA 엔티티 + 매퍼)
-│       └── out/memory/         연결 코드 저장소 (메모리)
+│       └── out/persistence/    기기, 연결 코드 저장소 (JPA 엔티티 + 매퍼)
 ├── guild/
 │   ├── domain/                 AllowedGuild (허용한 디스코드 서버)
 │   │   ├── vo/                 GuildAllowlist (허용 목록으로 머물 곳 정하기)
@@ -159,7 +158,7 @@ apps/bot-server/src/main/java/io/github/phs314/quicktts/bot/
 - 기기 토큰 인증은 스프링 시큐리티가 맡습니다. 기기 등록과 상태 확인(`/actuator/health`)만 토큰 없이 열려 있고, identity 의 필터가 `Bearer` 토큰으로 연결한 디스코드 사용자를 알아내면 컨트롤러는 `@AuthenticationPrincipal DiscordUserId` 로 받습니다 ([ADR 0031](docs/adr/0031-device-token-authentication-with-spring-security.md), [ADR 0036](docs/adr/0036-health-and-metrics-with-actuator.md)).
 - 도메인 규칙을 어겼을 때 던지는 예외는 각 컨텍스트의 `domain` 바로 아래에 둡니다. 데이터 상태로 정하는 규칙은 애그리거트와 값 객체에, 누가 부르는지로 정하는 권한은 서비스에 둡니다 ([ADR 0024](docs/adr/0024-rules-live-in-the-domain.md)).
 - 우리가 만든 예외는 모두 `BusinessException` 을 상속하고 종류(`ErrorKind`)를 가집니다. 웹은 `ApiExceptionHandler` 한 곳이 종류로 HTTP 상태를 정하고 예상하지 못한 실패까지 같은 오류 응답 모양으로 돌려주며, 디스코드 명령은 명령이 잡지 않은 실패에도 답이 가도록 감싸서 등록합니다 ([ADR 0025](docs/adr/0025-business-exceptions-by-kind.md)).
-- 출력 포트를 구현한 어댑터 이름은 `<포트 이름에서 Port 를 뺀 것><폴더 이름>Adapter` 입니다(`DevicePersistenceAdapter`, `BotOwnerDiscordAdapter`, `PairingMemoryAdapter`). 폴더 뜻이 이미 이름에 있으면 한 번만 씁니다(`GuildAllowlistEventAdapter`, `SpeechSynthesizerAdapter`). 포트를 구현하지 않는 도우미(`EdgeReadAloudEngine`, `GuildSpeechQueue`)와 Spring Data 인터페이스(`DeviceSpringDataRepository`)는 `Adapter` 를 붙이지 않고, 같은 폴더의 파일은 모두 대상 이름으로 시작합니다 ([ADR 0039](docs/adr/0039-outbound-adapters-end-with-adapter.md)).
+- 출력 포트를 구현한 어댑터 이름은 `<포트 이름에서 Port 를 뺀 것><폴더 이름>Adapter` 입니다(`DevicePersistenceAdapter`, `BotOwnerDiscordAdapter`, `BotVoiceStateMemoryAdapter`). 폴더 뜻이 이미 이름에 있으면 한 번만 씁니다(`GuildAllowlistEventAdapter`, `SpeechSynthesizerAdapter`). 포트를 구현하지 않는 도우미(`EdgeReadAloudEngine`, `GuildSpeechQueue`)와 Spring Data 인터페이스(`DeviceSpringDataRepository`)는 `Adapter` 를 붙이지 않고, 같은 폴더의 파일은 모두 대상 이름으로 시작합니다 ([ADR 0039](docs/adr/0039-outbound-adapters-end-with-adapter.md)).
 - 디스코드 서버는 코드에서 언제나 `guild` 이고 `server` 는 봇 서버만 뜻합니다 ([ADR 0027](docs/adr/0027-naming-rules.md)).
 - 이름은 디스코드 개발자 문서와 화면에 있는 말을 먼저 쓰고(Voice State, `author`, Keybind), 없으면 TTS 업계·스프링·Google API 지침 같은 실무 표준을 씁니다. 디스코드에 있는 말(speaker, owner, session)을 다른 뜻으로 쓰지 않고, 비유로 이름을 짓지 않습니다 ([ADR 0044](docs/adr/0044-discord-vocabulary-first-names.md)).
 - 출력 포트 테스트 대역은 포트마다 하나(`Fake<포트 이름>`)이고 테스트 폴더에서 포트와 같은 패키지에 있어서, 서비스 테스트와 통합 테스트가 같은 대역을 씁니다 ([ADR 0027](docs/adr/0027-naming-rules.md)).
@@ -171,7 +170,7 @@ apps/bot-server/src/main/java/io/github/phs314/quicktts/bot/
 - DB 에 쓰는 유스케이스 메서드에는 `@Transactional` 을 붙이고, 저장소는 그 트랜잭션 안에서 한 줄씩 씁니다. 읽기만 하는 유스케이스에는 붙이지 않습니다. 트랜잭션 안에서는 디스코드 서버 나가기 같은 되돌릴 수 없는 호출을 하지 않고, 쓴 결과로 나가야 하면 도메인 이벤트를 내서 커밋 뒤에 받는 쪽이 나갑니다(`@TransactionalEventListener`) ([ADR 0033](docs/adr/0033-transactional-on-writing-use-cases.md)).
 - TTS 엔진은 `SpeechSynthesizerPort` 뒤에 있습니다. 지금은 무료인 Microsoft Edge "소리 내어 읽기" 목소리(선희, 인준, 현수)와 Google 번역 목소리를 쓰고, Edge 가 실패하면 Google 번역 목소리로 대신 읽습니다. 엔진을 추가하려면 `synthesis/adapter/out/tts` 에 `TtsEngine` 구현을 하나 더 만들면 됩니다. 둘 다 공식 API 가 아니라서 언제든 막힐 수 있습니다. 엔진이 만든 음성은 문장과 목소리를 키로 메모리에 500개까지 기억해서, 같은 문장은 엔진을 다시 부르지 않습니다 ([ADR 0037](docs/adr/0037-cache-tts-results.md)).
 - 서버 상태는 `GET /actuator/health` 로 봅니다. 디스코드 게이트웨이에 붙어 있지 않은 샤드가 있거나 DB 가 안 되면 503 과 `DOWN` 입니다. 지표는 기기 토큰을 실어 `/actuator/metrics` 로 보고, TTS 는 목소리별 걸린 시간과 성공·실패(`quicktts.tts.synthesis`), Google 번역 목소리로 대신 읽은 횟수(`quicktts.tts.fallback`)를 셉니다 ([ADR 0036](docs/adr/0036-health-and-metrics-with-actuator.md)).
-- 기기 토큰은 서버에 SHA-256 해시로만 저장합니다. 연결 코드는 5분짜리 일회용이고 메모리에만 둡니다.
+- 기기 토큰은 서버에 SHA-256 해시로만 저장합니다. 연결 코드는 5분짜리 일회용이고 DB 에 두어서 서버를 다시 켜도 남습니다 ([ADR 0049](docs/adr/0049-store-pairings-in-database.md)).
 - DB 는 배포 서버가 MySQL, 이 PC 에서 띄우는 서버(개발, exe)가 H2 파일입니다. 스키마는 Flyway 마이그레이션(`apps/bot-server/src/main/resources/db/migration`)으로 관리하고, 저장소 테스트는 H2 와 MySQL 양쪽에서 돕니다 ([ADR 0016](docs/adr/0016-mysql-and-flyway.md)).
 - API 경로는 `/api/v1` 아래에 있습니다. 오류 응답은 ProblemDetail 에 `code` 속성(`ApiErrorCode`)을 실어 보내고, 클라이언트는 이 코드로 안내 문구를 고릅니다 ([ADR 0013](docs/adr/0013-api-versioning-and-error-codes.md)).
 - `QuickTtsApiIntegrationTest` 가 봇 서버를 통째로 띄워 `/api/v1` 을 HTTP 로 부르고 응답까지 확인합니다. 디스코드와 TTS 엔진만 출력 포트 대역으로 바꿔서 디스코드에 접속하지 않고 소리도 나지 않습니다 ([ADR 0017](docs/adr/0017-api-integration-test.md)).

@@ -15,13 +15,13 @@ final class DevicePersistenceMapper {
     }
 
     static DeviceJpaEntity toEntity(Device device) {
-        return new DeviceJpaEntity(device.tokenHash().value(), device.id().value(), device.userId().value(),
+        return new DeviceJpaEntity(device.id().value(), device.tokenHash().value(), device.userId().value(),
                 device.name().value(), device.registeredAt());
     }
 
     static Device toDomain(DeviceJpaEntity entity) {
         return new Device(
-                new DeviceId(entity.getDeviceId()),
+                new DeviceId(entity.getId()),
                 new DeviceTokenHash(entity.getTokenHash()),
                 new DiscordUserId(entity.getDiscordUserId()),
                 new DeviceName(entity.getName()),

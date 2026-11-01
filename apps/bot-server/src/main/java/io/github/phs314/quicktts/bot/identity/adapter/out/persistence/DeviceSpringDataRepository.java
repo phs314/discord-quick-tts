@@ -12,15 +12,15 @@ import org.springframework.transaction.annotation.Transactional;
  */
 interface DeviceSpringDataRepository extends JpaRepository<DeviceJpaEntity, String> {
 
-    Optional<DeviceJpaEntity> findByDeviceId(String deviceId);
+    Optional<DeviceJpaEntity> findByTokenHash(String tokenHash);
 
     List<DeviceJpaEntity> findByDiscordUserIdOrderByRegisteredAt(long discordUserId);
 
     /** 지운 줄 수를 돌려준다. 한 문장으로 지워서 엔티티를 먼저 읽지 않는다. */
     @Transactional
     @Modifying
-    @Query("delete from DeviceJpaEntity d where d.deviceId = :deviceId")
-    int deleteByDeviceId(String deviceId);
+    @Query("delete from DeviceJpaEntity d where d.id = :id")
+    int deleteDeviceById(String id);
 
     @Transactional
     @Modifying
