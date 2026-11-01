@@ -8,9 +8,9 @@ import io.github.phs314.quicktts.common.ApiErrorCode;
 /**
  * 문장을 보낸 사용자가 봇이 있는 서버의 음성 채널에 들어가 있지 않을 때 던진다.
  */
-public class SpeakerNotInVoiceChannelException extends BusinessException {
+public class AuthorNotInVoiceChannelException extends BusinessException {
 
-    public SpeakerNotInVoiceChannelException(DiscordUserId speaker) {
-        super(ErrorKind.CONFLICT, ApiErrorCode.SPEAKER_NOT_IN_VOICE_CHANNEL, "사용자 " + speaker.value() + " 가 음성 채널에 없습니다.");
+    public AuthorNotInVoiceChannelException(DiscordUserId author) {
+        super(ErrorKind.CONFLICT, ApiErrorCode.AUTHOR_NOT_IN_VOICE_CHANNEL, "사용자 " + author.value() + " 가 음성 채널에 없습니다.");
     }
 }

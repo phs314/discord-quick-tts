@@ -57,7 +57,7 @@ public class UnlinkCommandListener extends ListenerAdapter implements DiscordSla
             return;
         }
         List<DeviceDto> devices = getDevicesUseCase.getDevices(
-                new GetDevicesQuery(ownerOf(event.getUser().getIdLong())));
+                new GetDevicesQuery(userIdOf(event.getUser().getIdLong())));
         if (devices.isEmpty()) {
             event.reply("연결된 PC 가 없습니다.").setEphemeral(true).queue();
             return;
@@ -80,13 +80,13 @@ public class UnlinkCommandListener extends ListenerAdapter implements DiscordSla
         if (!MENU_ID.equals(event.getComponentId())) {
             return;
         }
-        DiscordUserId owner = ownerOf(event.getUser().getIdLong());
+        DiscordUserId userId = userIdOf(event.getUser().getIdLong());
         String selected = event.getValues().getFirst();
 
         String result;
         if (ALL_DEVICES.equals(selected)) {
-            result = "PC " + unlinkAllDevicesUseCase.unlinkAll(new UnlinkAllDevicesCommand(owner)) + "대의 연결을 끊었습니다.";
-        } else if (unlinkDeviceUseCase.unlink(new UnlinkDeviceCommand(owner, new DeviceId(selected)))) {
+            result = "PC " + unlinkAllDevicesUseCase.unlinkAll(new UnlinkAllDevicesCommand(userId)) + "대의 연결을 끊었습니다.";
+        } else if (unlinkDeviceUseCase.unlink(new UnlinkDeviceCommand(userId, new DeviceId(selected)))) {
             result = "연결을 끊었습니다. 그 PC 에서 다시 쓰려면 `/연결` 로 코드를 받으세요.";
         } else {
             result = "이미 끊긴 PC 입니다.";
@@ -94,7 +94,7 @@ public class UnlinkCommandListener extends ListenerAdapter implements DiscordSla
         event.editMessage(result).setComponents(List.of()).queue();
     }
 
-    private static DiscordUserId ownerOf(long discordUserId) {
+    private static DiscordUserId userIdOf(long discordUserId) {
         return new DiscordUserId(discordUserId);
     }
 }

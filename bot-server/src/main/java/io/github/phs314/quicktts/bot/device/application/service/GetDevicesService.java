@@ -16,6 +16,6 @@ public class GetDevicesService implements GetDevicesUseCase {
 
     @Override
     public List<DeviceDto> getDevices(GetDevicesQuery query) {
-        return devicePort.findByOwner(query.owner()).stream().map(DeviceDto::from).toList();
+        return devicePort.findByUserId(query.userId()).stream().map(DeviceDto::from).toList();
     }
 }

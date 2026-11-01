@@ -88,7 +88,7 @@ class ExistingH2DatabaseMigrationTest {
     }
 
     private static void assertKeepsDeviceAndVoice(AnnotationConfigApplicationContext context) {
-        assertThat(context.getBean(DevicePersistenceAdapter.class).findByOwner(OWNER))
+        assertThat(context.getBean(DevicePersistenceAdapter.class).findByUserId(OWNER))
                 .singleElement()
                 .satisfies(device -> assertThat(device.id().value()).isEqualTo("old-device-id"));
         var voices = context.getBean(VoicePreferencePersistenceAdapter.class);

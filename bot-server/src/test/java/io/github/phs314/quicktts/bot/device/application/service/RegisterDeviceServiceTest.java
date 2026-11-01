@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Test;
 
 class RegisterDeviceServiceTest {
 
-    private static final DiscordUserId OWNER = new DiscordUserId(42L);
+    private static final DiscordUserId USER = new DiscordUserId(42L);
     private static final Instant NOW = Instant.parse("2026-10-05T00:00:00Z");
     private static final DeviceName PC = new DeviceName("현수-PC");
 
@@ -34,7 +34,7 @@ class RegisterDeviceServiceTest {
 
         assertThat(devices.findByTokenHash(token.hash()))
                 .hasValueSatisfying(device -> {
-                    assertThat(device.owner()).isEqualTo(OWNER);
+                    assertThat(device.userId()).isEqualTo(USER);
                     assertThat(device.name()).isEqualTo(PC);
                 });
     }
@@ -68,7 +68,7 @@ class RegisterDeviceServiceTest {
     }
 
     private Pairing issuedPairing() {
-        Pairing pairing = Pairing.issue(OWNER, NOW);
+        Pairing pairing = Pairing.issue(USER, NOW);
         pairings.save(pairing);
         return pairing;
     }

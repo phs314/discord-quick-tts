@@ -14,17 +14,17 @@ public class Pairing {
     public static final Duration VALID_FOR = Duration.ofMinutes(5);
 
     private final PairingCode code;
-    private final DiscordUserId owner;
+    private final DiscordUserId userId;
     private final Instant expiresAt;
 
-    private Pairing(PairingCode code, DiscordUserId owner, Instant expiresAt) {
+    private Pairing(PairingCode code, DiscordUserId userId, Instant expiresAt) {
         this.code = Objects.requireNonNull(code);
-        this.owner = Objects.requireNonNull(owner);
+        this.userId = Objects.requireNonNull(userId);
         this.expiresAt = Objects.requireNonNull(expiresAt);
     }
 
-    public static Pairing issue(DiscordUserId owner, Instant now) {
-        return new Pairing(PairingCode.generate(), owner, now.plus(VALID_FOR));
+    public static Pairing issue(DiscordUserId userId, Instant now) {
+        return new Pairing(PairingCode.generate(), userId, now.plus(VALID_FOR));
     }
 
     /**
@@ -36,7 +36,7 @@ public class Pairing {
         if (isExpired(now)) {
             throw new InvalidPairingCodeException();
         }
-        return owner;
+        return userId;
     }
 
     public boolean isExpired(Instant now) {
@@ -47,8 +47,8 @@ public class Pairing {
         return code;
     }
 
-    public DiscordUserId owner() {
-        return owner;
+    public DiscordUserId userId() {
+        return userId;
     }
 
     @Override
@@ -63,6 +63,6 @@ public class Pairing {
 
     @Override
     public String toString() {
-        return "Pairing[owner=" + owner + ", expiresAt=" + expiresAt + "]";
+        return "Pairing[userId=" + userId + ", expiresAt=" + expiresAt + "]";
     }
 }

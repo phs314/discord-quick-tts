@@ -23,7 +23,7 @@ import org.springframework.context.annotation.AnnotationConfigApplicationContext
 @EnumSource(TestDatabase.class)
 class DevicePersistenceAdapterTest {
 
-    private static final DiscordUserId OWNER = new DiscordUserId(123456789012345678L);
+    private static final DiscordUserId USER = new DiscordUserId(123456789012345678L);
     private static final DiscordUserId OTHER = new DiscordUserId(987654321098765432L);
     private static final Instant NOW = Instant.now().truncatedTo(ChronoUnit.MILLIS);
 
@@ -49,7 +49,7 @@ class DevicePersistenceAdapterTest {
 
     @Test
     void 저장한_기기를_토큰_해시로_찾는다() {
-        Device device = device(OWNER, "a", "현수-PC", NOW);
+        Device device = device(USER, "a", "현수-PC", NOW);
 
         repository.save(device);
 
@@ -59,21 +59,21 @@ class DevicePersistenceAdapterTest {
     }
 
     @Test
-    void 주인의_기기만_등록한_순서대로_돌려준다() {
-        Device laptop = device(OWNER, "b", "노트북", NOW.plusSeconds(10));
-        Device desktop = device(OWNER, "a", "데스크톱", NOW);
+    void 그_사용자의_기기만_등록한_순서대로_돌려준다() {
+        Device laptop = device(USER, "b", "노트북", NOW.plusSeconds(10));
+        Device desktop = device(USER, "a", "데스크톱", NOW);
         repository.save(laptop);
         repository.save(desktop);
         repository.save(device(OTHER, "c", "남의-PC", NOW));
 
-        assertThat(repository.findByOwner(OWNER))
+        assertThat(repository.findByUserId(USER))
                 .usingRecursiveFieldByFieldElementComparator()
                 .containsExactly(desktop, laptop);
     }
 
     @Test
     void ID_로_찾고_지운다() {
-        Device device = device(OWNER, "a", "현수-PC", NOW);
+        Device device = device(USER, "a", "현수-PC", NOW);
         repository.save(device);
 
         assertThat(repository.findById(device.id())).get().usingRecursiveComparison().isEqualTo(device);
@@ -83,16 +83,16 @@ class DevicePersistenceAdapterTest {
     }
 
     @Test
-    void 주인의_기기를_모두_지우고_지운_수를_돌려준다() {
-        repository.save(device(OWNER, "a", "데스크톱", NOW));
-        repository.save(device(OWNER, "b", "노트북", NOW));
+    void 그_사용자의_기기를_모두_지우고_지운_수를_돌려준다() {
+        repository.save(device(USER, "a", "데스크톱", NOW));
+        repository.save(device(USER, "b", "노트북", NOW));
         repository.save(device(OTHER, "c", "남의-PC", NOW));
 
-        assertThat(repository.deleteAllByOwner(OWNER)).isEqualTo(2);
-        assertThat(repository.findByOwner(OTHER)).hasSize(1);
+        assertThat(repository.deleteAllByUserId(USER)).isEqualTo(2);
+        assertThat(repository.findByUserId(OTHER)).hasSize(1);
     }
 
-    private static Device device(DiscordUserId owner, String hashSeed, String name, Instant registeredAt) {
-        return new Device(DeviceId.generate(), new DeviceTokenHash(hashSeed.repeat(64)), owner, new DeviceName(name), registeredAt);
+    private static Device device(DiscordUserId userId, String hashSeed, String name, Instant registeredAt) {
+        return new Device(DeviceId.generate(), new DeviceTokenHash(hashSeed.repeat(64)), userId, new DeviceName(name), registeredAt);
     }
 }

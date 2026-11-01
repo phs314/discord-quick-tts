@@ -1,14 +1,14 @@
 package io.github.phs314.quicktts.bot.speech.application.port.in;
 
-import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindMyVoiceChannelQuery;
+import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindCurrentUserVoiceChannelQuery;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import java.util.Optional;
 
 /**
  * 사용자가 quick chat 을 보내면 어느 음성 채널에서 읽힐지 미리 알려 준다.
  */
-public interface FindMyVoiceChannelUseCase {
+public interface FindCurrentUserVoiceChannelUseCase {
 
     /** 봇이 있는 서버의 음성 채널에 없으면 비어 있다. */
-    Optional<VoiceChannelDetails> findMyVoiceChannel(FindMyVoiceChannelQuery query);
+    Optional<VoiceChannelDetails> findCurrentUserVoiceChannel(FindCurrentUserVoiceChannelQuery query);
 }

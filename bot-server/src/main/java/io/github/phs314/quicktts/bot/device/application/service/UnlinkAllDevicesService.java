@@ -16,6 +16,6 @@ public class UnlinkAllDevicesService implements UnlinkAllDevicesUseCase {
     @Override
     @Transactional
     public int unlinkAll(UnlinkAllDevicesCommand command) {
-        return devicePort.deleteAllByOwner(command.owner());
+        return devicePort.deleteAllByUserId(command.userId());
     }
 }

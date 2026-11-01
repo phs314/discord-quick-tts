@@ -16,14 +16,14 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 /**
- * 기기 토큰으로 주인을 알아내 스프링 시큐리티에 싣는지, 토큰이 맞지 않으면 아무것도 싣지 않고 넘기는지 확인한다.
+ * 기기 토큰으로 연결한 사용자를 알아내 스프링 시큐리티에 싣는지, 토큰이 맞지 않으면 아무것도 싣지 않고 넘기는지 확인한다.
  */
 class DeviceTokenAuthenticationFilterTest {
 
     private static final String TOKEN = "good-token";
-    private static final DiscordUserId OWNER = new DiscordUserId(42L);
+    private static final DiscordUserId USER = new DiscordUserId(42L);
     private static final AuthenticateDeviceUseCase AUTHENTICATE =
-            query -> query.rawDeviceToken().equals(TOKEN) ? Optional.of(OWNER) : Optional.empty();
+            query -> query.rawDeviceToken().equals(TOKEN) ? Optional.of(USER) : Optional.empty();
 
     private final DeviceTokenAuthenticationFilter filter = new DeviceTokenAuthenticationFilter(AUTHENTICATE);
 
@@ -33,12 +33,12 @@ class DeviceTokenAuthenticationFilterTest {
     }
 
     @Test
-    void 맞는_기기_토큰이면_주인을_싣는다() throws Exception {
+    void 맞는_기기_토큰이면_연결한_사용자를_싣는다() throws Exception {
         MockFilterChain chain = filter(QuickTtsApi.BEARER_PREFIX + TOKEN);
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         assertThat(authentication.isAuthenticated()).isTrue();
-        assertThat(authentication.getPrincipal()).isEqualTo(OWNER);
+        assertThat(authentication.getPrincipal()).isEqualTo(USER);
         assertThat(chain.getRequest()).isNotNull();
     }
 

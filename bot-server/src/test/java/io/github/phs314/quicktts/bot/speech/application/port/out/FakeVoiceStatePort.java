@@ -12,7 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 디스코드 음성 상태 대신 쓰는 대역. 사용자를 음성 채널에 넣고 빼면 그 채널에 사람이 있는지가 바뀐다.
  * 통합 테스트에서는 웹 서버 스레드가 읽으므로 여러 스레드에서 읽고 써도 된다.
  */
-public class FakeVoiceChannelLocatorPort implements VoiceChannelLocatorPort {
+public class FakeVoiceStatePort implements VoiceStatePort {
 
     private final Map<DiscordUserId, VoiceChannelDetails> speakers = new ConcurrentHashMap<>();
     private final Map<VoiceChannel, VoiceChannelDetails> channels = new ConcurrentHashMap<>();
@@ -38,17 +38,17 @@ public class FakeVoiceChannelLocatorPort implements VoiceChannelLocatorPort {
     }
 
     @Override
-    public Optional<VoiceChannelDetails> findCurrentChannel(DiscordUserId user) {
+    public Optional<VoiceChannelDetails> findUserVoiceChannel(DiscordUserId user) {
         return Optional.ofNullable(speakers.get(user));
     }
 
     @Override
-    public Optional<VoiceChannelDetails> findDetails(VoiceChannel channel) {
+    public Optional<VoiceChannelDetails> findChannelDetails(VoiceChannel channel) {
         return Optional.ofNullable(channels.get(channel));
     }
 
     @Override
-    public boolean hasPeople(VoiceChannel channel) {
+    public boolean hasHumanMembers(VoiceChannel channel) {
         return channelsWithPeople.contains(channel);
     }
 }

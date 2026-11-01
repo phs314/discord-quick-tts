@@ -17,10 +17,10 @@ import io.github.phs314.quicktts.bot.speech.application.port.in.ChangeVoiceUseCa
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.ChangeVoiceCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechSynthesizerPort;
-import io.github.phs314.quicktts.bot.speech.application.port.out.FakeVoiceChannelLocatorPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.FakeVoiceStatePort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizerPort;
-import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocatorPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceStatePort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import io.github.phs314.quicktts.common.ApiErrorCode;
@@ -59,7 +59,7 @@ import org.springframework.test.web.servlet.client.RestTestClient;
 @MockitoBean(types = {JDA.class, DiscordListenerRegistrar.class, BotOwnerPort.class, JoinedGuildPort.class})
 class QuickTtsApiIntegrationTest {
 
-    private static final FakeVoiceChannelLocatorPort VOICE_CHANNELS = new FakeVoiceChannelLocatorPort();
+    private static final FakeVoiceStatePort VOICE_CHANNELS = new FakeVoiceStatePort();
     private static final FakeSpeechPlayerPort PLAYER = new FakeSpeechPlayerPort();
     private static final FakeSpeechSynthesizerPort TTS = new FakeSpeechSynthesizerPort();
 
@@ -67,7 +67,7 @@ class QuickTtsApiIntegrationTest {
     private static final AtomicLong IDS = new AtomicLong(1_000);
 
     @TestBean(methodName = "voiceChannels")
-    VoiceChannelLocatorPort voiceChannelLocatorPort;
+    VoiceStatePort voiceStatePort;
 
     @TestBean(methodName = "player")
     SpeechPlayerPort speechPlayerPort;
@@ -92,7 +92,7 @@ class QuickTtsApiIntegrationTest {
 
     RestTestClient client;
 
-    static VoiceChannelLocatorPort voiceChannels() {
+    static VoiceStatePort voiceChannels() {
         return VOICE_CHANNELS;
     }
 
@@ -220,7 +220,7 @@ class QuickTtsApiIntegrationTest {
 
         sendQuickChat(token, "안녕")
                 .expectStatus().isEqualTo(409)
-                .expectBody().jsonPath("$.code").isEqualTo(ApiErrorCode.SPEAKER_NOT_IN_VOICE_CHANNEL);
+                .expectBody().jsonPath("$.code").isEqualTo(ApiErrorCode.AUTHOR_NOT_IN_VOICE_CHANNEL);
     }
 
     @Test
@@ -289,8 +289,8 @@ class QuickTtsApiIntegrationTest {
     }
 
     /** 디스코드 /연결 로 코드를 받아 클라이언트 첫 실행처럼 등록하고 기기 토큰을 돌려준다. */
-    private String registerDevice(DiscordUserId owner) {
-        String code = issuePairingCodeUseCase.issue(new IssuePairingCodeCommand(owner)).code().display();
+    private String registerDevice(DiscordUserId userId) {
+        String code = issuePairingCodeUseCase.issue(new IssuePairingCodeCommand(userId)).code().display();
         DeviceRegistrationResponse response = postDevice(code)
                 .expectStatus().isCreated()
                 .expectBody(DeviceRegistrationResponse.class)

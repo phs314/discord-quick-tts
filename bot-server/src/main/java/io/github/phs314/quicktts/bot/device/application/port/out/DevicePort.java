@@ -14,7 +14,7 @@ public interface DevicePort {
     Optional<Device> findByTokenHash(DeviceTokenHash tokenHash);
 
     /** 등록한 순서대로 돌려준다. */
-    List<Device> findByOwner(DiscordUserId owner);
+    List<Device> findByUserId(DiscordUserId userId);
 
     Optional<Device> findById(DeviceId id);
 
@@ -22,5 +22,5 @@ public interface DevicePort {
     boolean delete(DeviceId id);
 
     /** 지운 기기 수를 돌려준다. */
-    int deleteAllByOwner(DiscordUserId owner);
+    int deleteAllByUserId(DiscordUserId userId);
 }

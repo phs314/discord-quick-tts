@@ -31,8 +31,8 @@ public class DevicePersistenceAdapter implements DevicePort {
     }
 
     @Override
-    public List<Device> findByOwner(DiscordUserId owner) {
-        return deviceSpringDataRepository.findByDiscordUserIdOrderByRegisteredAt(owner.value()).stream()
+    public List<Device> findByUserId(DiscordUserId userId) {
+        return deviceSpringDataRepository.findByDiscordUserIdOrderByRegisteredAt(userId.value()).stream()
                 .map(DevicePersistenceMapper::toDomain)
                 .toList();
     }
@@ -49,7 +49,7 @@ public class DevicePersistenceAdapter implements DevicePort {
     }
 
     @Override
-    public int deleteAllByOwner(DiscordUserId owner) {
-        return deviceSpringDataRepository.deleteByDiscordUserId(owner.value());
+    public int deleteAllByUserId(DiscordUserId userId) {
+        return deviceSpringDataRepository.deleteByDiscordUserId(userId.value());
     }
 }

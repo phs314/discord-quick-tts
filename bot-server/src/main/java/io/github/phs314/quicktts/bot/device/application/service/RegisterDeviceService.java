@@ -28,10 +28,10 @@ public class RegisterDeviceService implements RegisterDeviceUseCase {
     public DeviceToken register(RegisterDeviceCommand command) {
         Instant now = clock.instant();
         Pairing pairing = pairingPort.findAndDelete(command.code()).orElseThrow(InvalidPairingCodeException::new);
-        DiscordUserId owner = pairing.redeem(now);
+        DiscordUserId userId = pairing.redeem(now);
 
         DeviceToken token = DeviceToken.generate();
-        devicePort.save(Device.register(token, owner, command.name(), now));
+        devicePort.save(Device.register(token, userId, command.name(), now));
         return token;
     }
 }

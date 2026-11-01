@@ -28,11 +28,11 @@ public class BotVoiceState {
      * 이 음성 채널에서 읽으러 가도 되는지 (먼저 온 채널 우선). 채널이 없거나, 이미 그 채널이거나,
      * 봇이 있는 채널에 사람이 아무도 없으면 된다.
      *
-     * @param hasPeople 음성 채널에 봇 말고 사람이 한 명이라도 있는지
+     * @param hasHumanMembers 음성 채널에 봇 말고 사람이 한 명이라도 있는지
      */
-    public boolean canJoin(VoiceChannel requested, Predicate<VoiceChannel> hasPeople) {
+    public boolean canJoin(VoiceChannel requested, Predicate<VoiceChannel> hasHumanMembers) {
         requireSameGuild(requested);
-        return channel == null || channel.equals(requested) || !hasPeople.test(channel);
+        return channel == null || channel.equals(requested) || !hasHumanMembers.test(channel);
     }
 
     /**
@@ -40,8 +40,8 @@ public class BotVoiceState {
      *
      * @throws IllegalStateException 같은 디스코드 서버의 다른 채널에 사람이 남아 있어서 옮길 수 없을 때
      */
-    public void join(VoiceChannel requested, Predicate<VoiceChannel> hasPeople) {
-        if (!canJoin(requested, hasPeople)) {
+    public void join(VoiceChannel requested, Predicate<VoiceChannel> hasHumanMembers) {
+        if (!canJoin(requested, hasHumanMembers)) {
             throw new IllegalStateException("봇이 같은 디스코드 서버의 다른 음성 채널에서 쓰이고 있습니다: " + channel);
         }
         channel = requested;
@@ -52,8 +52,8 @@ public class BotVoiceState {
      *
      * @return 나갔으면 true. 봇을 음성 채널에서 내보내야 한다
      */
-    public boolean leaveIfEmpty(Predicate<VoiceChannel> hasPeople) {
-        if (channel == null || hasPeople.test(channel)) {
+    public boolean leaveIfEmpty(Predicate<VoiceChannel> hasHumanMembers) {
+        if (channel == null || hasHumanMembers.test(channel)) {
             return false;
         }
         channel = null;

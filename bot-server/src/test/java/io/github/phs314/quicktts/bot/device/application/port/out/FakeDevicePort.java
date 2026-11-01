@@ -19,9 +19,9 @@ public class FakeDevicePort implements DevicePort {
     private final Map<DeviceTokenHash, Device> byHash = new HashMap<>();
 
     /** 연결 코드를 거치지 않고 기기를 바로 등록해 두고, 그 기기 토큰을 돌려준다. */
-    public DeviceToken registered(DiscordUserId owner, DeviceName name, Instant now) {
+    public DeviceToken registered(DiscordUserId userId, DeviceName name, Instant now) {
         DeviceToken token = DeviceToken.generate();
-        save(Device.register(token, owner, name, now));
+        save(Device.register(token, userId, name, now));
         return token;
     }
 
@@ -41,9 +41,9 @@ public class FakeDevicePort implements DevicePort {
     }
 
     @Override
-    public List<Device> findByOwner(DiscordUserId owner) {
+    public List<Device> findByUserId(DiscordUserId userId) {
         return byHash.values().stream()
-                .filter(device -> device.owner().equals(owner))
+                .filter(device -> device.userId().equals(userId))
                 .sorted(Comparator.comparing(Device::registeredAt))
                 .toList();
     }
@@ -59,9 +59,9 @@ public class FakeDevicePort implements DevicePort {
     }
 
     @Override
-    public int deleteAllByOwner(DiscordUserId owner) {
+    public int deleteAllByUserId(DiscordUserId userId) {
         int before = byHash.size();
-        byHash.values().removeIf(device -> device.owner().equals(owner));
+        byHash.values().removeIf(device -> device.userId().equals(userId));
         return before - byHash.size();
     }
 }

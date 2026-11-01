@@ -1,10 +1,10 @@
 package io.github.phs314.quicktts.bot.speech.adapter.in.web;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
-import io.github.phs314.quicktts.bot.speech.application.port.in.FindMyVoiceChannelUseCase;
+import io.github.phs314.quicktts.bot.speech.application.port.in.FindCurrentUserVoiceChannelUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
-import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindMyVoiceChannelQuery;
+import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindCurrentUserVoiceChannelQuery;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import io.github.phs314.quicktts.common.QuickChatRequest;
 import io.github.phs314.quicktts.common.QuickTtsApi;
@@ -27,21 +27,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class QuickChatController {
 
     private final SpeakQuickChatUseCase speakQuickChatUseCase;
-    private final FindMyVoiceChannelUseCase findMyVoiceChannelUseCase;
+    private final FindCurrentUserVoiceChannelUseCase findCurrentUserVoiceChannelUseCase;
 
     @PostMapping(QuickTtsApi.QUICK_CHAT_PATH)
     public ResponseEntity<Void> quickChat(
-            @AuthenticationPrincipal DiscordUserId speaker,
+            @AuthenticationPrincipal DiscordUserId author,
             @RequestBody QuickChatRequest request) {
-        SpeakQuickChatCommand command = QuickChatWebMapper.toCommand(speaker, request);
+        SpeakQuickChatCommand command = QuickChatWebMapper.toCommand(author, request);
         speakQuickChatUseCase.speak(command);
         return ResponseEntity.accepted().build();
     }
 
     @GetMapping(QuickTtsApi.MY_VOICE_CHANNEL_PATH)
     public ResponseEntity<VoiceChannelResponse> myVoiceChannel(@AuthenticationPrincipal DiscordUserId user) {
-        FindMyVoiceChannelQuery query = QuickChatWebMapper.toQuery(user);
-        Optional<VoiceChannelDetails> details = findMyVoiceChannelUseCase.findMyVoiceChannel(query);
+        FindCurrentUserVoiceChannelQuery query = QuickChatWebMapper.toQuery(user);
+        Optional<VoiceChannelDetails> details = findCurrentUserVoiceChannelUseCase.findCurrentUserVoiceChannel(query);
         if (details.isEmpty()) {
             return ResponseEntity.noContent().build();
         }

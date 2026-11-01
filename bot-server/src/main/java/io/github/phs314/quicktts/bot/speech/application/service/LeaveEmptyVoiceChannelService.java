@@ -5,7 +5,7 @@ import io.github.phs314.quicktts.bot.speech.application.port.in.LeaveEmptyVoiceC
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.LeaveIfEmptyCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.out.BotVoiceStatePort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
-import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocatorPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceStatePort;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,14 +14,14 @@ import org.springframework.stereotype.Service;
 public class LeaveEmptyVoiceChannelService implements LeaveEmptyVoiceChannelUseCase {
 
     private final BotVoiceStatePort botVoiceStatePort;
-    private final VoiceChannelLocatorPort voiceChannelLocatorPort;
+    private final VoiceStatePort voiceStatePort;
     private final SpeechPlayerPort speechPlayerPort;
 
     @Override
     public void leaveIfEmpty(LeaveIfEmptyCommand command) {
         GuildId guildId = command.guildId();
         botVoiceStatePort.withLockedState(guildId, state -> {
-            if (state.leaveIfEmpty(voiceChannelLocatorPort::hasPeople)) {
+            if (state.leaveIfEmpty(voiceStatePort::hasHumanMembers)) {
                 speechPlayerPort.leave(guildId);
             }
         });

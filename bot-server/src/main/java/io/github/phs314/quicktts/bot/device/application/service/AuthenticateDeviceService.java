@@ -24,6 +24,6 @@ public class AuthenticateDeviceService implements AuthenticateDeviceUseCase {
             return Optional.empty();
         }
         DeviceTokenHash tokenHash = new DeviceToken(rawDeviceToken).hash();
-        return devicePort.findByTokenHash(tokenHash).map(Device::owner);
+        return devicePort.findByTokenHash(tokenHash).map(Device::userId);
     }
 }

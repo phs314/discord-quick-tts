@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 class GetDevicesServiceTest {
 
-    private static final DiscordUserId OWNER = new DiscordUserId(42L);
+    private static final DiscordUserId USER = new DiscordUserId(42L);
     private static final DiscordUserId OTHER = new DiscordUserId(7L);
     private static final Instant NOW = Instant.parse("2026-10-05T00:00:00Z");
     private static final DeviceName PC = new DeviceName("현수-PC");
@@ -22,9 +22,9 @@ class GetDevicesServiceTest {
 
     @Test
     void 내_기기_목록에는_내가_등록한_PC_만_이름과_함께_보인다() {
-        devices.registered(OWNER, PC, NOW);
+        devices.registered(USER, PC, NOW);
         devices.registered(OTHER, new DeviceName("남의-PC"), NOW);
 
-        assertThat(service.getDevices(new GetDevicesQuery(OWNER))).extracting(DeviceDto::name).containsExactly(PC);
+        assertThat(service.getDevices(new GetDevicesQuery(USER))).extracting(DeviceDto::name).containsExactly(PC);
     }
 }
