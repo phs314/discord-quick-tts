@@ -179,8 +179,8 @@ public class QuickTtsApp extends Application {
             hide();
             return;
         }
-        if (text.length() > QuickTtsApi.MAX_TEXT_LENGTH) {
-            trayMenu.showError("문장이 너무 깁니다. (최대 " + QuickTtsApi.MAX_TEXT_LENGTH + "자)");
+        if (text.length() > QuickTtsApi.MAX_CONTENT_LENGTH) {
+            trayMenu.showError("문장이 너무 깁니다. (최대 " + QuickTtsApi.MAX_CONTENT_LENGTH + "자)");
             return;
         }
         hide();

@@ -148,7 +148,7 @@ class QuickChatControllerTest {
         mockMvc.perform(post(QuickTtsApi.QUICK_CHAT_PATH)
                         .header(HttpHeaders.AUTHORIZATION, QuickTtsApi.BEARER_PREFIX + TOKEN)
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content("{\"text\":"))
+                        .content("{\"content\":"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.code").value(ApiErrorCode.INVALID_REQUEST));
     }
@@ -187,6 +187,6 @@ class QuickChatControllerTest {
     private static MockHttpServletRequestBuilder quickChat(String text) {
         return post(QuickTtsApi.QUICK_CHAT_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"text\":\"" + text + "\"}");
+                .content("{\"content\":\"" + text + "\"}");
     }
 }

@@ -208,7 +208,7 @@ class QuickTtsApiIntegrationTest {
         sendQuickChat(token, " ")
                 .expectStatus().isBadRequest()
                 .expectBody().jsonPath("$.code").isEqualTo(ApiErrorCode.INVALID_VALUE);
-        sendQuickChat(token, "가".repeat(QuickTtsApi.MAX_TEXT_LENGTH + 1))
+        sendQuickChat(token, "가".repeat(QuickTtsApi.MAX_CONTENT_LENGTH + 1))
                 .expectStatus().isBadRequest()
                 .expectBody().jsonPath("$.code").isEqualTo(ApiErrorCode.INVALID_VALUE);
         assertThat(PLAYER.actions()).isEmpty();

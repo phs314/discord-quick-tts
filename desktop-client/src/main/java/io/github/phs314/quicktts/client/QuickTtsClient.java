@@ -97,7 +97,7 @@ class QuickTtsClient {
         return switch (error.code()) {
             case ApiErrorCode.INVALID_DEVICE_TOKEN -> new InvalidDeviceTokenException();
             case ApiErrorCode.INVALID_VALUE -> new QuickTtsClientException(error.detailOr(
-                    "문장이 비어 있거나 너무 깁니다. (최대 " + QuickTtsApi.MAX_TEXT_LENGTH + "자)"));
+                    "문장이 비어 있거나 너무 깁니다. (최대 " + QuickTtsApi.MAX_CONTENT_LENGTH + "자)"));
             case ApiErrorCode.AUTHOR_NOT_IN_VOICE_CHANNEL ->
                     new QuickTtsClientException("봇이 있는 서버의 음성 채널에 먼저 들어가 주세요.");
             case ApiErrorCode.VOICE_CHANNEL_IN_USE ->
