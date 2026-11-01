@@ -1,0 +1,11 @@
+package io.github.phs314.quicktts.api;
+
+/**
+ * quick chat 을 보내면 읽힐 음성 채널.
+ *
+ * @param guildName    디스코드 서버 이름 (디스코드 API 의 guild)
+ * @param guildIconUrl 디스코드 서버 아이콘 주소. 아이콘이 없는 서버면 null
+ * @param channelName  음성 채널 이름
+ */
+public record VoiceChannelResponse(String guildName, String guildIconUrl, String channelName) {
+}
