@@ -136,6 +136,7 @@
 | ADR | 제목 | 상태 |
 | --- | --- | --- |
 | [0036](0036-health-and-metrics-with-actuator.md) | 상태 확인과 지표는 Actuator 로 보고, 디스코드 연결과 TTS 를 거기에 더한다 | 일부 대체됨 (ADR 0046) |
+| [0053](0053-quick-chat-speed-metrics.md) | 핵심 약속 "빠름" 을 quick chat 지표 두 개로 잰다 | 채택 |
 | [0037](0037-cache-tts-results.md) | 엔진이 만든 음성은 스프링 캐시(Caffeine)로 기억한다 | 채택 |
 
 ### 데스크톱 클라이언트와 배포

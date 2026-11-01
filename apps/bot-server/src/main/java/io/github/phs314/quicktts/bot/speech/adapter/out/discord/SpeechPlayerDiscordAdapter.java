@@ -16,6 +16,8 @@ import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPor
 import io.github.phs314.quicktts.bot.speech.domain.vo.Audio;
 import io.github.phs314.quicktts.bot.speech.domain.vo.ChannelId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.Timer;
 import jakarta.annotation.PreDestroy;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,9 +33,12 @@ import org.springframework.stereotype.Component;
 /**
  * 디스코드 음성 채널에 들어가고 나가며, 음성 바이트를 메모리에서 바로 LavaPlayer 트랙으로 만들어 재생한다.
  * 파일을 거치지 않으므로 트랙은 부른 자리에서 바로 재생 순서에 들어간다.
+ * 순서에 들어온 문장이 앞 문장을 기다린 시간을 {@value #QUEUE_WAIT_METRIC} 지표로 잰다 (ADR 0053).
  */
 @Component
 public class SpeechPlayerDiscordAdapter implements SpeechPlayerPort {
+
+    static final String QUEUE_WAIT_METRIC = "quicktts.speech.queue.wait";
 
     private static final Logger log = LoggerFactory.getLogger(SpeechPlayerDiscordAdapter.class);
 
@@ -43,9 +48,11 @@ public class SpeechPlayerDiscordAdapter implements SpeechPlayerPort {
     private final ShardManager shardManager;
     private final AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
     private final Map<GuildId, GuildSpeechQueue> queues = new ConcurrentHashMap<>();
+    private final Timer queueWaitTimer;
 
-    public SpeechPlayerDiscordAdapter(ShardManager shardManager) {
+    public SpeechPlayerDiscordAdapter(ShardManager shardManager, MeterRegistry meterRegistry) {
         this.shardManager = shardManager;
+        this.queueWaitTimer = meterRegistry.timer(QUEUE_WAIT_METRIC);
     }
 
     /** 봇 서버가 꺼질 때 LavaPlayer 의 재생 스레드를 멈춘다. */
@@ -109,7 +116,7 @@ public class SpeechPlayerDiscordAdapter implements SpeechPlayerPort {
     }
 
     private GuildSpeechQueue queueOf(GuildId guildId) {
-        return queues.computeIfAbsent(guildId, id -> new GuildSpeechQueue(playerManager.createPlayer()));
+        return queues.computeIfAbsent(guildId, id -> new GuildSpeechQueue(playerManager.createPlayer(), queueWaitTimer));
     }
 
     /**

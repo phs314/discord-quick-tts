@@ -30,6 +30,7 @@ import io.github.phs314.quicktts.bot.speech.application.port.in.dto.VoiceChannel
 import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindCurrentUserVoiceChannelQuery;
 import io.github.phs314.quicktts.bot.speech.domain.vo.ChannelId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -50,7 +51,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
  * 인증된 요청은 {@code Authorization: Bearer <기기 토큰>} 을 싣고, 그 토큰의 주인은 AUTHOR 다.
  */
 @WebMvcTest(QuickChatController.class)
-@Import(SecurityConfig.class)
+@Import({SecurityConfig.class, SimpleMeterRegistry.class})
 class QuickChatControllerTest {
 
     private static final DiscordUserId AUTHOR = new DiscordUserId(42L);
@@ -58,6 +59,9 @@ class QuickChatControllerTest {
 
     @Autowired
     MockMvc mockMvc;
+
+    @Autowired
+    SimpleMeterRegistry meterRegistry;
 
     @MockitoBean
     SpeakQuickChatUseCase speak;
@@ -73,6 +77,12 @@ class QuickChatControllerTest {
         given(authenticateDevice.authenticate(new AuthenticateDeviceQuery(TOKEN))).willReturn(Optional.of(AUTHOR));
     }
 
+    /** 테스트끼리 스프링 컨텍스트를 같이 쓰므로 지표도 테스트마다 비운다. */
+    @BeforeEach
+    void clearMetrics() {
+        meterRegistry.clear();
+    }
+
     @Test
     void 인증된_사람이_보낸_문장으로_받으면_202() throws Exception {
         sendQuickChat("안녕").andExpect(status().isAccepted());
@@ -80,6 +90,29 @@ class QuickChatControllerTest {
         ArgumentCaptor<SpeakQuickChatCommand> spoken = ArgumentCaptor.forClass(SpeakQuickChatCommand.class);
         verify(speak).speak(spoken.capture());
         assertThat(spoken.getValue().author()).isEqualTo(AUTHOR);
+    }
+
+    @Test
+    void 받고_재생_순서에_넣기까지_걸린_시간을_성공으로_잰다() throws Exception {
+        sendQuickChat("안녕").andExpect(status().isAccepted());
+
+        assertThat(speakTimerCount("success", QuickChatController.NO_ERROR)).isEqualTo(1);
+    }
+
+    @Test
+    void 실패하면_오류_코드와_함께_실패로_잰다() throws Exception {
+        willThrow(new AuthorNotInVoiceChannelException(AUTHOR)).given(speak).speak(any());
+        sendQuickChat("안녕").andExpect(status().isConflict());
+
+        assertThat(speakTimerCount("failure", ApiErrorCode.AUTHOR_NOT_IN_VOICE_CHANNEL)).isEqualTo(1);
+    }
+
+    @Test
+    void 예상하지_못한_실패는_unexpected_로_잰다() throws Exception {
+        willThrow(new IllegalStateException("고장")).given(speak).speak(any());
+        sendQuickChat("안녕").andExpect(status().isInternalServerError());
+
+        assertThat(speakTimerCount("failure", QuickChatController.UNEXPECTED_ERROR)).isEqualTo(1);
     }
 
     @Test
@@ -189,5 +222,12 @@ class QuickChatControllerTest {
         return post(QuickTtsApi.QUICK_CHAT_PATH)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("{\"content\":\"" + text + "\"}");
+    }
+
+    private long speakTimerCount(String outcome, String error) {
+        var timer = meterRegistry.find(QuickChatController.SPEAK_METRIC)
+                .tags("outcome", outcome, "error", error)
+                .timer();
+        return timer == null ? 0 : timer.count();
     }
 }
