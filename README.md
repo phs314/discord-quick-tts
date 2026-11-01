@@ -138,7 +138,7 @@ apps/bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │       ├── out/persistence/    허용 목록 저장소 (JPA 엔티티 + 매퍼)
 │       └── out/config/         허용 목록을 쓸지 설정 값 (GuildAllowlistProperties)
 ├── shared/                     공유 커널(domain/vo 의 DiscordUserId, GuildId, VoiceId, 예외 공통 부모 BusinessException)과 웹·디스코드 공통 예외 처리
-└── config/                     디스코드 토큰, ShardManager(디스코드 연결), 시계, 디스코드 리스너와 슬래시 명령 등록, 웹 보안 규칙, 디스코드 연결 상태 확인, 캐시 켜기
+└── config/                     디스코드 토큰, ShardManager(디스코드 연결), 시계, 디스코드 리스너와 슬래시 명령 등록, 웹 보안 규칙, API 문서(OpenAPI) 머리말, 디스코드 연결 상태 확인, 캐시 켜기
 ```
 
 `ArchitectureTest`(ArchUnit)가 빌드 때마다 다음 의존 규칙을 확인합니다. ArchUnit 은 무엇이 무엇을 알아도 되는지만 봅니다 ([ADR 0032](docs/adr/0032-archunit-checks-dependencies-only.md)).
@@ -175,6 +175,7 @@ apps/bot-server/src/main/java/io/github/phs314/quicktts/bot/
 - 기기 토큰은 서버에 SHA-256 해시로만 저장합니다. 연결 코드는 5분짜리 일회용이고 DB 에 두어서 서버를 다시 켜도 남습니다 ([ADR 0049](docs/adr/0049-store-pairings-in-database.md)).
 - DB 는 배포 서버가 MySQL, 이 PC 에서 띄우는 서버(개발, exe)가 H2 파일입니다. 스키마는 Flyway 마이그레이션(`apps/bot-server/src/main/resources/db/migration`)으로 관리하고, 저장소 테스트는 H2 와 MySQL 양쪽에서 돕니다 ([ADR 0016](docs/adr/0016-mysql-and-flyway.md)).
 - API 경로는 `/api/v1` 아래에 있습니다. 오류 응답은 ProblemDetail 에 `code` 속성(`ApiErrorCode`)을 실어 보내고, 클라이언트는 이 코드로 안내 문구를 고릅니다 ([ADR 0013](docs/adr/0013-api-versioning-and-error-codes.md)).
+- API 문서는 서버를 띄운 뒤 `/swagger-ui.html` (OpenAPI JSON 은 `/v3/api-docs`)에서 봅니다. 토큰 없이 열리고, 숨기려면 `QUICKTTS_API_DOCS_ENABLED=false` 로 둡니다 ([ADR 0054](docs/adr/0054-openapi-docs-with-springdoc.md)).
 - `QuickTtsApiIntegrationTest` 가 봇 서버를 통째로 띄워 `/api/v1` 을 HTTP 로 부르고 응답까지 확인합니다. 디스코드와 TTS 엔진만 출력 포트 대역으로 바꿔서 디스코드에 접속하지 않고 소리도 나지 않습니다 ([ADR 0017](docs/adr/0017-api-integration-test.md)).
 
 ## 준비물

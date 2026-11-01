@@ -117,6 +117,7 @@
 | [0017](0017-api-integration-test.md) | API 통합 테스트는 디스코드와 TTS 엔진만 출력 포트 대역으로 바꾼다 | 일부 대체됨 (ADR 0046) |
 | [0030](0030-web-mappers.md) | 웹 요청·응답 변환은 컨트롤러 옆 웹 매퍼가 맡는다 | 일부 대체됨 (ADR 0031, ADR 0032, ADR 0038) |
 | [0031](0031-device-token-authentication-with-spring-security.md) | 기기 토큰 인증은 스프링 시큐리티 필터가 맡는다 | 일부 대체됨 (ADR 0036) |
+| [0054](0054-openapi-docs-with-springdoc.md) | 웹 API 문서는 springdoc 으로 컨트롤러에서 만든다 | 채택 |
 
 ### 디스코드와 음성
 
