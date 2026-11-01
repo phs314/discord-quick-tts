@@ -18,11 +18,11 @@ import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import jakarta.annotation.PreDestroy;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
 import net.dv8tion.jda.api.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.api.managers.AudioManager;
+import net.dv8tion.jda.api.sharding.ShardManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -39,12 +39,12 @@ public class SpeechPlayerDiscordAdapter implements SpeechPlayerPort {
     /** 형식을 알아낼 때 LavaPlayer 가 로그와 트랙 정보에 쓰는 이름. 메모리의 음성이라 주소는 없다. */
     private static final AudioReference SPEECH = new AudioReference("quicktts-speech", "Quick TTS");
 
-    private final JDA jda;
+    private final ShardManager shardManager;
     private final AudioPlayerManager playerManager = new DefaultAudioPlayerManager();
     private final Map<GuildId, GuildSpeechQueue> queues = new ConcurrentHashMap<>();
 
-    public SpeechPlayerDiscordAdapter(JDA jda) {
-        this.jda = jda;
+    public SpeechPlayerDiscordAdapter(ShardManager shardManager) {
+        this.shardManager = shardManager;
     }
 
     /** 봇 서버가 꺼질 때 LavaPlayer 의 재생 스레드를 멈춘다. */
@@ -55,7 +55,7 @@ public class SpeechPlayerDiscordAdapter implements SpeechPlayerPort {
 
     @Override
     public void join(VoiceChannel channel) {
-        Guild guild = jda.getGuildById(channel.guildId().value());
+        Guild guild = shardManager.getGuildById(channel.guildId().value());
         AudioChannel audioChannel = guild == null ? null : guild.getChannelById(AudioChannel.class, channel.channelId());
         if (audioChannel == null) {
             log.warn("음성 채널을 찾을 수 없습니다: {}", channel);
@@ -88,7 +88,7 @@ public class SpeechPlayerDiscordAdapter implements SpeechPlayerPort {
         if (queue != null) {
             queue.clear();
         }
-        Guild guild = jda.getGuildById(guildId.value());
+        Guild guild = shardManager.getGuildById(guildId.value());
         // 아직 들어가는 중이라 isConnected() 가 false 여도 닫아야 들어가기가 취소된다. 연결이 없으면 아무 일도 없다.
         if (guild != null) {
             guild.getAudioManager().closeAudioConnection();

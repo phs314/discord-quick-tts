@@ -23,10 +23,10 @@ import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import java.time.Instant;
 import java.util.List;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.requests.restaction.interactions.ReplyCallbackAction;
+import net.dv8tion.jda.api.sharding.ShardManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -37,12 +37,12 @@ class AllowlistCommandListenerTest {
     private static final GuildId JOINED = new GuildId(100L);
     private static final GuildId NOT_JOINED = new GuildId(200L);
 
-    private final JDA jda = mock(JDA.class, RETURNS_DEEP_STUBS);
+    private final ShardManager shardManager = mock(ShardManager.class);
     private final GetAllowlistUseCase getAllowlistUseCase = mock(GetAllowlistUseCase.class);
     private final AddToAllowlistUseCase addToAllowlistUseCase = mock(AddToAllowlistUseCase.class);
     private final RemoveFromAllowlistUseCase removeFromAllowlistUseCase = mock(RemoveFromAllowlistUseCase.class);
     private final AllowlistCommandListener listener =
-            new AllowlistCommandListener(jda, getAllowlistUseCase, addToAllowlistUseCase, removeFromAllowlistUseCase);
+            new AllowlistCommandListener(shardManager, getAllowlistUseCase, addToAllowlistUseCase, removeFromAllowlistUseCase);
     private final ReplyCallbackAction reply = mock(ReplyCallbackAction.class, RETURNS_SELF);
     /** 가장 최근에 만든 명령 이벤트. {@link #replied()} 가 여기에 간 답을 꺼낸다. */
     private SlashCommandInteractionEvent event;
@@ -51,9 +51,8 @@ class AllowlistCommandListenerTest {
     void setUp() {
         Guild joined = mock(Guild.class);
         when(joined.getName()).thenReturn("우리 서버");
-        when(jda.getGuildById(JOINED.value())).thenReturn(joined);
-        when(jda.getGuildById(NOT_JOINED.value())).thenReturn(null);
-        when(jda.getSelfUser().getApplicationId()).thenReturn("777");
+        when(shardManager.getGuildById(JOINED.value())).thenReturn(joined);
+        when(shardManager.getGuildById(NOT_JOINED.value())).thenReturn(null);
     }
 
     @Test
@@ -131,6 +130,7 @@ class AllowlistCommandListenerTest {
         when(event.getName()).thenReturn("allowlist");
         when(event.getSubcommandName()).thenReturn(subcommand);
         when(event.getUser().getIdLong()).thenReturn(OWNER.value());
+        when(event.getJDA().getSelfUser().getApplicationId()).thenReturn("777");
         if (server != null) {
             when(event.getOption("server").getAsString()).thenReturn(server);
         }

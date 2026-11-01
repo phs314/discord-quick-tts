@@ -110,7 +110,7 @@ apps/bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │       ├── out/persistence/    허용 목록 저장소 (JPA 엔티티 + 매퍼)
 │       └── out/settings/       허용 목록을 쓸지 설정 값 (GuildAllowlistProperties)
 ├── shared/                     공유 커널(domain/vo 의 DiscordUserId, GuildId, 예외 공통 부모 BusinessException)과 웹·디스코드 공통 예외 처리
-└── config/                     디스코드 토큰, JDA, 시계, 디스코드 리스너와 슬래시 명령 등록, 웹 보안 규칙, 디스코드 연결 상태 확인, 캐시 켜기
+└── config/                     디스코드 토큰, ShardManager(디스코드 연결), 시계, 디스코드 리스너와 슬래시 명령 등록, 웹 보안 규칙, 디스코드 연결 상태 확인, 캐시 켜기
 ```
 
 `ArchitectureTest`(ArchUnit)가 빌드 때마다 다음 의존 규칙을 확인합니다. ArchUnit 은 무엇이 무엇을 알아도 되는지만 봅니다 ([ADR 0032](docs/adr/0032-archunit-checks-dependencies-only.md)).
@@ -143,7 +143,7 @@ apps/bot-server/src/main/java/io/github/phs314/quicktts/bot/
 - 한 번에 함께 저장하는 것은 애그리거트 하나입니다. 같은 종류를 한꺼번에 넣거나 지울 때만 포트 메서드 하나(`saveAll`, `deleteAllByUserId`)로 묶고, 다른 애그리거트는 순서대로 따로 저장합니다 ([ADR 0028](docs/adr/0028-one-aggregate-per-write.md)).
 - DB 에 쓰는 유스케이스 메서드에는 `@Transactional` 을 붙이고, 저장소는 그 트랜잭션 안에서 한 줄씩 씁니다. 읽기만 하는 유스케이스에는 붙이지 않습니다. 트랜잭션 안에서는 디스코드 서버 나가기 같은 되돌릴 수 없는 호출을 하지 않고, 쓴 결과로 나가야 하면 도메인 이벤트를 내서 커밋 뒤에 받는 쪽이 나갑니다(`@TransactionalEventListener`) ([ADR 0033](docs/adr/0033-transactional-on-writing-use-cases.md)).
 - TTS 엔진은 `SpeechSynthesizerPort` 뒤에 있습니다. 지금은 무료인 Microsoft Edge "소리 내어 읽기" 목소리(선희, 인준, 현수)와 Google 번역 목소리를 쓰고, Edge 가 실패하면 Google 번역 목소리로 대신 읽습니다. 엔진을 추가하려면 `speech/adapter/out/tts` 에 `TtsEngine` 구현을 하나 더 만들면 됩니다. 둘 다 공식 API 가 아니라서 언제든 막힐 수 있습니다. 엔진이 만든 음성은 문장과 목소리를 키로 메모리에 500개까지 기억해서, 같은 문장은 엔진을 다시 부르지 않습니다 ([ADR 0037](docs/adr/0037-cache-tts-results.md)).
-- 서버 상태는 `GET /actuator/health` 로 봅니다. 디스코드 게이트웨이에 붙어 있지 않거나 DB 가 안 되면 503 과 `DOWN` 입니다. 지표는 기기 토큰을 실어 `/actuator/metrics` 로 보고, TTS 는 목소리별 걸린 시간과 성공·실패(`quicktts.tts.synthesis`), Google 번역 목소리로 대신 읽은 횟수(`quicktts.tts.fallback`)를 셉니다 ([ADR 0036](docs/adr/0036-health-and-metrics-with-actuator.md)).
+- 서버 상태는 `GET /actuator/health` 로 봅니다. 디스코드 게이트웨이에 붙어 있지 않은 샤드가 있거나 DB 가 안 되면 503 과 `DOWN` 입니다. 지표는 기기 토큰을 실어 `/actuator/metrics` 로 보고, TTS 는 목소리별 걸린 시간과 성공·실패(`quicktts.tts.synthesis`), Google 번역 목소리로 대신 읽은 횟수(`quicktts.tts.fallback`)를 셉니다 ([ADR 0036](docs/adr/0036-health-and-metrics-with-actuator.md)).
 - 기기 토큰은 서버에 SHA-256 해시로만 저장합니다. 연결 코드는 5분짜리 일회용이고 메모리에만 둡니다.
 - DB 는 배포 서버가 MySQL, 이 PC 에서 띄우는 서버(개발, exe)가 H2 파일입니다. 스키마는 Flyway 마이그레이션(`apps/bot-server/src/main/resources/db/migration`)으로 관리하고, 저장소 테스트는 H2 와 MySQL 양쪽에서 돕니다 ([ADR 0016](docs/adr/0016-mysql-and-flyway.md)).
 - API 경로는 `/api/v1` 아래에 있습니다. 오류 응답은 ProblemDetail 에 `code` 속성(`ApiErrorCode`)을 실어 보내고, 클라이언트는 이 코드로 안내 문구를 고릅니다 ([ADR 0013](docs/adr/0013-api-versioning-and-error-codes.md)).

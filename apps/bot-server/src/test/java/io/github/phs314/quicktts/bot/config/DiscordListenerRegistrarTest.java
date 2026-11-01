@@ -5,6 +5,7 @@ import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import io.github.phs314.quicktts.bot.shared.adapter.in.discord.DiscordSlashCommand;
 import io.github.phs314.quicktts.bot.shared.adapter.in.discord.InteractionErrorHandler;
@@ -15,15 +16,18 @@ import net.dv8tion.jda.api.hooks.EventListener;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
 import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
+import net.dv8tion.jda.api.sharding.ShardManager;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 
 class DiscordListenerRegistrarTest {
 
-    private final JDA jda = mock(JDA.class, RETURNS_DEEP_STUBS);
+    private final ShardManager shardManager = mock(ShardManager.class);
+    private final JDA shard = mock(JDA.class, RETURNS_DEEP_STUBS);
 
     @Test
     void 리스너마다_한_번씩_등록하고_슬래시_명령만_실패_답장으로_감싼다() {
+        when(shardManager.getShards()).thenReturn(List.of(shard));
         EventListener listener = new ListenerAdapter() {
         };
         DiscordSlashCommand command = new DiscordSlashCommand() {
@@ -37,10 +41,10 @@ class DiscordListenerRegistrarTest {
             }
         };
 
-        new DiscordListenerRegistrar(jda, List.of(listener, command), List.of(command)).register();
+        new DiscordListenerRegistrar(shardManager, List.of(listener, command), List.of(command)).register();
 
         ArgumentCaptor<Object> registered = ArgumentCaptor.forClass(Object.class);
-        verify(jda, times(2)).addEventListener(registered.capture());
+        verify(shardManager, times(2)).addEventListener(registered.capture());
         assertThat(registered.getAllValues().getFirst()).isSameAs(listener);
         assertThat(registered.getAllValues().get(1)).isInstanceOf(InteractionErrorHandler.class);
     }

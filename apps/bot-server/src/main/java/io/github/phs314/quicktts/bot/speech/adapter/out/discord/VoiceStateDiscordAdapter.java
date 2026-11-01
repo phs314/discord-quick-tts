@@ -8,11 +8,11 @@ import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.GuildVoiceState;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.entities.channel.middleman.AudioChannel;
+import net.dv8tion.jda.api.sharding.ShardManager;
 import org.springframework.stereotype.Component;
 
 /**
@@ -22,11 +22,11 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class VoiceStateDiscordAdapter implements VoiceStatePort {
 
-    private final JDA jda;
+    private final ShardManager shardManager;
 
     @Override
     public Optional<VoiceChannelDetails> findUserVoiceChannel(DiscordUserId user) {
-        return jda.getGuilds().stream()
+        return shardManager.getGuilds().stream()
                 .map(guild -> guild.getMemberById(user.value()))
                 .filter(Objects::nonNull)
                 .map(VoiceStateDiscordAdapter::currentChannel)
@@ -47,7 +47,7 @@ public class VoiceStateDiscordAdapter implements VoiceStatePort {
     }
 
     private Optional<AudioChannel> findAudioChannel(VoiceChannel channel) {
-        Guild guild = jda.getGuildById(channel.guildId().value());
+        Guild guild = shardManager.getGuildById(channel.guildId().value());
         return Optional.ofNullable(guild == null ? null : guild.getChannelById(AudioChannel.class, channel.channelId()));
     }
 

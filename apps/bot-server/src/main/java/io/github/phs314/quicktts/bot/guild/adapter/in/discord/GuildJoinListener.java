@@ -24,7 +24,7 @@ public class GuildJoinListener extends ListenerAdapter {
     private final LeaveNotAllowedGuildUseCase leaveNotAllowedGuildUseCase;
 
     /**
-     * JDA 는 이미 준비된 상태로 만들어지므로, 꺼져 있는 동안 초대된 디스코드 서버는 봇 서버가 켜졌을 때 여기서 확인한다.
+     * ShardManager 는 모든 샤드가 준비된 뒤에 만들어지므로, 꺼져 있는 동안 초대된 디스코드 서버는 봇 서버가 켜졌을 때 여기서 확인한다.
      * 허용 목록 채우기(DB 트랜잭션)가 끝난 뒤에 나가기(되돌릴 수 없는 호출)를 따로 부른다 (ADR 0033).
      */
     @EventListener(ApplicationReadyEvent.class)

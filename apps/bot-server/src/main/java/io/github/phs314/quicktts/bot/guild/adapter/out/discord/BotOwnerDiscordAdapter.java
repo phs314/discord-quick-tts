@@ -4,8 +4,8 @@ import io.github.phs314.quicktts.bot.guild.application.port.out.BotOwnerPort;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.ApplicationInfo;
+import net.dv8tion.jda.api.sharding.ShardManager;
 import org.springframework.stereotype.Component;
 
 /**
@@ -16,12 +16,12 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class BotOwnerDiscordAdapter implements BotOwnerPort {
 
-    private final JDA jda;
+    private final ShardManager shardManager;
     private DiscordUserId owner;
 
     @PostConstruct
     void load() {
-        ApplicationInfo info = jda.retrieveApplicationInfo().complete();
+        ApplicationInfo info = shardManager.retrieveApplicationInfo().complete();
         owner = new DiscordUserId(info.getTeam() != null ? info.getTeam().getOwnerIdLong() : info.getOwner().getIdLong());
     }
 
