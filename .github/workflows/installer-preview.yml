@@ -7,8 +7,8 @@ name: 설치 화면 미리보기
 on:
   pull_request:
     paths:
-      - 'desktop-client/packaging/**'
-      - 'desktop-client/build.gradle.kts'
+      - 'apps/desktop-client/packaging/**'
+      - 'apps/desktop-client/build.gradle.kts'
       - 'scripts/installer-screenshots.ps1'
       - '.github/workflows/installer-preview.yml'
   workflow_dispatch:
@@ -43,8 +43,8 @@ jobs:
         run: |
           mkdir -p "$RUNNER_TEMP/installers"
           for version in 0.0.1 0.0.2; do
-            ./gradlew :desktop-client:packageInstaller -Pversion=$version
-            cp "desktop-client/build/distributions/QuickTTS-$version.exe" "$RUNNER_TEMP/installers/"
+            ./gradlew :apps:desktop-client:packageInstaller -Pversion=$version
+            cp "apps/desktop-client/build/distributions/QuickTTS-$version.exe" "$RUNNER_TEMP/installers/"
           done
 
       - name: 처음 설치 화면 캡처

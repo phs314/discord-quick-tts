@@ -51,7 +51,7 @@
 
 | ADR | 제목 | 상태 |
 | --- | --- | --- |
-| [0001](0001-hexagonal-bot-server.md) | 봇 서버는 헥사고날 구조로 짓고 ArchUnit 으로 지킨다 | 일부 대체됨 (ADR 0009) |
+| [0001](0001-hexagonal-bot-server.md) | 봇 서버는 헥사고날 구조로 짓고 ArchUnit 으로 지킨다 | 일부 대체됨 (ADR 0009, ADR 0045) |
 | [0002](0002-bounded-contexts.md) | 봇 서버를 speech, device, shared 컨텍스트로 나눈다 | 일부 대체됨 (ADR 0015, ADR 0025, ADR 0031) |
 | [0012](0012-application-subpackages.md) | application 의 유스케이스, Command, Dto, 예외를 폴더로 나눈다 | 일부 대체됨 (ADR 0024, ADR 0029, ADR 0032, ADR 0041) |
 | [0023](0023-properties-per-adapter.md) | 설정 값은 그 값을 쓰는 어댑터 패키지에 둔다 | 채택 |
@@ -60,6 +60,7 @@
 | [0035](0035-archunit-patterns-and-domain-allowlist.md) | 도메인과 애플리케이션이 어댑터를 모르는지는 폴더 이름과 상관없이 검사하고, 도메인은 써도 되는 것만 적는다 | 채택 |
 | [0040](0040-inbound-adapters-do-not-call-other-contexts.md) | 인바운드 어댑터는 다른 컨텍스트의 유스케이스를 부르지 않고, 다른 컨텍스트 소식은 공개 이벤트로 받는다 | 채택 |
 | [0041](0041-use-cases-directly-in-port-in.md) | 입력 포트(...UseCase)는 port/in 바로 아래에 둔다 | 채택 |
+| [0045](0045-apps-libs-build-logic-layout.md) | 저장소를 apps, libs, build-logic 으로 나눈다 | 채택 |
 
 ### 도메인 모델
 

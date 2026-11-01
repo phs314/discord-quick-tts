@@ -35,11 +35,14 @@
 
 ## 모듈
 
+저장소 맨 위는 띄우는 프로그램(`apps/`), 앱끼리 나눠 쓰는 코드(`libs/`), 모든 모듈이 같이 쓰는 빌드 설정(`build-logic/`)으로 나뉩니다 ([ADR 0045](docs/adr/0045-apps-libs-build-logic-layout.md)).
+
 | 모듈 | 내용 |
 | --- | --- |
-| `bot-server` | Spring Boot + JDA + LavaPlayer. `/연결` 명령, 기기 등록, quick chat API 를 맡습니다. |
-| `desktop-client` | JavaFX 입력 위젯 + JNativeHook 전역 단축키 + 트레이 아이콘. |
-| `common` | 클라이언트와 서버가 함께 쓰는 요청 형식과 상수. |
+| `apps/bot-server` | Spring Boot + JDA + LavaPlayer. `/연결` 명령, 기기 등록, quick chat API 를 맡습니다. |
+| `apps/desktop-client` | JavaFX 입력 위젯 + JNativeHook 전역 단축키 + 트레이 아이콘. |
+| `libs/api-contract` | 데스크톱 앱과 봇 서버가 함께 쓰는 웹 API 약속(경로, 요청·응답 형식, 오류 코드). 패키지는 `io.github.phs314.quicktts.api` 입니다. |
+| `build-logic` | 규칙 플러그인 `quicktts.java`(JDK 25, UTF-8, JUnit 5)와 `quicktts.spring-app`(스프링 부트 앱). 버전은 `gradle/libs.versions.toml` 하나에서 정합니다. |
 
 ## 봇 서버 구조 (바운디드 컨텍스트 + 헥사고날)
 
@@ -54,7 +57,7 @@ ADR 목록과 상태(채택, 일부 대체됨), 새 ADR 을 쓰는 법은 [docs/
 | `shared` | 여러 컨텍스트가 함께 쓰는 공유 커널 (`DiscordUserId`, `GuildId`, 도메인 검증 예외) |
 
 ```
-bot-server/src/main/java/io/github/phs314/quicktts/bot/
+apps/bot-server/src/main/java/io/github/phs314/quicktts/bot/
 ├── speech/
 │   ├── domain/                 BotVoiceState (디스코드 서버별 봇 음성 상태, 애그리거트), UnknownVoiceException
 │   │   └── vo/                 QuickChatMessage, VoiceChannel, Speech, Voice, VoiceCatalog (값 객체)
@@ -112,7 +115,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 
 `ArchitectureTest`(ArchUnit)가 빌드 때마다 다음 의존 규칙을 확인합니다. ArchUnit 은 무엇이 무엇을 알아도 되는지만 봅니다 ([ADR 0032](docs/adr/0032-archunit-checks-dependencies-only.md)).
 
-- 각 컨텍스트의 `domain` 은 자바 표준 라이브러리와 도메인, `common` 의 오류 코드만 쓰고, `application` 은 스프링 중 `@Service`, `@Transactional` 만 씁니다 ([ADR 0009](docs/adr/0009-spring-annotations-on-services.md), [ADR 0035](docs/adr/0035-archunit-patterns-and-domain-allowlist.md)). `domain` 과 `application` 은 어떤 어댑터 폴더도 모르고, 어댑터끼리도 서로 모릅니다.
+- 각 컨텍스트의 `domain` 은 자바 표준 라이브러리와 도메인, `libs/api-contract` 의 오류 코드만 쓰고, `application` 은 스프링 중 `@Service`, `@Transactional` 만 씁니다 ([ADR 0009](docs/adr/0009-spring-annotations-on-services.md), [ADR 0035](docs/adr/0035-archunit-patterns-and-domain-allowlist.md)). `domain` 과 `application` 은 어떤 어댑터 폴더도 모르고, 어댑터끼리도 서로 모릅니다.
 - 컨텍스트끼리는 컨텍스트 지도(`ArchitectureTest.CONTEXT_MAP`)에 적힌 대로만, 상대의 공개 입구(`application.port.in`)로만 부릅니다. 부르는 자리는 서비스의 출력 포트를 구현한 `adapter/out/<상대>` 하나이고, 인바운드 어댑터와 서비스, 도메인은 다른 컨텍스트를 모릅니다. 다른 컨텍스트에 알리기만 하면 될 때는 보내는 쪽이 `...EventPort` 로 공개 이벤트(`application/port/in/event`)를 내고, 받는 쪽 `adapter/in/event` 리스너가 받아 자기 유스케이스를 부릅니다. 지금은 서로 부르는 컨텍스트가 없고(`guild` 는 다른 컨텍스트와 서로 모름), `shared` 는 어느 컨텍스트도 모릅니다 ([ADR 0026](docs/adr/0026-calls-between-contexts.md), [ADR 0040](docs/adr/0040-inbound-adapters-do-not-call-other-contexts.md)).
 - 인바운드 어댑터는 입력 포트로만 애플리케이션을 부르고, 애그리거트(`Device`, `Pairing`, `BotVoiceState`)를 직접 쓰지 않고 입력 포트가 돌려주는 `...Dto` 로만 봅니다 ([ADR 0010](docs/adr/0010-use-cases-return-dtos.md)).
 - 서비스는 다른 서비스의 입력 포트(`...UseCase`)를 쓰지 않고 출력 포트와 도메인만 씁니다 ([ADR 0008](docs/adr/0008-one-service-per-use-case.md)).
@@ -142,7 +145,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 - TTS 엔진은 `SpeechSynthesizerPort` 뒤에 있습니다. 지금은 무료인 Microsoft Edge "소리 내어 읽기" 목소리(선희, 인준, 현수)와 Google 번역 목소리를 쓰고, Edge 가 실패하면 Google 번역 목소리로 대신 읽습니다. 엔진을 추가하려면 `speech/adapter/out/tts` 에 `TtsEngine` 구현을 하나 더 만들면 됩니다. 둘 다 공식 API 가 아니라서 언제든 막힐 수 있습니다. 엔진이 만든 음성은 문장과 목소리를 키로 메모리에 500개까지 기억해서, 같은 문장은 엔진을 다시 부르지 않습니다 ([ADR 0037](docs/adr/0037-cache-tts-results.md)).
 - 서버 상태는 `GET /actuator/health` 로 봅니다. 디스코드 게이트웨이에 붙어 있지 않거나 DB 가 안 되면 503 과 `DOWN` 입니다. 지표는 기기 토큰을 실어 `/actuator/metrics` 로 보고, TTS 는 목소리별 걸린 시간과 성공·실패(`quicktts.tts.synthesis`), Google 번역 목소리로 대신 읽은 횟수(`quicktts.tts.fallback`)를 셉니다 ([ADR 0036](docs/adr/0036-health-and-metrics-with-actuator.md)).
 - 기기 토큰은 서버에 SHA-256 해시로만 저장합니다. 연결 코드는 5분짜리 일회용이고 메모리에만 둡니다.
-- DB 는 배포 서버가 MySQL, 이 PC 에서 띄우는 서버(개발, exe)가 H2 파일입니다. 스키마는 Flyway 마이그레이션(`bot-server/src/main/resources/db/migration`)으로 관리하고, 저장소 테스트는 H2 와 MySQL 양쪽에서 돕니다 ([ADR 0016](docs/adr/0016-mysql-and-flyway.md)).
+- DB 는 배포 서버가 MySQL, 이 PC 에서 띄우는 서버(개발, exe)가 H2 파일입니다. 스키마는 Flyway 마이그레이션(`apps/bot-server/src/main/resources/db/migration`)으로 관리하고, 저장소 테스트는 H2 와 MySQL 양쪽에서 돕니다 ([ADR 0016](docs/adr/0016-mysql-and-flyway.md)).
 - API 경로는 `/api/v1` 아래에 있습니다. 오류 응답은 ProblemDetail 에 `code` 속성(`ApiErrorCode`)을 실어 보내고, 클라이언트는 이 코드로 안내 문구를 고릅니다 ([ADR 0013](docs/adr/0013-api-versioning-and-error-codes.md)).
 - `QuickTtsApiIntegrationTest` 가 봇 서버를 통째로 띄워 `/api/v1` 을 HTTP 로 부르고 응답까지 확인합니다. 디스코드와 TTS 엔진만 출력 포트 대역으로 바꿔서 디스코드에 접속하지 않고 소리도 나지 않습니다 ([ADR 0017](docs/adr/0017-api-integration-test.md)).
 
@@ -158,13 +161,13 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 2. 실행합니다. 등록된 기기와 목소리 설정은 `data/` 폴더의 H2 파일에 저장됩니다. MySQL 을 쓰려면 `.env` 에 `QUICKTTS_DB_URL`, `QUICKTTS_DB_USERNAME`, `QUICKTTS_DB_PASSWORD` 를 채웁니다(`.env.example` 참고).
 
 ```bash
-./gradlew :bot-server:bootRun
+./gradlew :apps:bot-server:bootRun
 ```
 
 ## 데스크톱 클라이언트 실행
 
 ```bash
-./gradlew :desktop-client:run
+./gradlew :apps:desktop-client:run
 ```
 
 처음 실행하면 연결 코드를 묻습니다. 디스코드에서 `/연결` 을 입력하면 나만 보이는 코드가 오니 그대로 붙여 넣으세요. 이후에는 `~/.discord-quick-tts/client.properties` 에 저장된 기기 토큰으로 자동 로그인됩니다. 봇 서버 주소는 기본 `http://localhost:8080` 이고, 배포판은 `-Dquicktts.server-url=...` 로 기본값을 바꿉니다.
@@ -205,15 +208,15 @@ winget install --id WiXToolset.WiXToolset
 ```
 
 ```bash
-./gradlew :desktop-client:packageInstaller
+./gradlew :apps:desktop-client:packageInstaller
 ```
 
-`desktop-client/build/distributions/QuickTTS-0.1.0.exe` 가 생깁니다. GitHub Actions 의 **설치 파일** 워크플로도 같은 파일을 만들어 아티팩트(`QuickTTS-installer`)로 올리므로, WiX 없이 거기서 받아도 됩니다. 정식 버전은 [Releases](https://github.com/phs314/discord-quick-tts/releases/latest) 에서 로그인 없이 받을 수 있습니다.
+`apps/desktop-client/build/distributions/QuickTTS-0.1.0.exe` 가 생깁니다. GitHub Actions 의 **설치 파일** 워크플로도 같은 파일을 만들어 아티팩트(`QuickTTS-installer`)로 올리므로, WiX 없이 거기서 받아도 됩니다. 정식 버전은 [Releases](https://github.com/phs314/discord-quick-tts/releases/latest) 에서 로그인 없이 받을 수 있습니다.
 
 설치 파일을 실행하면 설치 경로(기본 `%LOCALAPPDATA%\QuickTTS`)를 고르고, 바탕화면과 시작 메뉴에 바로가기를 만들지 체크박스로 고릅니다. 사용자 폴더에 설치하므로 관리자 권한은 묻지 않습니다 ([ADR 0018](docs/adr/0018-windows-installer.md)). 설치 화면은 앱 아이콘 색의 그림과 한국어 문구로 꾸며져 있습니다 ([ADR 0021](docs/adr/0021-installer-look.md)).
 
 - 새로 만든 설치 파일을 실행하면 이전 설치를 지우고 그 자리에 새로 설치합니다. 실행 중이면 트레이의 Exit 로 먼저 끄세요.
-- 설치 화면의 그림(`desktop-client/packaging/installer/*.bmp`, 원본은 `source/`)이나 문구(`MsiInstallerStrings_ko.wxl`)를 바꾸면, PR 의 **설치 화면 미리보기** 워크플로가 실제 설치 화면을 캡처해 [`ci/installer-screenshots`](https://github.com/phs314/discord-quick-tts/tree/ci/installer-screenshots) 브랜치와 아티팩트(`installer-screenshots`)로 올립니다.
+- 설치 화면의 그림(`apps/desktop-client/packaging/installer/*.bmp`, 원본은 `source/`)이나 문구(`MsiInstallerStrings_ko.wxl`)를 바꾸면, PR 의 **설치 화면 미리보기** 워크플로가 실제 설치 화면을 캡처해 [`ci/installer-screenshots`](https://github.com/phs314/discord-quick-tts/tree/ci/installer-screenshots) 브랜치와 아티팩트(`installer-screenshots`)로 올립니다.
 - 압축 파일로 쓰던 PC 는 트레이의 Exit 로 끄고 풀어 둔 폴더를 지운 뒤 설치하면 됩니다. Start with Windows 는 새로 설치한 QuickTTS 를 처음 켤 때 새 경로로 바뀝니다.
 - 지울 때는 Windows 설정 → 앱 → 설치된 앱 → QuickTTS → 제거 를 씁니다. 설정과 데이터(`~/.discord-quick-tts`)는 남습니다. 트레이의 **Start with Windows** 를 켜 두었다면 제거 전에 끄세요.
 
@@ -222,10 +225,10 @@ winget install --id WiXToolset.WiXToolset
 설치 없이 풀어서 쓰려면 압축 파일을 만듭니다. WiX 는 필요 없습니다.
 
 ```bash
-./gradlew :desktop-client:packageZip
+./gradlew :apps:desktop-client:packageZip
 ```
 
-`desktop-client/build/distributions/QuickTTS-0.1.0-windows.zip` 이 생깁니다. Gradle 빌드 폴더가 아닌 곳(예: `%LOCALAPPDATA%\Programs\QuickTTS`)에 풀어서 쓰세요. 빌드 폴더에서 실행하면 다음에 다시 만들 때 파일이 잠겨 실패합니다.
+`apps/desktop-client/build/distributions/QuickTTS-0.1.0-windows.zip` 이 생깁니다. Gradle 빌드 폴더가 아닌 곳(예: `%LOCALAPPDATA%\Programs\QuickTTS`)에 풀어서 쓰세요. 빌드 폴더에서 실행하면 다음에 다시 만들 때 파일이 잠겨 실패합니다.
 
 ### 새 버전 내기 (GitHub Releases)
 
