@@ -1,7 +1,7 @@
 package io.github.phs314.quicktts.bot.speech.application.port.in;
 
+import io.github.phs314.quicktts.bot.speech.application.port.in.dto.VoiceChannelDto;
 import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindCurrentUserVoiceChannelQuery;
-import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import java.util.Optional;
 
 /**
@@ -10,5 +10,5 @@ import java.util.Optional;
 public interface FindCurrentUserVoiceChannelUseCase {
 
     /** 봇이 있는 서버의 음성 채널에 없으면 비어 있다. */
-    Optional<VoiceChannelDetails> findCurrentUserVoiceChannel(FindCurrentUserVoiceChannelQuery query);
+    Optional<VoiceChannelDto> findCurrentUserVoiceChannel(FindCurrentUserVoiceChannelQuery query);
 }

@@ -17,6 +17,11 @@ public class FakeAllowedGuildPort implements AllowedGuildPort {
     }
 
     @Override
+    public boolean exists(GuildId guildId) {
+        return byGuild.containsKey(guildId);
+    }
+
+    @Override
     public boolean saveIfAbsent(AllowedGuild allowedGuild) {
         return byGuild.putIfAbsent(allowedGuild.guildId(), allowedGuild) == null;
     }

@@ -23,6 +23,11 @@ public class AllowedGuildPersistenceAdapter implements AllowedGuildPort {
                 .toList();
     }
 
+    @Override
+    public boolean exists(GuildId guildId) {
+        return allowedGuildSpringDataRepository.existsById(guildId.value());
+    }
+
     /** 이미 있으면 넣지 않는다. 있는지 본 뒤 다른 요청이 같은 서버를 먼저 넣으면 기본 키 때문에 커밋에서 실패한다. */
     @Override
     public boolean saveIfAbsent(AllowedGuild allowedGuild) {

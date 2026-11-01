@@ -5,6 +5,7 @@ import io.github.phs314.quicktts.bot.speech.application.exception.AuthorNotInVoi
 import io.github.phs314.quicktts.bot.speech.application.exception.VoiceChannelInUseException;
 import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
+import io.github.phs314.quicktts.bot.speech.application.port.in.dto.VoiceChannelDto;
 import io.github.phs314.quicktts.bot.speech.application.port.out.BotVoiceStatePort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.TextToSpeechPort;
@@ -15,7 +16,6 @@ import io.github.phs314.quicktts.bot.speech.domain.normalization.TextNormalizer;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Audio;
 import io.github.phs314.quicktts.bot.speech.domain.vo.SpokenText;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
-import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -33,7 +33,7 @@ public class SpeakQuickChatService implements SpeakQuickChatUseCase {
     public void speak(SpeakQuickChatCommand command) {
         SpokenText text = TextNormalizer.normalize(command.message());
         VoiceChannel channel = voiceStatePort.findUserVoiceChannel(command.author())
-                .map(VoiceChannelDetails::channel)
+                .map(VoiceChannelDto::channel)
                 .orElseThrow(() -> new AuthorNotInVoiceChannelException(command.author()));
 
         VoiceId voiceId = userVoicePort.getVoiceId(command.author());
@@ -54,6 +54,6 @@ public class SpeakQuickChatService implements SpeakQuickChatUseCase {
     private VoiceChannelInUseException inUseException(BotVoiceState state) {
         VoiceChannel inUse = state.channel().orElseThrow();
         return new VoiceChannelInUseException(voiceStatePort.findChannelDetails(inUse)
-                .orElseGet(() -> new VoiceChannelDetails(inUse, "", null, "알 수 없음")));
+                .orElseGet(() -> new VoiceChannelDto(inUse, "", null, "알 수 없음")));
     }
 }

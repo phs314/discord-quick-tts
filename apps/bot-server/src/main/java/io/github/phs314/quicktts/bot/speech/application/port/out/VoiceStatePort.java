@@ -1,8 +1,8 @@
 package io.github.phs314.quicktts.bot.speech.application.port.out;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
+import io.github.phs314.quicktts.bot.speech.application.port.in.dto.VoiceChannelDto;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
-import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import java.util.Optional;
 
 /**
@@ -11,10 +11,10 @@ import java.util.Optional;
 public interface VoiceStatePort {
 
     /** 사용자가 지금 들어가 있는 음성 채널. */
-    Optional<VoiceChannelDetails> findUserVoiceChannel(DiscordUserId user);
+    Optional<VoiceChannelDto> findUserVoiceChannel(DiscordUserId user);
 
     /** 사용자에게 보여 줄 음성 채널 정보. 채널이 없어졌으면 빈 값이다. */
-    Optional<VoiceChannelDetails> findChannelDetails(VoiceChannel channel);
+    Optional<VoiceChannelDto> findChannelDetails(VoiceChannel channel);
 
     /** 음성 채널에 봇 말고 사람이 한 명이라도 있는지. 채널이 없어졌으면 false 다. */
     boolean hasHumanMembers(VoiceChannel channel);

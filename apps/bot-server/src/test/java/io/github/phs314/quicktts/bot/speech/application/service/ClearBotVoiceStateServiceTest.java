@@ -6,14 +6,15 @@ import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.ClearBotVoiceStateCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeBotVoiceStatePort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechPlayerPort;
+import io.github.phs314.quicktts.bot.speech.domain.vo.ChannelId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import org.junit.jupiter.api.Test;
 
 class ClearBotVoiceStateServiceTest {
 
     private static final GuildId GUILD = new GuildId(1L);
-    private static final VoiceChannel GENERAL = new VoiceChannel(GUILD, 2L);
-    private static final VoiceChannel GAME = new VoiceChannel(GUILD, 3L);
+    private static final VoiceChannel GENERAL = new VoiceChannel(GUILD, new ChannelId(2L));
+    private static final VoiceChannel GAME = new VoiceChannel(GUILD, new ChannelId(3L));
 
     private final FakeBotVoiceStatePort states = new FakeBotVoiceStatePort();
     private final FakeSpeechPlayerPort player = new FakeSpeechPlayerPort();

@@ -16,6 +16,6 @@ final class AllowedGuildPersistenceMapper {
     }
 
     static AllowedGuild toDomain(AllowedGuildJpaEntity entity) {
-        return new AllowedGuild(new GuildId(entity.getGuildId()), entity.getAllowedAt());
+        return AllowedGuild.restore(new GuildId(entity.getGuildId()), entity.getAllowedAt());
     }
 }

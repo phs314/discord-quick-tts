@@ -13,14 +13,18 @@ public class AllowedGuild {
     /** 허용 목록에 넣은 시각 */
     private final Instant allowedAt;
 
-    /** 저장소에서 읽어 온 것을 되살릴 때 쓴다. 새로 넣을 때는 {@link #allow} 를 쓴다. */
-    public AllowedGuild(GuildId guildId, Instant allowedAt) {
+    private AllowedGuild(GuildId guildId, Instant allowedAt) {
         this.guildId = Objects.requireNonNull(guildId);
         this.allowedAt = Objects.requireNonNull(allowedAt);
     }
 
     public static AllowedGuild allow(GuildId guildId, Instant now) {
         return new AllowedGuild(guildId, now);
+    }
+
+    /** 저장소에서 읽어 온 것을 되살릴 때 쓴다. 새로 넣을 때는 {@link #allow} 를 쓴다. */
+    public static AllowedGuild restore(GuildId guildId, Instant allowedAt) {
+        return new AllowedGuild(guildId, allowedAt);
     }
 
     public GuildId guildId() {

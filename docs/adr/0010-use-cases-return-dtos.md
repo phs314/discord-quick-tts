@@ -4,6 +4,7 @@
   - 웹 요청·응답 변환은 웹 매퍼가 맡음 → ADR 0030
   - Command·Dto 이름 규칙은 리뷰로 지킴 → ADR 0032
   - `...UseCase` 는 `usecase` 폴더 대신 `port/in` 바로 아래 → ADR 0041
+  - `VoiceChannelDetails` 는 도메인에서 빠져 `VoiceChannelDto` 로 → ADR 0052
 - 날짜: 2026-10-11
 
 입력 포트 두 개가 애그리거트를 그대로 돌려줬습니다. `IssuePairingCodeUseCase.issue` 는 `Pairing` 을, `ManageOwnDevicesUseCase.devices` 는 `List<Device>` 를 돌려줘서 디스코드 리스너가 애그리거트 안을 다 볼 수 있었습니다. `/연결해제` 리스너는 쓰지도 않는 `Device.tokenHash()` 까지 볼 수 있었고, `/연결` 리스너는 도메인 상수 `Pairing.VALID_FOR` 를 직접 읽었습니다.

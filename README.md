@@ -63,12 +63,13 @@ apps/bot-server/src/main/java/io/github/phs314/quicktts/bot/
 ├── speech/
 │   ├── domain/                 BotVoiceState (디스코드 서버별 봇 음성 상태, 애그리거트)
 │   │   ├── normalization/      TextNormalizer (읽기 다듬기 규칙, 도메인 서비스)
-│   │   └── vo/                 QuickChatMessage, SpokenText, VoiceChannel, Audio (값 객체)
+│   │   └── vo/                 QuickChatMessage, SpokenText, VoiceChannel, ChannelId, Audio (값 객체)
 │   ├── application/
 │   │   ├── exception/          AuthorNotInVoiceChannel, VoiceChannelInUse, BotCannotJoinVoiceChannel, UnplayableAudio 예외
 │   │   ├── port/in/            SpeakQuickChat, FindCurrentUserVoiceChannel, LeaveEmptyVoiceChannel, SyncBotVoiceState, ClearBotVoiceState (...UseCase, 메서드 하나씩)
 │   │   ├── port/in/command/    SpeakQuickChat, LeaveEmptyVoiceChannel, SyncBotVoiceState, ClearBotVoiceState (...Command)
 │   │   ├── port/in/query/      FindCurrentUserVoiceChannel (...Query)
+│   │   ├── port/in/dto/        VoiceChannelDto
 │   │   ├── port/out/           VoiceStatePort, SpeechPlayerPort, BotVoiceStatePort, UserVoicePort, TextToSpeechPort
 │   │   └── service/            입력 포트마다 하나 (SpeakQuickChatService 등)
 │   └── adapter/

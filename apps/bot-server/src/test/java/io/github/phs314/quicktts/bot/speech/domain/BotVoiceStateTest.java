@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
+import io.github.phs314.quicktts.bot.speech.domain.vo.ChannelId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import java.util.Optional;
 import java.util.Set;
@@ -13,8 +14,8 @@ import org.junit.jupiter.api.Test;
 class BotVoiceStateTest {
 
     private static final GuildId GUILD = new GuildId(1L);
-    private static final VoiceChannel GENERAL = new VoiceChannel(GUILD, 2L);
-    private static final VoiceChannel GAME = new VoiceChannel(GUILD, 3L);
+    private static final VoiceChannel GENERAL = new VoiceChannel(GUILD, new ChannelId(2L));
+    private static final VoiceChannel GAME = new VoiceChannel(GUILD, new ChannelId(3L));
     private static final Predicate<VoiceChannel> NOBODY = channel -> false;
 
     private final BotVoiceState state = BotVoiceState.empty(GUILD);
@@ -54,7 +55,7 @@ class BotVoiceStateTest {
 
     @Test
     void 다른_디스코드_서버의_채널에는_들어갈_수_없다() {
-        assertThatThrownBy(() -> state.join(new VoiceChannel(new GuildId(9L), 2L), NOBODY))
+        assertThatThrownBy(() -> state.join(new VoiceChannel(new GuildId(9L), new ChannelId(2L)), NOBODY))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

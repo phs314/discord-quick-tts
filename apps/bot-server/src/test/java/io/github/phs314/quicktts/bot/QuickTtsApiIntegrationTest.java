@@ -23,12 +23,13 @@ import io.github.phs314.quicktts.bot.settings.application.port.in.ChangeVoiceUse
 import io.github.phs314.quicktts.bot.settings.application.port.in.command.ChangeVoiceCommand;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
+import io.github.phs314.quicktts.bot.speech.application.port.in.dto.VoiceChannelDto;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeVoiceStatePort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceStatePort;
+import io.github.phs314.quicktts.bot.speech.domain.vo.ChannelId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
-import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import io.github.phs314.quicktts.bot.synthesis.application.port.out.FakeSpeechSynthesizerPort;
 import io.github.phs314.quicktts.bot.synthesis.application.port.out.SpeechSynthesizerPort;
 import java.util.List;
@@ -169,7 +170,7 @@ class QuickTtsApiIntegrationTest {
 
         sendQuickChat(token, "안녕").expectStatus().isAccepted();
 
-        assertThat(PLAYER.actions()).containsExactly("join:" + channel.channelId(), "play:fake:injoon:안녕");
+        assertThat(PLAYER.actions()).containsExactly("join:" + channel.channelId().value(), "play:fake:injoon:안녕");
     }
 
     @Test
@@ -245,7 +246,7 @@ class QuickTtsApiIntegrationTest {
                 .jsonPath("$.code").isEqualTo(ApiErrorCode.VOICE_CHANNEL_IN_USE)
                 .jsonPath("$.detail").value(String.class, detail -> assertThat(detail).contains("게임"));
 
-        assertThat(PLAYER.actions()).containsExactly("join:" + first.channelId(), "play:fake:sunhi:먼저");
+        assertThat(PLAYER.actions()).containsExactly("join:" + first.channelId().value(), "play:fake:sunhi:먼저");
     }
 
     @Test
@@ -335,10 +336,10 @@ class QuickTtsApiIntegrationTest {
     }
 
     private static VoiceChannel newChannel(GuildId guildId) {
-        return new VoiceChannel(guildId, IDS.incrementAndGet());
+        return new VoiceChannel(guildId, new ChannelId(IDS.incrementAndGet()));
     }
 
-    private static VoiceChannelDetails details(VoiceChannel channel, String channelName) {
-        return new VoiceChannelDetails(channel, "우리 서버", "https://example.com/icon.png", channelName);
+    private static VoiceChannelDto details(VoiceChannel channel, String channelName) {
+        return new VoiceChannelDto(channel, "우리 서버", "https://example.com/icon.png", channelName);
     }
 }

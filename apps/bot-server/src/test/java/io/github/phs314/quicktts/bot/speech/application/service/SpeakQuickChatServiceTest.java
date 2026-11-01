@@ -11,14 +11,15 @@ import io.github.phs314.quicktts.bot.speech.application.exception.AuthorNotInVoi
 import io.github.phs314.quicktts.bot.speech.application.exception.BotCannotJoinVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.exception.VoiceChannelInUseException;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
+import io.github.phs314.quicktts.bot.speech.application.port.in.dto.VoiceChannelDto;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeBotVoiceStatePort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeTextToSpeechPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeUserVoicePort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeVoiceStatePort;
+import io.github.phs314.quicktts.bot.speech.domain.vo.ChannelId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
-import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import org.junit.jupiter.api.Test;
 
 class SpeakQuickChatServiceTest {
@@ -26,12 +27,12 @@ class SpeakQuickChatServiceTest {
     private static final GuildId GUILD = new GuildId(1L);
     private static final DiscordUserId AUTHOR = new DiscordUserId(42L);
     private static final DiscordUserId FRIEND = new DiscordUserId(43L);
-    private static final VoiceChannelDetails GENERAL =
-            new VoiceChannelDetails(new VoiceChannel(GUILD, 2L), "우리 서버", null, "일반");
-    private static final VoiceChannelDetails GAME =
-            new VoiceChannelDetails(new VoiceChannel(GUILD, 3L), "우리 서버", null, "게임");
-    private static final VoiceChannelDetails OTHER_SERVER =
-            new VoiceChannelDetails(new VoiceChannel(new GuildId(9L), 4L), "다른 서버", null, "일반");
+    private static final VoiceChannelDto GENERAL =
+            new VoiceChannelDto(new VoiceChannel(GUILD, new ChannelId(2L)), "우리 서버", null, "일반");
+    private static final VoiceChannelDto GAME =
+            new VoiceChannelDto(new VoiceChannel(GUILD, new ChannelId(3L)), "우리 서버", null, "게임");
+    private static final VoiceChannelDto OTHER_SERVER =
+            new VoiceChannelDto(new VoiceChannel(new GuildId(9L), new ChannelId(4L)), "다른 서버", null, "일반");
 
     private final FakeVoiceStatePort discord = new FakeVoiceStatePort();
     private final FakeSpeechPlayerPort player = new FakeSpeechPlayerPort();

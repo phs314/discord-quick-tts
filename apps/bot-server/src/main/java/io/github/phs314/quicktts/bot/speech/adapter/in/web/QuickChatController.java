@@ -1,14 +1,14 @@
 package io.github.phs314.quicktts.bot.speech.adapter.in.web;
 
+import io.github.phs314.quicktts.api.QuickChatRequest;
+import io.github.phs314.quicktts.api.QuickTtsApi;
+import io.github.phs314.quicktts.api.VoiceChannelResponse;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.application.port.in.FindCurrentUserVoiceChannelUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
+import io.github.phs314.quicktts.bot.speech.application.port.in.dto.VoiceChannelDto;
 import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindCurrentUserVoiceChannelQuery;
-import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
-import io.github.phs314.quicktts.api.QuickChatRequest;
-import io.github.phs314.quicktts.api.QuickTtsApi;
-import io.github.phs314.quicktts.api.VoiceChannelResponse;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +41,7 @@ public class QuickChatController {
     @GetMapping(QuickTtsApi.MY_VOICE_CHANNEL_PATH)
     public ResponseEntity<VoiceChannelResponse> myVoiceChannel(@AuthenticationPrincipal DiscordUserId user) {
         FindCurrentUserVoiceChannelQuery query = QuickChatWebMapper.toQuery(user);
-        Optional<VoiceChannelDetails> details = findCurrentUserVoiceChannelUseCase.findCurrentUserVoiceChannel(query);
+        Optional<VoiceChannelDto> details = findCurrentUserVoiceChannelUseCase.findCurrentUserVoiceChannel(query);
         if (details.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
