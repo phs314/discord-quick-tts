@@ -63,7 +63,7 @@ class QuickTtsApiIntegrationTest {
     private static final FakeSpeechPlayerPort PLAYER = new FakeSpeechPlayerPort();
     private static final FakeSpeechSynthesizerPort TTS = new FakeSpeechSynthesizerPort();
 
-    /** 테스트끼리 봇 자리, 목소리 설정, 기기가 섞이지 않게 사용자, 디스코드 서버, 채널마다 새 ID 를 쓴다. */
+    /** 테스트끼리 봇 음성 상태, 목소리 설정, 기기가 섞이지 않게 사용자, 디스코드 서버, 채널마다 새 ID 를 쓴다. */
     private static final AtomicLong IDS = new AtomicLong(1_000);
 
     @TestBean(methodName = "voiceChannels")

@@ -7,9 +7,9 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
-import io.github.phs314.quicktts.bot.speech.application.port.in.FollowBotMoveUseCase;
+import io.github.phs314.quicktts.bot.speech.application.port.in.SyncBotVoiceStateUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.LeaveEmptyVoiceChannelUseCase;
-import io.github.phs314.quicktts.bot.speech.application.port.in.command.FollowBotMoveCommand;
+import io.github.phs314.quicktts.bot.speech.application.port.in.command.SyncBotVoiceStateCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.LeaveIfEmptyCommand;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import java.util.Optional;
@@ -24,14 +24,14 @@ class VoiceStateListenerTest {
     private static final long PERSON = 2L;
 
     private final LeaveEmptyVoiceChannelUseCase leaveEmptyVoiceChannelUseCase = mock(LeaveEmptyVoiceChannelUseCase.class);
-    private final FollowBotMoveUseCase followBotMoveUseCase = mock(FollowBotMoveUseCase.class);
-    private final VoiceStateListener listener = new VoiceStateListener(leaveEmptyVoiceChannelUseCase, followBotMoveUseCase);
+    private final SyncBotVoiceStateUseCase syncBotVoiceStateUseCase = mock(SyncBotVoiceStateUseCase.class);
+    private final VoiceStateListener listener = new VoiceStateListener(leaveEmptyVoiceChannelUseCase, syncBotVoiceStateUseCase);
 
     @Test
     void 들어오기만_한_소식은_넘긴다() {
         listener.onGuildVoiceUpdate(voiceUpdate(PERSON, null, channel(10L)));
 
-        verifyNoInteractions(leaveEmptyVoiceChannelUseCase, followBotMoveUseCase);
+        verifyNoInteractions(leaveEmptyVoiceChannelUseCase, syncBotVoiceStateUseCase);
     }
 
     @Test
@@ -39,23 +39,23 @@ class VoiceStateListenerTest {
         listener.onGuildVoiceUpdate(voiceUpdate(PERSON, channel(10L), channel(20L)));
 
         verify(leaveEmptyVoiceChannelUseCase).leaveIfEmpty(new LeaveIfEmptyCommand(GUILD_ID));
-        verifyNoInteractions(followBotMoveUseCase);
+        verifyNoInteractions(syncBotVoiceStateUseCase);
     }
 
     @Test
-    void 봇이_다른_채널로_옮겨지면_자리를_따라_옮긴다() {
+    void 봇이_다른_채널로_옮겨지면_상태도_따라_옮긴다() {
         listener.onGuildVoiceUpdate(voiceUpdate(BOT, channel(10L), channel(20L)));
 
-        verify(followBotMoveUseCase).followBotMove(new FollowBotMoveCommand(
+        verify(syncBotVoiceStateUseCase).sync(new SyncBotVoiceStateCommand(
                 new VoiceChannel(GUILD_ID, 10L), Optional.of(new VoiceChannel(GUILD_ID, 20L))));
         verifyNoInteractions(leaveEmptyVoiceChannelUseCase);
     }
 
     @Test
-    void 봇이_채널에서_끊기면_자리를_비운다() {
+    void 봇이_채널에서_끊기면_채널을_지운다() {
         listener.onGuildVoiceUpdate(voiceUpdate(BOT, channel(10L), null));
 
-        verify(followBotMoveUseCase).followBotMove(new FollowBotMoveCommand(
+        verify(syncBotVoiceStateUseCase).sync(new SyncBotVoiceStateCommand(
                 new VoiceChannel(GUILD_ID, 10L), Optional.empty()));
     }
 
