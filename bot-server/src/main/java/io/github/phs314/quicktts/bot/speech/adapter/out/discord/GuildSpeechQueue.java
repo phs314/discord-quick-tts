@@ -48,6 +48,12 @@ class GuildSpeechQueue extends AudioEventAdapter {
         player.stopTrack();
     }
 
+    /** 기다리던 문장을 버리고 플레이어를 없앤다. 그 뒤로는 이 큐를 쓰지 않는다. */
+    synchronized void destroy() {
+        pending.clear();
+        player.destroy();
+    }
+
     @Override
     public void onTrackEnd(AudioPlayer player, AudioTrack track, AudioTrackEndReason endReason) {
         if (endReason.mayStartNext) {
