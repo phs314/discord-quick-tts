@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * 바운디드 컨텍스트(speech, settings, synthesis, device, guild) 사이와 각 컨텍스트 안의 헥사고날 의존 방향을 지킨다.
+ * 바운디드 컨텍스트(speech, settings, synthesis, identity, guild) 사이와 각 컨텍스트 안의 헥사고날 의존 방향을 지킨다.
  * 이름과 위치 규칙은 ADR 에 적어 두고 리뷰로 지킨다 (ADR 0032).
  */
 @AnalyzeClasses(packages = "io.github.phs314.quicktts.bot", importOptions = ImportOption.DoNotIncludeTests.class)
@@ -39,7 +39,7 @@ class ArchitectureTest {
             "speech", Set.of("settings", "synthesis"),
             "settings", Set.of("synthesis"),
             "synthesis", Set.of(),
-            "device", Set.of(),
+            "identity", Set.of(),
             "guild", Set.of());
 
     /** 컨텍스트가 아닌 맨 위 패키지. shared 는 공유 커널, config 는 조립 코드다. */
@@ -92,13 +92,13 @@ class ArchitectureTest {
             .ignoreDependency(resideInAPackage(EVENT_LISTENERS), resideInAPackage(PUBLIC_EVENTS));
 
     @ArchTest
-    static final ArchRule deviceIsHexagonal = onionArchitecture()
-            .domainModels("..bot.device.domain..")
-            .applicationServices("..bot.device.application..")
-            .adapter("web", "..bot.device.adapter.in.web..")
-            .adapter("discord-command", "..bot.device.adapter.in.discord..")
-            .adapter("persistence", "..bot.device.adapter.out.persistence..")
-            .adapter("memory", "..bot.device.adapter.out.memory..")
+    static final ArchRule identityIsHexagonal = onionArchitecture()
+            .domainModels("..bot.identity.domain..")
+            .applicationServices("..bot.identity.application..")
+            .adapter("web", "..bot.identity.adapter.in.web..")
+            .adapter("discord-command", "..bot.identity.adapter.in.discord..")
+            .adapter("persistence", "..bot.identity.adapter.out.persistence..")
+            .adapter("memory", "..bot.identity.adapter.out.memory..")
             .withOptionalLayers(true)
             .ignoreDependency(resideInAPackage("..bot.config.."), alwaysTrue())
             .ignoreDependency(resideInAPackage(OUTBOUND_ADAPTERS), resideInAPackage(PUBLIC_ENTRANCES))
@@ -174,7 +174,7 @@ class ArchitectureTest {
     static final ArchRule sharedKernelDependsOnNoContext = noClasses()
             .that().resideInAPackage("..bot.shared..")
             .should().dependOnClassesThat().resideInAnyPackage(
-                    "..bot.speech..", "..bot.settings..", "..bot.synthesis..", "..bot.device..", "..bot.guild..");
+                    "..bot.speech..", "..bot.settings..", "..bot.synthesis..", "..bot.identity..", "..bot.guild..");
 
     /** 인바운드 어댑터는 입력 포트로만 애플리케이션을 부른다. 서비스 구현이나 출력 포트를 직접 쓰지 않는다. */
     @ArchTest

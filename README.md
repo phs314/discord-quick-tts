@@ -54,7 +54,7 @@ ADR 목록과 상태(채택, 일부 대체됨), 새 ADR 을 쓰는 법은 [docs/
 | `speech` (핵심) | 누가 무슨 문장을 어느 음성 채널에서 읽게 하나 |
 | `settings` (지원) | 사용자가 고른 설정 (지금은 `/목소리` 로 고른 목소리) |
 | `synthesis` (일반) | 문장을 음성으로 만드는 TTS 엔진과 목소리 목록 |
-| `device` (지원) | 이 PC 가 어느 디스코드 사용자의 것인가 (`/연결` 코드 발급, 기기 등록, 기기 인증) |
+| `identity` (지원) | 이 PC 가 어느 디스코드 사용자의 것인가 (`/연결` 코드 발급, 기기 등록, 기기 인증) |
 | `guild` (지원) | 봇이 어느 디스코드 서버에 머물러도 되나 (허용 목록, 봇 주인 확인) |
 | `shared` | 여러 컨텍스트가 함께 쓰는 공유 커널 (`DiscordUserId`, `GuildId`, `VoiceId`, 도메인 검증 예외) |
 
@@ -102,7 +102,7 @@ apps/bot-server/src/main/java/io/github/phs314/quicktts/bot/
 │   │   └── service/            입력 포트마다 하나
 │   └── adapter/
 │       └── out/tts/            TTS 엔진 (Edge, Google 번역), 엔진 고르기, 결과 캐시와 지표
-├── device/
+├── identity/
 │   ├── domain/                 Pairing, Device (엔티티), InvalidPairingCodeException
 │   │   └── vo/                 PairingCode, DeviceToken, DeviceId, DeviceName (값 객체)
 │   ├── application/
@@ -143,7 +143,7 @@ apps/bot-server/src/main/java/io/github/phs314/quicktts/bot/
 `ArchitectureTest`(ArchUnit)가 빌드 때마다 다음 의존 규칙을 확인합니다. ArchUnit 은 무엇이 무엇을 알아도 되는지만 봅니다 ([ADR 0032](docs/adr/0032-archunit-checks-dependencies-only.md)).
 
 - 각 컨텍스트의 `domain` 은 자바 표준 라이브러리와 도메인, `libs/api-contract` 의 오류 코드만 쓰고, `application` 은 스프링 중 `@Service`, `@Transactional` 만 씁니다 ([ADR 0009](docs/adr/0009-spring-annotations-on-services.md), [ADR 0035](docs/adr/0035-archunit-patterns-and-domain-allowlist.md)). `domain` 과 `application` 은 어떤 어댑터 폴더도 모르고, 어댑터끼리도 서로 모릅니다.
-- 컨텍스트끼리는 컨텍스트 지도(`ArchitectureTest.CONTEXT_MAP`)에 적힌 대로만, 상대의 공개 입구(`application.port.in`)로만 부릅니다. 부르는 자리는 서비스의 출력 포트를 구현한 `adapter/out/<상대>` 하나이고, 인바운드 어댑터와 서비스, 도메인은 다른 컨텍스트를 모릅니다. 다른 컨텍스트에 알리기만 하면 될 때는 보내는 쪽이 `...EventPort` 로 공개 이벤트(`application/port/in/event`)를 내고, 받는 쪽 `adapter/in/event` 리스너가 받아 자기 유스케이스를 부릅니다. 지금은 `speech` 가 `settings`(읽을 목소리)와 `synthesis`(음성 만들기)를, `settings` 가 `synthesis`(목소리 목록)를 부릅니다. 상대가 돌려주는 것은 `...Dto` 이고 받는 쪽 어댑터가 자기 값 객체로 바꿉니다. `device`, `guild` 는 다른 컨텍스트와 서로 모르고, `shared` 는 어느 컨텍스트도 모릅니다 ([ADR 0026](docs/adr/0026-calls-between-contexts.md), [ADR 0040](docs/adr/0040-inbound-adapters-do-not-call-other-contexts.md)).
+- 컨텍스트끼리는 컨텍스트 지도(`ArchitectureTest.CONTEXT_MAP`)에 적힌 대로만, 상대의 공개 입구(`application.port.in`)로만 부릅니다. 부르는 자리는 서비스의 출력 포트를 구현한 `adapter/out/<상대>` 하나이고, 인바운드 어댑터와 서비스, 도메인은 다른 컨텍스트를 모릅니다. 다른 컨텍스트에 알리기만 하면 될 때는 보내는 쪽이 `...EventPort` 로 공개 이벤트(`application/port/in/event`)를 내고, 받는 쪽 `adapter/in/event` 리스너가 받아 자기 유스케이스를 부릅니다. 지금은 `speech` 가 `settings`(읽을 목소리)와 `synthesis`(음성 만들기)를, `settings` 가 `synthesis`(목소리 목록)를 부릅니다. 상대가 돌려주는 것은 `...Dto` 이고 받는 쪽 어댑터가 자기 값 객체로 바꿉니다. `identity`, `guild` 는 다른 컨텍스트와 서로 모르고, `shared` 는 어느 컨텍스트도 모릅니다 ([ADR 0026](docs/adr/0026-calls-between-contexts.md), [ADR 0040](docs/adr/0040-inbound-adapters-do-not-call-other-contexts.md)).
 - 인바운드 어댑터는 입력 포트로만 애플리케이션을 부르고, 애그리거트(`Device`, `Pairing`, `BotVoiceState`, `UserSettings`)를 직접 쓰지 않고 입력 포트가 돌려주는 `...Dto` 로만 봅니다 ([ADR 0010](docs/adr/0010-use-cases-return-dtos.md)).
 - 서비스는 다른 서비스의 입력 포트(`...UseCase`)를 쓰지 않고 출력 포트와 도메인만 씁니다 ([ADR 0008](docs/adr/0008-one-service-per-use-case.md)).
 - 설정 값은 그 값을 쓰는 어댑터 패키지에 두고(`TtsProperties`, `GuildAllowlistProperties`), 어댑터는 `config` 를 쓰지 않습니다. 기본값은 `application.yml` 에, 꼭 있어야 하는 값은 `@Validated` 와 제약으로 적습니다 ([ADR 0023](docs/adr/0023-properties-per-adapter.md)).
@@ -156,7 +156,7 @@ apps/bot-server/src/main/java/io/github/phs314/quicktts/bot/
 - 유스케이스 메서드는 상태를 바꾸면 `...Command`, 조회면 `...Query` 하나를 받고, 받을 값이 없으면 인자 없이 둡니다 ([ADR 0029](docs/adr/0029-commands-and-queries.md)).
 - 컨트롤러는 웹 요청·응답을 직접 바꾸지 않고, 같은 패키지의 웹 매퍼(`DeviceWebMapper`)에 맡깁니다 ([ADR 0030](docs/adr/0030-web-mappers.md)).
 - 저장소 어댑터는 Spring Data JPA 를 쓰고, JPA 엔티티(`DeviceJpaEntity`)를 도메인과 따로 둡니다. 엔티티와 애그리거트는 같은 패키지의 퍼시스턴스 매퍼(`DevicePersistenceMapper`)가 옮기고, 도메인 클래스에는 JPA 애너테이션을 붙이지 않습니다 ([ADR 0038](docs/adr/0038-jpa-entities-with-persistence-mappers.md)).
-- 기기 토큰 인증은 스프링 시큐리티가 맡습니다. 기기 등록과 상태 확인(`/actuator/health`)만 토큰 없이 열려 있고, device 의 필터가 `Bearer` 토큰으로 연결한 디스코드 사용자를 알아내면 컨트롤러는 `@AuthenticationPrincipal DiscordUserId` 로 받습니다 ([ADR 0031](docs/adr/0031-device-token-authentication-with-spring-security.md), [ADR 0036](docs/adr/0036-health-and-metrics-with-actuator.md)).
+- 기기 토큰 인증은 스프링 시큐리티가 맡습니다. 기기 등록과 상태 확인(`/actuator/health`)만 토큰 없이 열려 있고, identity 의 필터가 `Bearer` 토큰으로 연결한 디스코드 사용자를 알아내면 컨트롤러는 `@AuthenticationPrincipal DiscordUserId` 로 받습니다 ([ADR 0031](docs/adr/0031-device-token-authentication-with-spring-security.md), [ADR 0036](docs/adr/0036-health-and-metrics-with-actuator.md)).
 - 도메인 규칙을 어겼을 때 던지는 예외는 각 컨텍스트의 `domain` 바로 아래에 둡니다. 데이터 상태로 정하는 규칙은 애그리거트와 값 객체에, 누가 부르는지로 정하는 권한은 서비스에 둡니다 ([ADR 0024](docs/adr/0024-rules-live-in-the-domain.md)).
 - 우리가 만든 예외는 모두 `BusinessException` 을 상속하고 종류(`ErrorKind`)를 가집니다. 웹은 `ApiExceptionHandler` 한 곳이 종류로 HTTP 상태를 정하고 예상하지 못한 실패까지 같은 오류 응답 모양으로 돌려주며, 디스코드 명령은 명령이 잡지 않은 실패에도 답이 가도록 감싸서 등록합니다 ([ADR 0025](docs/adr/0025-business-exceptions-by-kind.md)).
 - 출력 포트를 구현한 어댑터 이름은 `<포트 이름에서 Port 를 뺀 것><폴더 이름>Adapter` 입니다(`DevicePersistenceAdapter`, `BotOwnerDiscordAdapter`, `PairingMemoryAdapter`). 폴더 뜻이 이미 이름에 있으면 한 번만 씁니다(`GuildAllowlistEventAdapter`, `SpeechSynthesizerAdapter`). 포트를 구현하지 않는 도우미(`EdgeReadAloudEngine`, `GuildSpeechQueue`)와 Spring Data 인터페이스(`DeviceSpringDataRepository`)는 `Adapter` 를 붙이지 않고, 같은 폴더의 파일은 모두 대상 이름으로 시작합니다 ([ADR 0039](docs/adr/0039-outbound-adapters-end-with-adapter.md)).

@@ -52,7 +52,7 @@
 | ADR | 제목 | 상태 |
 | --- | --- | --- |
 | [0001](0001-hexagonal-bot-server.md) | 봇 서버는 헥사고날 구조로 짓고 ArchUnit 으로 지킨다 | 일부 대체됨 (ADR 0009, ADR 0045) |
-| [0002](0002-bounded-contexts.md) | 봇 서버를 speech, device, shared 컨텍스트로 나눈다 | 일부 대체됨 (ADR 0015, ADR 0025, ADR 0031, ADR 0047) |
+| [0002](0002-bounded-contexts.md) | 봇 서버를 speech, device, shared 컨텍스트로 나눈다 | 일부 대체됨 (ADR 0015, ADR 0025, ADR 0031, ADR 0047, ADR 0048) |
 | [0012](0012-application-subpackages.md) | application 의 유스케이스, Command, Dto, 예외를 폴더로 나눈다 | 일부 대체됨 (ADR 0024, ADR 0029, ADR 0032, ADR 0041) |
 | [0023](0023-properties-per-adapter.md) | 설정 값은 그 값을 쓰는 어댑터 패키지에 둔다 | 일부 대체됨 (ADR 0047) |
 | [0026](0026-calls-between-contexts.md) | 컨텍스트 사이 호출은 컨텍스트 지도와 공개 입구로만 한다 | 일부 대체됨 (ADR 0031, ADR 0033, ADR 0040) |
@@ -62,6 +62,7 @@
 | [0041](0041-use-cases-directly-in-port-in.md) | 입력 포트(...UseCase)는 port/in 바로 아래에 둔다 | 채택 |
 | [0045](0045-apps-libs-build-logic-layout.md) | 저장소를 apps, libs, build-logic 으로 나눈다 | 채택 |
 | [0047](0047-split-settings-and-synthesis-from-speech.md) | speech 에서 사용자 설정(settings)과 음성 만들기(synthesis)를 떼어 낸다 | 채택 |
+| [0048](0048-rename-device-context-to-identity.md) | device 컨텍스트를 identity 로 부른다 | 채택 |
 
 ### 도메인 모델
 
