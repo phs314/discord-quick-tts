@@ -27,6 +27,11 @@ public class Pairing {
         return new Pairing(PairingCode.generate(), userId, now.plus(VALID_FOR));
     }
 
+    /** 저장소에서 읽어 온 연결을 되살릴 때 쓴다. 새로 발급할 때는 {@link #issue} 를 쓴다. */
+    public static Pairing restore(PairingCode code, DiscordUserId userId, Instant expiresAt) {
+        return new Pairing(code, userId, expiresAt);
+    }
+
     /**
      * 연결 코드를 써서 이 코드를 받은 사용자를 돌려준다.
      *
@@ -49,6 +54,10 @@ public class Pairing {
 
     public DiscordUserId userId() {
         return userId;
+    }
+
+    public Instant expiresAt() {
+        return expiresAt;
     }
 
     @Override

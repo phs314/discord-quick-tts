@@ -5,6 +5,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.github.phs314.quicktts.bot.guild.adapter.out.persistence.AllowedGuildPersistenceAdapter;
 import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
 import io.github.phs314.quicktts.bot.identity.adapter.out.persistence.DevicePersistenceAdapter;
+import io.github.phs314.quicktts.bot.identity.adapter.out.persistence.PairingPersistenceAdapter;
+import io.github.phs314.quicktts.bot.identity.domain.Device;
+import io.github.phs314.quicktts.bot.identity.domain.Pairing;
+import io.github.phs314.quicktts.bot.identity.domain.vo.DeviceId;
+import io.github.phs314.quicktts.bot.identity.domain.vo.DeviceName;
+import io.github.phs314.quicktts.bot.identity.domain.vo.DeviceTokenHash;
 import io.github.phs314.quicktts.bot.settings.adapter.out.persistence.UserSettingsPersistenceAdapter;
 import io.github.phs314.quicktts.bot.settings.domain.UserSettings;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
@@ -12,10 +18,13 @@ import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.VoiceId;
 import io.github.phs314.quicktts.bot.support.TestDatabase;
 import io.github.phs314.quicktts.bot.support.TestJpa;
+import java.time.Clock;
 import java.time.Instant;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.simple.JdbcClient;
 
 /**
@@ -73,8 +82,17 @@ class ExistingH2DatabaseMigrationTest {
 
     /** 서버와 같은 JPA 설정으로 저장소 어댑터를 띄운다. 엔티티가 옛 DB 의 테이블과도 맞는지 함께 확인된다. */
     private static AnnotationConfigApplicationContext repositories(DataSource dataSource) {
-        return TestJpa.context(dataSource,
-                DevicePersistenceAdapter.class, UserSettingsPersistenceAdapter.class, AllowedGuildPersistenceAdapter.class);
+        return TestJpa.context(dataSource, SystemClock.class, DevicePersistenceAdapter.class,
+                PairingPersistenceAdapter.class, UserSettingsPersistenceAdapter.class, AllowedGuildPersistenceAdapter.class);
+    }
+
+    @Configuration
+    static class SystemClock {
+
+        @Bean
+        Clock clock() {
+            return Clock.systemUTC();
+        }
     }
 
     private static void insertDeviceAndVoice(JdbcClient jdbc) {
@@ -89,9 +107,20 @@ class ExistingH2DatabaseMigrationTest {
     }
 
     private static void assertKeepsDeviceAndVoice(AnnotationConfigApplicationContext context) {
-        assertThat(context.getBean(DevicePersistenceAdapter.class).findByUserId(OWNER))
+        var devices = context.getBean(DevicePersistenceAdapter.class);
+        assertThat(devices.findByUserId(OWNER))
                 .singleElement()
                 .satisfies(device -> assertThat(device.id().value()).isEqualTo("old-device-id"));
+        assertThat(devices.findByTokenHash(new DeviceTokenHash("a".repeat(64))))
+                .hasValueSatisfying(device -> assertThat(device.id().value()).isEqualTo("old-device-id"));
+        Device added = new Device(DeviceId.generate(), new DeviceTokenHash("b".repeat(64)), OWNER,
+                new DeviceName("노트북"), Instant.parse("2026-11-01T00:00:00Z"));
+        devices.save(added);
+        assertThat(devices.findById(added.id())).isPresent();
+        var pairings = context.getBean(PairingPersistenceAdapter.class);
+        Pairing pairing = Pairing.issue(OWNER, Instant.now());
+        pairings.save(pairing);
+        assertThat(pairings.findAndDelete(pairing.code())).isPresent();
         var settings = context.getBean(UserSettingsPersistenceAdapter.class);
         assertThat(settings.find(OWNER).flatMap(UserSettings::voiceId)).contains(new VoiceId("edge:ko-KR-SunHiNeural"));
         settings.save(new UserSettings(OWNER, new VoiceId("edge:ko-KR-InJoonNeural")));

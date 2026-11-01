@@ -18,12 +18,12 @@ import org.springframework.data.domain.Persistable;
 class DeviceJpaEntity implements Persistable<String> {
 
     @Id
-    @Column(name = "token_hash")
-    private String tokenHash;
-
-    /** 기기 식별자. 기본 키는 토큰 해시라서 JPA 의 id 와 헷갈리지 않게 이름을 바꾼다. */
     @Column(name = "id")
-    private String deviceId;
+    private String id;
+
+    /** 토큰은 다시 발급할 수 있어서 기본 키가 아니라 유일한 값으로 둔다. */
+    @Column(name = "token_hash", unique = true)
+    private String tokenHash;
 
     @Column(name = "discord_user_id")
     private long discordUserId;
@@ -44,9 +44,9 @@ class DeviceJpaEntity implements Persistable<String> {
     protected DeviceJpaEntity() {
     }
 
-    DeviceJpaEntity(String tokenHash, String deviceId, long discordUserId, String name, Instant registeredAt) {
+    DeviceJpaEntity(String id, String tokenHash, long discordUserId, String name, Instant registeredAt) {
+        this.id = id;
         this.tokenHash = tokenHash;
-        this.deviceId = deviceId;
         this.discordUserId = discordUserId;
         this.name = name;
         this.registeredAt = registeredAt;
@@ -54,10 +54,6 @@ class DeviceJpaEntity implements Persistable<String> {
 
     String getTokenHash() {
         return tokenHash;
-    }
-
-    String getDeviceId() {
-        return deviceId;
     }
 
     long getDiscordUserId() {
@@ -74,7 +70,7 @@ class DeviceJpaEntity implements Persistable<String> {
 
     @Override
     public String getId() {
-        return tokenHash;
+        return id;
     }
 
     @Override

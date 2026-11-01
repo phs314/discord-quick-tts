@@ -26,7 +26,7 @@ public class DevicePersistenceAdapter implements DevicePort {
 
     @Override
     public Optional<Device> findByTokenHash(DeviceTokenHash tokenHash) {
-        return deviceSpringDataRepository.findById(tokenHash.value())
+        return deviceSpringDataRepository.findByTokenHash(tokenHash.value())
                 .map(DevicePersistenceMapper::toDomain);
     }
 
@@ -39,13 +39,13 @@ public class DevicePersistenceAdapter implements DevicePort {
 
     @Override
     public Optional<Device> findById(DeviceId id) {
-        return deviceSpringDataRepository.findByDeviceId(id.value())
+        return deviceSpringDataRepository.findById(id.value())
                 .map(DevicePersistenceMapper::toDomain);
     }
 
     @Override
     public boolean delete(DeviceId id) {
-        return deviceSpringDataRepository.deleteByDeviceId(id.value()) > 0;
+        return deviceSpringDataRepository.deleteDeviceById(id.value()) > 0;
     }
 
     @Override
