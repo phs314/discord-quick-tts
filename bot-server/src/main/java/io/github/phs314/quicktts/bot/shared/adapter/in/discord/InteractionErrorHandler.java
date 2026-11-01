@@ -15,15 +15,15 @@ import org.slf4j.LoggerFactory;
  * 예상한 실패({@link BusinessException})는 그 문구를, 그 밖의 실패는 다시 해 달라는 안내를 보내고 로그를 남긴다.
  * 명령은 안내 문구를 바꾸고 싶은 예외만 직접 잡는다 (ADR 0025).
  */
-public class FailureReplyingListener implements EventListener {
+public class InteractionErrorHandler implements EventListener {
 
     static final String UNEXPECTED_FAILURE_REPLY = "처리하다가 문제가 생겼어요. 잠시 뒤에 다시 해 주세요.";
 
-    private static final Logger log = LoggerFactory.getLogger(FailureReplyingListener.class);
+    private static final Logger log = LoggerFactory.getLogger(InteractionErrorHandler.class);
 
     private final EventListener command;
 
-    public FailureReplyingListener(EventListener command) {
+    public InteractionErrorHandler(EventListener command) {
         this.command = Objects.requireNonNull(command);
     }
 
