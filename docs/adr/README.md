@@ -124,7 +124,8 @@
 | [0007](0007-first-come-voice-channel.md) | 같은 디스코드 서버에서는 먼저 쓰고 있는 음성 채널이 우선이다 | 일부 대체됨 (ADR 0013, ADR 0014) |
 | [0014](0014-bot-seat-aggregate.md) | 디스코드 서버별 봇 자리(BotSeat)를 speech 의 애그리거트로 둔다 | 일부 대체됨 (ADR 0043, ADR 0044) |
 | [0015](0015-guild-allowlist.md) | 봇이 머물 디스코드 서버를 허용 목록으로 정한다 (guild 컨텍스트) | 채택 |
-| [0019](0019-spoken-text-cleanup.md) | 문장은 speech 도메인에서 읽기 좋게 다듬은 뒤 엔진에 보낸다 | 채택 |
+| [0019](0019-spoken-text-cleanup.md) | 문장은 speech 도메인에서 읽기 좋게 다듬은 뒤 엔진에 보낸다 | 일부 대체됨 (ADR 0049) |
+| [0049](0049-text-normalizer.md) | 문장 다듬기 규칙은 speech/domain/normalization 의 TextNormalizer 에 둔다 | 채택 |
 | [0043](0043-play-speech-from-memory.md) | 음성은 임시 파일 없이 메모리에서 바로 재생한다 | 채택 |
 | [0046](0046-discord-shard-manager.md) | 디스코드 연결은 처음부터 ShardManager 로 만든다 | 채택 |
 
