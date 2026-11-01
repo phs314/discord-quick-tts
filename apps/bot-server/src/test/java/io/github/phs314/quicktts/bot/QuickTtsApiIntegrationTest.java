@@ -293,6 +293,20 @@ class QuickTtsApiIntegrationTest {
                 .expectStatus().isOk();
     }
 
+    @Test
+    void API_문서는_토큰_없이_열려_있고_기기_등록만_토큰_없이_부른다고_적는다() {
+        client.get().uri("/v3/api-docs")
+                .exchange()
+                .expectStatus().isOk()
+                .expectBody()
+                .jsonPath("$.components.securitySchemes.deviceToken.scheme").isEqualTo("bearer")
+                .jsonPath("$.security[0].deviceToken").exists()
+                .jsonPath("$.paths['" + QuickTtsApi.QUICK_CHAT_PATH + "'].post").exists()
+                .jsonPath("$.paths['" + QuickTtsApi.QUICK_CHAT_PATH + "'].post.parameters").doesNotExist()
+                .jsonPath("$.paths['" + QuickTtsApi.MY_VOICE_CHANNEL_PATH + "'].get").exists()
+                .jsonPath("$.paths['" + QuickTtsApi.DEVICES_PATH + "'].post.security").isEmpty();
+    }
+
     /** 디스코드 /연결 로 코드를 받아 클라이언트 첫 실행처럼 등록하고 기기 토큰을 돌려준다. */
     /** 샤드 하나가 이 상태로 디스코드에 붙어 있는 것처럼 만든다. */
     private void connectShard(JDA.Status status) {

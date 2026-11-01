@@ -50,6 +50,15 @@ management:
         quicktts.quickchat.speak: 0.5, 0.95
         quicktts.speech.queue.wait: 0.5, 0.95
 
+springdoc:
+  # 웹 API 문서. /v3/api-docs 가 OpenAPI JSON, /swagger-ui.html 이 화면이다. 토큰 없이 열린다(ADR 0054).
+  # 공개 서버에서 문서를 숨기려면 QUICKTTS_API_DOCS_ENABLED=false 로 둔다.
+  api-docs:
+    enabled: ${QUICKTTS_API_DOCS_ENABLED:true}
+  swagger-ui:
+    enabled: ${QUICKTTS_API_DOCS_ENABLED:true}
+  default-produces-media-type: application/json
+
 quicktts:
   discord:
     token: ${DISCORD_TOKEN:}
