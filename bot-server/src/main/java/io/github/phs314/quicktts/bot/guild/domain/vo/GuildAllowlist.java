@@ -17,20 +17,20 @@ public record GuildAllowlist(boolean enabled, Set<GuildId> guilds) {
     }
 
     /** 봇이 이 디스코드 서버에 머물러도 되는지. */
-    public boolean permits(GuildId guildId) {
+    public boolean allows(GuildId guildId) {
         return !enabled || guilds.contains(guildId);
     }
 
     /** 봇이 들어가 있는 디스코드 서버 중 나가야 하는 곳. */
-    public List<GuildId> notPermitted(List<GuildId> joined) {
-        return joined.stream().filter(guildId -> !permits(guildId)).toList();
+    public List<GuildId> notAllowed(List<GuildId> joined) {
+        return joined.stream().filter(guildId -> !allows(guildId)).toList();
     }
 
     /**
      * 처음 채워야 하는지. 허용 목록을 쓰는데 비어 있으면, 봇 주인이 이미 쓰던 디스코드 서버에서 쫓겨나지 않게
      * 봇이 지금 들어가 있는 디스코드 서버를 모두 넣는다.
      */
-    public boolean needsFirstFill() {
+    public boolean needsSeeding() {
         return enabled && guilds.isEmpty();
     }
 }

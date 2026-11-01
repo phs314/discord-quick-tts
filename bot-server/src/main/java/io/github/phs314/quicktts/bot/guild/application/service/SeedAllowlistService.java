@@ -1,6 +1,6 @@
 package io.github.phs314.quicktts.bot.guild.application.service;
 
-import io.github.phs314.quicktts.bot.guild.application.port.in.FillEmptyAllowlistUseCase;
+import io.github.phs314.quicktts.bot.guild.application.port.in.SeedAllowlistUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.out.AllowedGuildPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.GuildAllowlistSettingPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.JoinedGuildPort;
@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-public class FillEmptyAllowlistService implements FillEmptyAllowlistUseCase {
+public class SeedAllowlistService implements SeedAllowlistUseCase {
 
     private final AllowedGuildPort allowedGuildPort;
     private final JoinedGuildPort joinedGuildPort;
@@ -29,8 +29,8 @@ public class FillEmptyAllowlistService implements FillEmptyAllowlistUseCase {
      */
     @Override
     @Transactional
-    public void fillIfEmpty() {
-        if (!currentAllowlist().needsFirstFill()) {
+    public void seedIfEmpty() {
+        if (!currentAllowlist().needsSeeding()) {
             return;
         }
         Instant now = clock.instant();

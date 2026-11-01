@@ -3,14 +3,14 @@ package io.github.phs314.quicktts.bot.guild.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import io.github.phs314.quicktts.bot.guild.adapter.in.event.GuildDisallowedListener;
+import io.github.phs314.quicktts.bot.guild.adapter.in.event.GuildRemovedFromAllowlistListener;
 import io.github.phs314.quicktts.bot.guild.adapter.out.event.GuildAllowlistEventAdapter;
 import io.github.phs314.quicktts.bot.guild.adapter.out.persistence.AllowedGuildPersistenceAdapter;
-import io.github.phs314.quicktts.bot.guild.application.port.in.DisallowGuildUseCase;
-import io.github.phs314.quicktts.bot.guild.application.port.in.FillEmptyAllowlistUseCase;
+import io.github.phs314.quicktts.bot.guild.application.port.in.RemoveFromAllowlistUseCase;
+import io.github.phs314.quicktts.bot.guild.application.port.in.SeedAllowlistUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.LeaveAllNotAllowedGuildsUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.LeaveNotAllowedGuildUseCase;
-import io.github.phs314.quicktts.bot.guild.application.port.in.command.DisallowGuildCommand;
+import io.github.phs314.quicktts.bot.guild.application.port.in.command.RemoveFromAllowlistCommand;
 import io.github.phs314.quicktts.bot.guild.application.port.out.FakeGuildAllowlistSettingPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.FakeJoinedGuildPort;
 import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
@@ -54,13 +54,13 @@ class GuildAllowlistTransactionTest {
     private static final GuildId STRANGER = new GuildId(2L);
 
     @Autowired
-    FillEmptyAllowlistUseCase fillEmptyAllowlistUseCase;
+    SeedAllowlistUseCase seedAllowlistUseCase;
 
     @Autowired
     LeaveAllNotAllowedGuildsUseCase leaveAllNotAllowedGuildsUseCase;
 
     @Autowired
-    DisallowGuildUseCase disallowGuildUseCase;
+    RemoveFromAllowlistUseCase removeFromAllowlistUseCase;
 
     @Autowired
     AllowedGuildPersistenceAdapter repository;
@@ -75,7 +75,7 @@ class GuildAllowlistTransactionTest {
         joinedGuildPort.join(STRANGER);
         joinedGuildPort.join(MINE);
 
-        assertThatThrownBy(fillEmptyAllowlistUseCase::fillIfEmpty).isInstanceOf(DataIntegrityViolationException.class);
+        assertThatThrownBy(seedAllowlistUseCase::seedIfEmpty).isInstanceOf(DataIntegrityViolationException.class);
 
         // 일부만 남았다면 다음에 켤 때 목록이 비어 있지 않아서 남은 디스코드 서버에서 나가게 된다.
         assertThat(repository.findAll()).isEmpty();
@@ -87,7 +87,7 @@ class GuildAllowlistTransactionTest {
         joinedGuildPort.join(MINE);
         joinedGuildPort.join(STRANGER);
 
-        fillEmptyAllowlistUseCase.fillIfEmpty();
+        seedAllowlistUseCase.seedIfEmpty();
         leaveAllNotAllowedGuildsUseCase.leaveAllNotAllowed();
 
         assertThat(joinedGuildPort.left()).containsExactly(STRANGER);
@@ -101,7 +101,7 @@ class GuildAllowlistTransactionTest {
         joinedGuildPort.join(MINE);
         joinedGuildPort.join(STRANGER);
 
-        disallowGuildUseCase.disallow(new DisallowGuildCommand(OWNER, STRANGER));
+        removeFromAllowlistUseCase.remove(new RemoveFromAllowlistCommand(OWNER, STRANGER));
 
         assertThat(repository.findAll()).extracting(AllowedGuild::guildId).containsExactly(MINE);
         assertThat(joinedGuildPort.left()).containsExactly(STRANGER);
@@ -168,9 +168,9 @@ class GuildAllowlistTransactionTest {
         }
 
         @Bean
-        FillEmptyAllowlistService fillEmptyAllowlistService(
+        SeedAllowlistService seedAllowlistService(
                 AllowedGuildPersistenceAdapter repository, TransactionRecordingJoinedGuildPort joinedGuildPort) {
-            return new FillEmptyAllowlistService(repository, joinedGuildPort,
+            return new SeedAllowlistService(repository, joinedGuildPort,
                     new FakeGuildAllowlistSettingPort(), Clock.fixed(NOW, ZoneOffset.UTC));
         }
 
@@ -187,15 +187,15 @@ class GuildAllowlistTransactionTest {
         }
 
         @Bean
-        DisallowGuildService disallowGuildService(
+        RemoveFromAllowlistService removeFromAllowlistService(
                 AllowedGuildPersistenceAdapter repository, ApplicationEventPublisher applicationEventPublisher) {
-            return new DisallowGuildService(() -> OWNER, repository,
+            return new RemoveFromAllowlistService(() -> OWNER, repository,
                     new GuildAllowlistEventAdapter(applicationEventPublisher));
         }
 
         @Bean
-        GuildDisallowedListener guildDisallowedListener(LeaveNotAllowedGuildUseCase leaveNotAllowedGuildUseCase) {
-            return new GuildDisallowedListener(leaveNotAllowedGuildUseCase);
+        GuildRemovedFromAllowlistListener guildRemovedFromAllowlistListener(LeaveNotAllowedGuildUseCase leaveNotAllowedGuildUseCase) {
+            return new GuildRemovedFromAllowlistListener(leaveNotAllowedGuildUseCase);
         }
     }
 }

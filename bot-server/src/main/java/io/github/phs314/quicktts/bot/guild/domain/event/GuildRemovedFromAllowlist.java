@@ -8,5 +8,5 @@ import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
  *
  * @param guildId 허용 목록에서 뺀 디스코드 서버
  */
-public record GuildDisallowed(GuildId guildId) {
+public record GuildRemovedFromAllowlist(GuildId guildId) {
 }

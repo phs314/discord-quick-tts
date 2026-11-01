@@ -21,10 +21,10 @@ public class LeaveAllNotAllowedGuildsService implements LeaveAllNotAllowedGuilds
     @Override
     public void leaveAllNotAllowed() {
         GuildAllowlist allowlist = currentAllowlist();
-        if (allowlist.needsFirstFill()) {
+        if (allowlist.needsSeeding()) {
             return;
         }
-        allowlist.notPermitted(joinedGuildPort.joinedGuilds()).forEach(joinedGuildPort::leaveWithNotice);
+        allowlist.notAllowed(joinedGuildPort.joinedGuilds()).forEach(joinedGuildPort::leaveWithNotice);
     }
 
     private GuildAllowlist currentAllowlist() {

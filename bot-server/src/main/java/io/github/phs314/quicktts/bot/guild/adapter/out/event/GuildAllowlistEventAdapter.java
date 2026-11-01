@@ -1,7 +1,7 @@
 package io.github.phs314.quicktts.bot.guild.adapter.out.event;
 
 import io.github.phs314.quicktts.bot.guild.application.port.out.GuildAllowlistEventPort;
-import io.github.phs314.quicktts.bot.guild.domain.event.GuildDisallowed;
+import io.github.phs314.quicktts.bot.guild.domain.event.GuildRemovedFromAllowlist;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
@@ -14,7 +14,7 @@ public class GuildAllowlistEventAdapter implements GuildAllowlistEventPort {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
-    public void publish(GuildDisallowed event) {
+    public void publish(GuildRemovedFromAllowlist event) {
         applicationEventPublisher.publishEvent(event);
     }
 }

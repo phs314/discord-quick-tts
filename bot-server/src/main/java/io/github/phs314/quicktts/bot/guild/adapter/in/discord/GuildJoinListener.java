@@ -1,6 +1,6 @@
 package io.github.phs314.quicktts.bot.guild.adapter.in.discord;
 
-import io.github.phs314.quicktts.bot.guild.application.port.in.FillEmptyAllowlistUseCase;
+import io.github.phs314.quicktts.bot.guild.application.port.in.SeedAllowlistUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.LeaveAllNotAllowedGuildsUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.LeaveNotAllowedGuildUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.command.LeaveIfNotAllowedCommand;
@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class GuildJoinListener extends ListenerAdapter {
 
-    private final FillEmptyAllowlistUseCase fillEmptyAllowlistUseCase;
+    private final SeedAllowlistUseCase seedAllowlistUseCase;
     private final LeaveAllNotAllowedGuildsUseCase leaveAllNotAllowedGuildsUseCase;
     private final LeaveNotAllowedGuildUseCase leaveNotAllowedGuildUseCase;
 
@@ -29,7 +29,7 @@ public class GuildJoinListener extends ListenerAdapter {
      */
     @EventListener(ApplicationReadyEvent.class)
     void leaveNotAllowedGuildsOnStartup() {
-        fillEmptyAllowlistUseCase.fillIfEmpty();
+        seedAllowlistUseCase.seedIfEmpty();
         leaveAllNotAllowedGuildsUseCase.leaveAllNotAllowed();
     }
 
