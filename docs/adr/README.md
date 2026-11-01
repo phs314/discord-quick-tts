@@ -70,6 +70,7 @@
 | --- | --- | --- |
 | [0003](0003-value-objects-and-aggregates.md) | 값 객체는 domain/vo 의 record, 애그리거트는 식별자로 비교하는 class | 일부 대체됨 (ADR 0014) |
 | [0024](0024-rules-live-in-the-domain.md) | 데이터 상태로 정하는 규칙은 애그리거트와 값 객체에 둔다 | 일부 대체됨 (ADR 0032) |
+| [0052](0052-domain-model-tidy.md) | 도메인 모델을 작게 바로잡는다: 채널 ID, 화면용 채널 정보, 되살리기, 음성 배열, 허용 목록 확인 | 채택 |
 
 ### 이름
 
@@ -86,7 +87,7 @@
 | --- | --- | --- |
 | [0008](0008-one-service-per-use-case.md) | 서비스는 유스케이스(입력 포트) 하나만 구현한다 | 일부 대체됨 (ADR 0014, ADR 0032, ADR 0042) |
 | [0009](0009-spring-annotations-on-services.md) | 서비스에는 @Service, @RequiredArgsConstructor 를 붙이고 @Transactional 은 필요한 곳에만 쓴다 | 일부 대체됨 (ADR 0011, ADR 0028, ADR 0033) |
-| [0010](0010-use-cases-return-dtos.md) | 유스케이스는 애그리거트 대신 Dto 를 돌려준다 | 일부 대체됨 (ADR 0030, ADR 0032, ADR 0041) |
+| [0010](0010-use-cases-return-dtos.md) | 유스케이스는 애그리거트 대신 Dto 를 돌려준다 | 일부 대체됨 (ADR 0030, ADR 0032, ADR 0041, ADR 0052) |
 | [0011](0011-lombok-constructors-for-beans.md) | 필드 주입만 하는 스프링 빈은 모두 @RequiredArgsConstructor 를 쓴다 | 채택 |
 | [0029](0029-commands-and-queries.md) | 유스케이스는 Command 나 Query 하나를 받는다 | 일부 대체됨 (ADR 0031, ADR 0032, ADR 0042) |
 | [0042](0042-one-method-per-use-case.md) | 유스케이스(입력 포트) 하나에는 메서드 하나만 둔다 | 채택 |

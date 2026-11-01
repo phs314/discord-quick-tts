@@ -26,9 +26,10 @@ import io.github.phs314.quicktts.bot.speech.application.exception.VoiceChannelIn
 import io.github.phs314.quicktts.bot.speech.application.port.in.FindCurrentUserVoiceChannelUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
+import io.github.phs314.quicktts.bot.speech.application.port.in.dto.VoiceChannelDto;
 import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindCurrentUserVoiceChannelQuery;
+import io.github.phs314.quicktts.bot.speech.domain.vo.ChannelId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
-import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -127,7 +128,7 @@ class QuickChatControllerTest {
     @Test
     void 봇이_다른_채널에서_쓰이고_있으면_409_와_voice_channel_in_use() throws Exception {
         willThrow(new VoiceChannelInUseException(
-                new VoiceChannelDetails(new VoiceChannel(new GuildId(1L), 3L), "우리 서버", null, "게임")))
+                new VoiceChannelDto(new VoiceChannel(new GuildId(1L), new ChannelId(3L)), "우리 서버", null, "게임")))
                 .given(speak).speak(any());
         sendQuickChat("안녕")
                 .andExpect(status().isConflict())
@@ -136,7 +137,7 @@ class QuickChatControllerTest {
 
     @Test
     void 봇이_보낸_사람의_채널에_들어갈_수_없으면_403_과_bot_cannot_join_voice_channel() throws Exception {
-        willThrow(new BotCannotJoinVoiceChannelException(new VoiceChannel(new GuildId(1L), 2L), null))
+        willThrow(new BotCannotJoinVoiceChannelException(new VoiceChannel(new GuildId(1L), new ChannelId(2L)), null))
                 .given(speak).speak(any());
         sendQuickChat("안녕")
                 .andExpect(status().isForbidden())

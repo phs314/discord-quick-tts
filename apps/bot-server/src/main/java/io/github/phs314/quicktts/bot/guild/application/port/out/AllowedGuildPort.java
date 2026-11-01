@@ -12,6 +12,9 @@ public interface AllowedGuildPort {
     /** 넣은 순서대로 */
     List<AllowedGuild> findAll();
 
+    /** 이 디스코드 서버가 허용 목록에 들어 있는지. 서버 하나를 볼 때 목록 전체를 읽지 않는다. */
+    boolean exists(GuildId guildId);
+
     /** @return 새로 넣었으면 true, 이미 있었으면 false */
     boolean saveIfAbsent(AllowedGuild allowedGuild);
 

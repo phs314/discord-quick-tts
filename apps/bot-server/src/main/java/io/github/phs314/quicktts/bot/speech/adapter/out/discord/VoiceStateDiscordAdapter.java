@@ -2,9 +2,10 @@ package io.github.phs314.quicktts.bot.speech.adapter.out.discord;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
+import io.github.phs314.quicktts.bot.speech.application.port.in.dto.VoiceChannelDto;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceStatePort;
+import io.github.phs314.quicktts.bot.speech.domain.vo.ChannelId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
-import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class VoiceStateDiscordAdapter implements VoiceStatePort {
     private final ShardManager shardManager;
 
     @Override
-    public Optional<VoiceChannelDetails> findUserVoiceChannel(DiscordUserId user) {
+    public Optional<VoiceChannelDto> findUserVoiceChannel(DiscordUserId user) {
         return shardManager.getGuilds().stream()
                 .map(guild -> guild.getMemberById(user.value()))
                 .filter(Objects::nonNull)
@@ -35,7 +36,7 @@ public class VoiceStateDiscordAdapter implements VoiceStatePort {
     }
 
     @Override
-    public Optional<VoiceChannelDetails> findChannelDetails(VoiceChannel channel) {
+    public Optional<VoiceChannelDto> findChannelDetails(VoiceChannel channel) {
         return findAudioChannel(channel).map(audioChannel -> toDetails(audioChannel.getGuild(), audioChannel));
     }
 
@@ -48,18 +49,18 @@ public class VoiceStateDiscordAdapter implements VoiceStatePort {
 
     private Optional<AudioChannel> findAudioChannel(VoiceChannel channel) {
         Guild guild = shardManager.getGuildById(channel.guildId().value());
-        return Optional.ofNullable(guild == null ? null : guild.getChannelById(AudioChannel.class, channel.channelId()));
+        return Optional.ofNullable(guild == null ? null : guild.getChannelById(AudioChannel.class, channel.channelId().value()));
     }
 
-    private static Optional<VoiceChannelDetails> currentChannel(Member member) {
+    private static Optional<VoiceChannelDto> currentChannel(Member member) {
         GuildVoiceState voiceState = member.getVoiceState();
         AudioChannel channel = voiceState == null ? null : voiceState.getChannel();
         return channel == null ? Optional.empty() : Optional.of(toDetails(member.getGuild(), channel));
     }
 
-    private static VoiceChannelDetails toDetails(Guild guild, AudioChannel channel) {
-        return new VoiceChannelDetails(
-                new VoiceChannel(new GuildId(guild.getIdLong()), channel.getIdLong()),
+    private static VoiceChannelDto toDetails(Guild guild, AudioChannel channel) {
+        return new VoiceChannelDto(
+                new VoiceChannel(new GuildId(guild.getIdLong()), new ChannelId(channel.getIdLong())),
                 guild.getName(),
                 guild.getIconUrl(),
                 channel.getName());

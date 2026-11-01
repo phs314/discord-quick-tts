@@ -2,6 +2,7 @@ package io.github.phs314.quicktts.bot.speech.application.port.out;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Audio;
+import io.github.phs314.quicktts.bot.speech.domain.vo.ChannelId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -25,7 +26,7 @@ public class FakeSpeechPlayerPort implements SpeechPlayerPort {
 
     @Override
     public void join(VoiceChannel channel) {
-        actions.add("join:" + channel.channelId());
+        actions.add("join:" + channel.channelId().value());
     }
 
     @Override

@@ -6,6 +6,7 @@ import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.SyncBotVoiceStateCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeBotVoiceStatePort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechPlayerPort;
+import io.github.phs314.quicktts.bot.speech.domain.vo.ChannelId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -13,8 +14,8 @@ import org.junit.jupiter.api.Test;
 class SyncBotVoiceStateServiceTest {
 
     private static final GuildId GUILD = new GuildId(1L);
-    private static final VoiceChannel GENERAL = new VoiceChannel(GUILD, 2L);
-    private static final VoiceChannel GAME = new VoiceChannel(GUILD, 3L);
+    private static final VoiceChannel GENERAL = new VoiceChannel(GUILD, new ChannelId(2L));
+    private static final VoiceChannel GAME = new VoiceChannel(GUILD, new ChannelId(3L));
 
     private final FakeSpeechPlayerPort player = new FakeSpeechPlayerPort();
     private final FakeBotVoiceStatePort states = new FakeBotVoiceStatePort();

@@ -1,8 +1,8 @@
 package io.github.phs314.quicktts.bot.speech.application.port.out;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
+import io.github.phs314.quicktts.bot.speech.application.port.in.dto.VoiceChannelDto;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
-import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -14,12 +14,12 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class FakeVoiceStatePort implements VoiceStatePort {
 
-    private final Map<DiscordUserId, VoiceChannelDetails> speakers = new ConcurrentHashMap<>();
-    private final Map<VoiceChannel, VoiceChannelDetails> channels = new ConcurrentHashMap<>();
+    private final Map<DiscordUserId, VoiceChannelDto> speakers = new ConcurrentHashMap<>();
+    private final Map<VoiceChannel, VoiceChannelDto> channels = new ConcurrentHashMap<>();
     private final Set<VoiceChannel> channelsWithPeople = ConcurrentHashMap.newKeySet();
 
     /** 사용자가 그 음성 채널에 들어간다. 채널에 사람이 생긴다. */
-    public void enter(DiscordUserId user, VoiceChannelDetails details) {
+    public void enter(DiscordUserId user, VoiceChannelDto details) {
         speakers.put(user, details);
         channels.put(details.channel(), details);
         channelsWithPeople.add(details.channel());
@@ -38,12 +38,12 @@ public class FakeVoiceStatePort implements VoiceStatePort {
     }
 
     @Override
-    public Optional<VoiceChannelDetails> findUserVoiceChannel(DiscordUserId user) {
+    public Optional<VoiceChannelDto> findUserVoiceChannel(DiscordUserId user) {
         return Optional.ofNullable(speakers.get(user));
     }
 
     @Override
-    public Optional<VoiceChannelDetails> findChannelDetails(VoiceChannel channel) {
+    public Optional<VoiceChannelDto> findChannelDetails(VoiceChannel channel) {
         return Optional.ofNullable(channels.get(channel));
     }
 

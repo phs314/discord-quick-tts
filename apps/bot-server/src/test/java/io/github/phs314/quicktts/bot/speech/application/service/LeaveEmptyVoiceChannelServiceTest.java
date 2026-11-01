@@ -5,19 +5,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.LeaveEmptyVoiceChannelCommand;
+import io.github.phs314.quicktts.bot.speech.application.port.in.dto.VoiceChannelDto;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeBotVoiceStatePort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeVoiceStatePort;
+import io.github.phs314.quicktts.bot.speech.domain.vo.ChannelId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
-import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import org.junit.jupiter.api.Test;
 
 class LeaveEmptyVoiceChannelServiceTest {
 
     private static final GuildId GUILD = new GuildId(1L);
     private static final DiscordUserId USER = new DiscordUserId(42L);
-    private static final VoiceChannelDetails GENERAL =
-            new VoiceChannelDetails(new VoiceChannel(GUILD, 2L), "우리 서버", null, "일반");
+    private static final VoiceChannelDto GENERAL =
+            new VoiceChannelDto(new VoiceChannel(GUILD, new ChannelId(2L)), "우리 서버", null, "일반");
 
     private final FakeVoiceStatePort discord = new FakeVoiceStatePort();
     private final FakeSpeechPlayerPort player = new FakeSpeechPlayerPort();
@@ -52,7 +53,7 @@ class LeaveEmptyVoiceChannelServiceTest {
         assertThat(player.actions()).isEmpty();
     }
 
-    private void join(VoiceChannelDetails details) {
+    private void join(VoiceChannelDto details) {
         discord.enter(USER, details);
         states.withLockedState(GUILD, state -> state.join(details.channel(), discord::hasHumanMembers));
     }

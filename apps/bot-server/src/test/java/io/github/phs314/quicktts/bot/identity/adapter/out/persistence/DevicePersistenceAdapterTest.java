@@ -93,6 +93,6 @@ class DevicePersistenceAdapterTest {
     }
 
     private static Device device(DiscordUserId userId, String hashSeed, String name, Instant registeredAt) {
-        return new Device(DeviceId.generate(), new DeviceTokenHash(hashSeed.repeat(64)), userId, new DeviceName(name), registeredAt);
+        return Device.restore(DeviceId.generate(), new DeviceTokenHash(hashSeed.repeat(64)), userId, new DeviceName(name), registeredAt);
     }
 }

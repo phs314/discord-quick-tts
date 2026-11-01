@@ -113,7 +113,7 @@ class ExistingH2DatabaseMigrationTest {
                 .satisfies(device -> assertThat(device.id().value()).isEqualTo("old-device-id"));
         assertThat(devices.findByTokenHash(new DeviceTokenHash("a".repeat(64))))
                 .hasValueSatisfying(device -> assertThat(device.id().value()).isEqualTo("old-device-id"));
-        Device added = new Device(DeviceId.generate(), new DeviceTokenHash("b".repeat(64)), OWNER,
+        Device added = Device.restore(DeviceId.generate(), new DeviceTokenHash("b".repeat(64)), OWNER,
                 new DeviceName("노트북"), Instant.parse("2026-11-01T00:00:00Z"));
         devices.save(added);
         assertThat(devices.findById(added.id())).isPresent();

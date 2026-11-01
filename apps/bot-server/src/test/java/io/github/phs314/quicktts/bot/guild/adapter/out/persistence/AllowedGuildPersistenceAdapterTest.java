@@ -73,6 +73,14 @@ class AllowedGuildPersistenceAdapterTest {
     }
 
     @Test
+    void 넣은_서버만_있다고_답한다() {
+        repository.saveIfAbsent(AllowedGuild.allow(FIRST, EARLIER));
+
+        assertThat(repository.exists(FIRST)).isTrue();
+        assertThat(repository.exists(SECOND)).isFalse();
+    }
+
+    @Test
     void 한꺼번에_넣는다() {
         repository.saveAll(List.of(AllowedGuild.allow(FIRST, EARLIER), AllowedGuild.allow(SECOND, EARLIER)));
 

@@ -1,12 +1,12 @@
 package io.github.phs314.quicktts.bot.speech.adapter.in.web;
 
-import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
-import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
-import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindCurrentUserVoiceChannelQuery;
-import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
-import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import io.github.phs314.quicktts.api.QuickChatRequest;
 import io.github.phs314.quicktts.api.VoiceChannelResponse;
+import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
+import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
+import io.github.phs314.quicktts.bot.speech.application.port.in.dto.VoiceChannelDto;
+import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindCurrentUserVoiceChannelQuery;
+import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
 
 /**
  * {@link QuickChatController} 의 웹 요청·응답과 유스케이스 입력·결과를 서로 바꾼다 (ADR 0030).
@@ -25,7 +25,7 @@ final class QuickChatWebMapper {
         return new FindCurrentUserVoiceChannelQuery(user);
     }
 
-    static VoiceChannelResponse toResponse(VoiceChannelDetails details) {
+    static VoiceChannelResponse toResponse(VoiceChannelDto details) {
         return new VoiceChannelResponse(details.guildName(), details.guildIconUrl(), details.channelName());
     }
 }

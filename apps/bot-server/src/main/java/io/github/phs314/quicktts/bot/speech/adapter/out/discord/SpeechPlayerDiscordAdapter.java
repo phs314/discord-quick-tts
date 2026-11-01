@@ -14,6 +14,7 @@ import io.github.phs314.quicktts.bot.speech.application.exception.BotCannotJoinV
 import io.github.phs314.quicktts.bot.speech.application.exception.UnplayableAudioException;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Audio;
+import io.github.phs314.quicktts.bot.speech.domain.vo.ChannelId;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import jakarta.annotation.PreDestroy;
 import java.util.Map;
@@ -56,7 +57,7 @@ public class SpeechPlayerDiscordAdapter implements SpeechPlayerPort {
     @Override
     public void join(VoiceChannel channel) {
         Guild guild = shardManager.getGuildById(channel.guildId().value());
-        AudioChannel audioChannel = guild == null ? null : guild.getChannelById(AudioChannel.class, channel.channelId());
+        AudioChannel audioChannel = guild == null ? null : guild.getChannelById(AudioChannel.class, channel.channelId().value());
         if (audioChannel == null) {
             log.warn("음성 채널을 찾을 수 없습니다: {}", channel);
             return;

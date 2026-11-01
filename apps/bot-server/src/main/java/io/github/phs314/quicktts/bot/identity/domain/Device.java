@@ -24,8 +24,7 @@ public class Device {
     /** 등록 시각 */
     private final Instant registeredAt;
 
-    /** 저장소에서 읽어 온 기기를 되살릴 때 쓴다. 새로 등록할 때는 {@link #register} 를 쓴다. */
-    public Device(DeviceId id, DeviceTokenHash tokenHash, DiscordUserId userId, DeviceName name, Instant registeredAt) {
+    private Device(DeviceId id, DeviceTokenHash tokenHash, DiscordUserId userId, DeviceName name, Instant registeredAt) {
         this.id = Objects.requireNonNull(id);
         this.tokenHash = Objects.requireNonNull(tokenHash);
         this.userId = Objects.requireNonNull(userId);
@@ -35,6 +34,12 @@ public class Device {
 
     public static Device register(DeviceToken token, DiscordUserId userId, DeviceName name, Instant now) {
         return new Device(DeviceId.generate(), token.hash(), userId, name, now);
+    }
+
+    /** 저장소에서 읽어 온 기기를 되살릴 때 쓴다. 새로 등록할 때는 {@link #register} 를 쓴다. */
+    public static Device restore(DeviceId id, DeviceTokenHash tokenHash, DiscordUserId userId, DeviceName name,
+            Instant registeredAt) {
+        return new Device(id, tokenHash, userId, name, registeredAt);
     }
 
     /** 그 사용자의 기기인지. 기기를 보거나 해제할 수 있는 사람은 그 사용자뿐이다. */
