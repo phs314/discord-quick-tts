@@ -16,9 +16,9 @@ import java.util.Set;
  * 입력창을 여는 전역 단축키. 설정 파일에는 {@code Ctrl+Shift+Space} 처럼 글자로 저장한다.
  * 키 번호는 JNativeHook 의 {@code VC_} 값이라 키보드 배치나 한/영 상태와 상관없이 같은 키를 가리킨다.
  */
-public record Hotkey(boolean ctrl, boolean alt, boolean shift, boolean win, int keyCode) {
+public record Keybind(boolean ctrl, boolean alt, boolean shift, boolean win, int keyCode) {
 
-    public static final Hotkey DEFAULT = new Hotkey(true, false, true, false, NativeKeyEvent.VC_SPACE);
+    public static final Keybind DEFAULT = new Keybind(true, false, true, false, NativeKeyEvent.VC_SPACE);
 
     /** 단독으로는 단축키의 주 키가 될 수 없는 조합 키. */
     private static final Set<Integer> MODIFIER_KEYS = Set.of(
@@ -41,7 +41,7 @@ public record Hotkey(boolean ctrl, boolean alt, boolean shift, boolean win, int 
     }
 
     /** 키 입력을 단축키로 바꾼다. 조합 키만 눌렀거나 이름을 모르는 키면 비어 있다. */
-    public static Optional<Hotkey> fromEvent(int modifiers, int pressedKeyCode) {
+    public static Optional<Keybind> fromEvent(int modifiers, int pressedKeyCode) {
         if (MODIFIER_KEYS.contains(pressedKeyCode) || !KEY_NAMES.containsKey(pressedKeyCode)) {
             return Optional.empty();
         }
@@ -49,7 +49,7 @@ public record Hotkey(boolean ctrl, boolean alt, boolean shift, boolean win, int 
     }
 
     /** {@code Ctrl+Shift+Space} 같은 글자를 읽는다. 대소문자는 가리지 않고, 못 읽거나 쓸 수 없는 단축키면 비어 있다. */
-    public static Optional<Hotkey> parse(String text) {
+    public static Optional<Keybind> parse(String text) {
         boolean ctrl = false, alt = false, shift = false, win = false;
         Integer keyCode = null;
         for (String part : text.split("\\+")) {
@@ -73,8 +73,8 @@ public record Hotkey(boolean ctrl, boolean alt, boolean shift, boolean win, int 
         if (keyCode == null) {
             return Optional.empty();
         }
-        Hotkey hotkey = new Hotkey(ctrl, alt, shift, win, keyCode);
-        return hotkey.validationProblem().isEmpty() ? Optional.of(hotkey) : Optional.empty();
+        Keybind keybind = new Keybind(ctrl, alt, shift, win, keyCode);
+        return keybind.validationProblem().isEmpty() ? Optional.of(keybind) : Optional.empty();
     }
 
     @Override
@@ -97,8 +97,8 @@ public record Hotkey(boolean ctrl, boolean alt, boolean shift, boolean win, int 
         return KEY_NAMES.getOrDefault(keyCode, "").matches("F\\d+");
     }
 
-    private static Hotkey of(int modifiers, int keyCode) {
-        return new Hotkey(
+    private static Keybind of(int modifiers, int keyCode) {
+        return new Keybind(
                 (modifiers & NativeKeyEvent.CTRL_MASK) != 0,
                 (modifiers & NativeKeyEvent.ALT_MASK) != 0,
                 (modifiers & NativeKeyEvent.SHIFT_MASK) != 0,

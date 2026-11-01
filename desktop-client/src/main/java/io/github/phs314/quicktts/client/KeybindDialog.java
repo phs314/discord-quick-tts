@@ -13,10 +13,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 /**
- * 트레이 메뉴의 Change Shortcut... 으로 여는 창. 새 단축키를 직접 눌러서 정한다.
- * 키 입력은 {@link GlobalHotkey} 가 받아 {@link #onPressed(Hotkey)} 로 넘겨 준다.
+ * 트레이 메뉴의 Change Keybind... 으로 여는 창. 새 단축키를 직접 눌러서 정한다.
+ * 키 입력은 {@link GlobalKeybind} 가 받아 {@link #onPressed(Keybind)} 로 넘겨 준다.
  */
-final class HotkeyDialog {
+final class KeybindDialog {
 
     private static final PseudoClass NEW = PseudoClass.getPseudoClass("new");
     private static final PseudoClass INVALID = PseudoClass.getPseudoClass("invalid");
@@ -29,12 +29,12 @@ final class HotkeyDialog {
     private final Label message = new Label();
     private final Button saveButton = ThemedWindow.button("저장", "primary");
     private final ThemedWindow window;
-    private Hotkey chosen;
-    private Hotkey result;
+    private Keybind chosen;
+    private Keybind result;
 
-    HotkeyDialog(Hotkey current) {
+    KeybindDialog(Keybind current) {
         window = new ThemedWindow("단축키 바꾸기", body(), footer());
-        // 누른 키는 GlobalHotkey 로 받으니, 창 안에서는 Space 로 버튼이 눌리는 일 없게 키 입력을 막는다. Esc 만 닫기로 둔다.
+        // 누른 키는 GlobalKeybind 로 받으니, 창 안에서는 Space 로 버튼이 눌리는 일 없게 키 입력을 막는다. Esc 만 닫기로 둔다.
         window.scene().addEventFilter(KeyEvent.ANY, event -> {
             boolean plainEscape = event.getCode() == KeyCode.ESCAPE && !event.isControlDown()
                     && !event.isAltDown() && !event.isShiftDown() && !event.isMetaDown();
@@ -46,20 +46,20 @@ final class HotkeyDialog {
     }
 
     /** 창을 띄우고 닫힐 때까지 기다린다. 저장을 눌렀을 때만 새 단축키가 있다. */
-    Optional<Hotkey> showAndWait() {
+    Optional<Keybind> showAndWait() {
         window.showAndWait();
         return Optional.ofNullable(result);
     }
 
     /** 누른 키 조합을 보여 준다. 어느 스레드에서 불러도 된다. */
-    void onPressed(Hotkey hotkey) {
+    void onPressed(Keybind keybind) {
         Platform.runLater(() -> {
-            if (hotkey.validationProblem().isPresent()) {
+            if (keybind.validationProblem().isPresent()) {
                 chosen = null;
-                display(hotkey, hotkey.validationProblem().get(), false);
+                display(keybind, keybind.validationProblem().get(), false);
             } else {
-                chosen = hotkey;
-                display(hotkey, hotkey.win()
+                chosen = keybind;
+                display(keybind, keybind.win()
                         ? "저장을 누르면 바로 바뀌어요. Win 이 들어간 조합은 윈도우가 먼저 가로챌 수 있어요."
                         : "저장을 누르면 바로 바뀌어요.", true);
             }
@@ -81,8 +81,8 @@ final class HotkeyDialog {
     }
 
     private Node footer() {
-        Button reset = ThemedWindow.button("기본값으로 (" + Hotkey.DEFAULT + ")", "reset");
-        reset.setOnAction(event -> onPressed(Hotkey.DEFAULT));
+        Button reset = ThemedWindow.button("기본값으로 (" + Keybind.DEFAULT + ")", "reset");
+        reset.setOnAction(event -> onPressed(Keybind.DEFAULT));
         Button cancel = ThemedWindow.button("취소", "cancel");
         cancel.setOnAction(event -> window.close());
         saveButton.setOnAction(event -> {
@@ -92,11 +92,11 @@ final class HotkeyDialog {
         return ThemedWindow.footer(reset, cancel, saveButton);
     }
 
-    private void display(Hotkey hotkey, String text, boolean canSave) {
-        boolean invalid = hotkey.validationProblem().isPresent();
+    private void display(Keybind keybind, String text, boolean canSave) {
+        boolean invalid = keybind.validationProblem().isPresent();
         tag.setText(canSave || invalid ? "새 단축키" : "지금 단축키");
         keys.getChildren().clear();
-        for (String name : hotkey.keys()) {
+        for (String name : keybind.keys()) {
             if (!keys.getChildren().isEmpty()) {
                 keys.getChildren().add(styled(new Label("+"), "key-plus"));
             }
@@ -106,7 +106,7 @@ final class HotkeyDialog {
         keyBox.pseudoClassStateChanged(INVALID, invalid);
         message.setText(text);
         message.pseudoClassStateChanged(ERROR, invalid);
-        message.pseudoClassStateChanged(WARNING, canSave && hotkey.win());
+        message.pseudoClassStateChanged(WARNING, canSave && keybind.win());
         saveButton.setDisable(!canSave);
     }
 

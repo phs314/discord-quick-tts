@@ -30,7 +30,7 @@ public class HelpCommandListener extends ListenerAdapter implements DiscordSlash
             ・ `/목소리`: 내 문장을 읽어 줄 목소리를 고릅니다.
             ・ `/도움말`: 이 안내를 다시 봅니다.
 
-            단축키는 작업 표시줄 트레이의 Quick TTS 아이콘 → **Change Shortcut...** 에서 바꿉니다.
+            단축키는 작업 표시줄 트레이의 Quick TTS 아이콘 → **Change Keybind...** 에서 바꿉니다.
             같은 서버에서 봇이 이미 다른 음성 채널에서 읽고 있으면, 그 채널이 빌 때까지 기다려 주세요."""
             .formatted(DOWNLOAD_URL);
 
