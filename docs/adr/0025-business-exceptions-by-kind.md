@@ -3,6 +3,7 @@
 - 상태: 일부 대체됨
   - `BusinessException` 상속과 웹 예외 처리기 하나 규칙은 리뷰로 지킴 → ADR 0032
   - 임시 파일 `UncheckedIOException` 은 없어지고, 재생할 수 없는 음성은 `SpeechSynthesisException` → ADR 0043
+  - 종류 이름을 gRPC 표준 코드로(`INVALID_ARGUMENT`, `PERMISSION_DENIED`, `FAILED_PRECONDITION`, `UNAVAILABLE`) → ADR 0044
 - 날짜: 2026-10-16
 
 예외 9개가 모두 `RuntimeException` 을 바로 상속했습니다. 그래서 예외를 하나 더할 때마다 고칠 곳이 넷이었습니다. 예외 클래스, common 의 `ApiErrorCode`, 컨텍스트별 웹 예외 처리기(`SpeechExceptionHandler`, `DeviceExceptionHandler`, `DomainExceptionHandler`)의 메서드, 그 예외가 날 수 있는 디스코드 명령의 `catch` 입니다. 디스코드 명령에는 공통 처리가 없어서, 명령이 잡지 않은 예외가 나면 디스코드는 "애플리케이션이 응답하지 않았어요" 만 보여 줬습니다.
