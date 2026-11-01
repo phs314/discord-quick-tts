@@ -6,29 +6,13 @@ import java.util.Optional;
 import java.util.concurrent.CompletionException;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.geometry.Insets;
-import javafx.geometry.Rectangle2D;
-import javafx.scene.Scene;
-import javafx.scene.control.TextField;
-import javafx.scene.input.KeyCode;
-import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
-import javafx.stage.StageStyle;
 
 /**
- * QuickTTS 트레이 앱. 전역 단축키로 화면 아래쪽 가운데에 quick chat 입력 위젯을 띄운다.
- * Enter 로 보내고 Esc 나 다른 창 클릭으로 닫는다.
+ * QuickTTS 트레이 앱. 전역 단축키로 quick chat 창({@link QuickChatWindow})을 띄우고,
+ * 거기서 보낸 문장을 봇 서버로 보낸다.
  */
 public class QuickTtsApp extends Application {
-
-    /** 막대 둘레의 그림자 여백. */
-    private static final double SHADOW_MARGIN = 24;
-    /** 화면 높이에서 막대 아래쪽 끝까지의 비율. 0.15 면 화면 맨 아래에서 15% 위에 막대가 놓인다. */
-    private static final double BOTTOM_RATIO = 0.15;
-    /** 입력창 창 제목. 화면에는 안 보이고, 윈도우에서 창을 찾아 앞으로 가져올 때 쓴다. */
-    private static final String WINDOW_TITLE = "QuickTTS Quick Chat";
 
     /** {@link Launcher} 가 먼저 잡아 둔 중복 실행 방지 자리. 클래스패스로 바로 띄우면 null 이다. */
     static SingleInstance singleInstance;
@@ -38,9 +22,7 @@ public class QuickTtsApp extends Application {
     private QuickTtsClient client;
     private LocalBotServer localBotServer;
     private GlobalKeybind keybind;
-    private Stage stage;
-    private InputBar inputBar;
-    private TextField input;
+    private QuickChatWindow window;
     /** 단축키 바꾸기 창이 이미 떠 있으면 트레이 메뉴를 또 눌러도 하나만 띄운다. */
     private boolean changingKeybind;
 
@@ -58,18 +40,9 @@ public class QuickTtsApp extends Application {
             return;
         }
 
-        stage = primaryStage;
-        stage.initStyle(StageStyle.TRANSPARENT);
-        stage.setTitle(WINDOW_TITLE);
-        stage.setAlwaysOnTop(true);
-        stage.setScene(createScene());
-        stage.focusedProperty().addListener((observable, wasFocused, isFocused) -> {
-            if (!isFocused) {
-                hide();
-            }
-        });
+        window = new QuickChatWindow(primaryStage, this::send, this::refreshVoiceChannel);
 
-        keybind = new GlobalKeybind(config.keybind(), () -> Platform.runLater(this::toggle));
+        keybind = new GlobalKeybind(config.keybind(), window::toggleLater);
         try {
             keybind.register();
         } catch (NativeHookException e) {
@@ -81,7 +54,7 @@ public class QuickTtsApp extends Application {
                 () -> Platform.runLater(Platform::exit), WindowsStartup.forThisApp());
         // 이미 떠 있는데 exe 를 또 실행하면 새로 뜨는 대신 입력창을 연다.
         if (singleInstance != null) {
-            singleInstance.onShowRequested(() -> Platform.runLater(this::show));
+            singleInstance.onShowRequested(() -> Platform.runLater(window::show));
         }
         // 새 버전이 있으면 트레이 알림으로만 알린다. 확인하지 못해도 조용히 넘어간다.
         UpdateChecker.forThisApp().ifPresent(checker ->
@@ -102,64 +75,16 @@ public class QuickTtsApp extends Application {
         trayMenu.remove();
     }
 
-    private Scene createScene() {
-        inputBar = new InputBar();
-        input = inputBar.input();
-        input.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.ENTER) {
-                send();
-            } else if (event.getCode() == KeyCode.ESCAPE) {
-                hide();
-            }
-        });
-
-        // 그림자가 잘리지 않도록 막대 둘레에 투명한 여백을 둔다.
-        StackPane root = new StackPane(inputBar.node());
-        root.setPadding(new Insets(SHADOW_MARGIN));
-        root.setStyle("-fx-background-color: transparent;");
-        Scene scene = new Scene(root);
-        scene.setFill(Color.TRANSPARENT);
-        return scene;
-    }
-
-    private void toggle() {
-        if (stage.isShowing()) {
-            hide();
-        } else {
-            show();
-        }
-    }
-
-    /** 화면 아래쪽 가운데(맨 아래에서 {@link #BOTTOM_RATIO} 위)에 띄우고 문장이 읽힐 음성 채널을 다시 확인한다. */
-    private void show() {
-        Rectangle2D screen = Screen.getPrimary().getBounds();
-        Rectangle2D usable = Screen.getPrimary().getVisualBounds();
-        WindowsForeground.allowActivation();
-        stage.show();
-        stage.setX(screen.getMinX() + (screen.getWidth() - stage.getWidth()) / 2);
-        double barBottom = screen.getMaxY() - screen.getHeight() * BOTTOM_RATIO;
-        // 작업 표시줄이 아주 커도 막대가 그 뒤에 숨지 않게 한다.
-        barBottom = Math.min(barBottom, usable.getMaxY());
-        stage.setY(barBottom - stage.getHeight() + SHADOW_MARGIN);
-        stage.toFront();
-        stage.requestFocus();
-        WindowsForeground.activate(WINDOW_TITLE);
-        // 창을 숨겼다 다시 띄우면 JavaFX 가 새 창을 만들면서 한글 조합 입력(IME) 연결을 잃는다.
-        // 포커스가 이미 입력란에 있으면 다시 연결하지 않으므로, 막대로 옮겼다가 입력란으로 돌려서 다시 연결한다.
-        // 연결이 없으면 조합 중인 글자가 화면 왼쪽 위의 따로 뜬 창에 보이고 입력란에는 한 글자씩 늦게 들어온다.
-        inputBar.node().requestFocus();
-        input.requestFocus();
-        refreshVoiceChannel();
-    }
-
+    /** 창을 띄울 때마다 문장이 읽힐 음성 채널을 다시 확인한다. */
     private void refreshVoiceChannel() {
+        InputBar inputBar = window.inputBar();
         inputBar.showChecking();
         client.findMyVoiceChannel(config.deviceToken()).whenComplete((channel, failure) -> Platform.runLater(() -> {
             Throwable cause = failure instanceof CompletionException ? failure.getCause() : failure;
             if (failure == null) {
                 inputBar.showChannel(channel);
             } else if (cause instanceof QuickTtsClient.InvalidDeviceTokenException) {
-                hide();
+                window.hide();
                 trayMenu.showError(cause.getMessage());
                 forgetDeviceAndPairAgain();
             } else {
@@ -168,22 +93,16 @@ public class QuickTtsApp extends Application {
         }));
     }
 
-    private void hide() {
-        input.clear();
-        stage.hide();
-    }
-
-    private void send() {
-        String text = input.getText().strip();
-        if (text.isEmpty()) {
-            hide();
-            return;
-        }
+    /**
+     * 창에서 Enter 로 보낸 문장을 봇 서버로 보낸다. 실패는 트레이 알림으로 알린다.
+     *
+     * @return 보냈으면 true, 너무 길어서 창을 그대로 둬야 하면 false
+     */
+    private boolean send(String text) {
         if (text.length() > QuickTtsApi.MAX_CONTENT_LENGTH) {
             trayMenu.showError("문장이 너무 깁니다. (최대 " + QuickTtsApi.MAX_CONTENT_LENGTH + "자)");
-            return;
+            return false;
         }
-        hide();
         client.send(config.deviceToken(), text).exceptionally(failure -> {
             Throwable cause = failure instanceof CompletionException ? failure.getCause() : failure;
             String message = cause instanceof QuickTtsClient.QuickTtsClientException
@@ -195,6 +114,7 @@ public class QuickTtsApp extends Application {
             }
             return null;
         });
+        return true;
     }
 
     /** 새 단축키를 눌러서 정하는 창을 띄우고, 저장하면 설정 파일에 쓰고 바로 바꾼다. */
