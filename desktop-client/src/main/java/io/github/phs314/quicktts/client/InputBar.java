@@ -85,7 +85,7 @@ final class InputBar {
 
     void showChannel(Optional<VoiceChannelResponse> channel) {
         channel.ifPresentOrElse(
-                found -> setChip(guildIcon(found), found.channelName(), true, found.serverName() + " · " + found.channelName()),
+                found -> setChip(guildIcon(found), found.channelName(), true, found.guildName() + " · " + found.channelName()),
                 () -> setChip(null, "음성 채널 없음", false, "봇이 있는 서버의 음성 채널에 들어가야 읽어 줄 수 있어요."));
     }
 
@@ -105,14 +105,14 @@ final class InputBar {
 
     /** 서버 아이콘을 동그랗게 잘라 보여 준다. 아이콘이 없는 서버는 이름 첫 글자로 대신한다. */
     private Node guildIcon(VoiceChannelResponse channel) {
-        if (channel.serverIconUrl() == null) {
-            Label initial = new Label(channel.serverName().isEmpty() ? "?" : channel.serverName().substring(0, 1));
+        if (channel.guildIconUrl() == null) {
+            Label initial = new Label(channel.guildName().isEmpty() ? "?" : channel.guildName().substring(0, 1));
             initial.setStyle("-fx-text-fill: #5865f2; -fx-font-size: 10px; -fx-font-weight: bold;" + FONT);
             StackPane badge = new StackPane(new Circle(SERVER_ICON_SIZE / 2, Color.WHITE), initial);
             badge.setMinSize(SERVER_ICON_SIZE, SERVER_ICON_SIZE);
             return badge;
         }
-        Image image = guildIcons.computeIfAbsent(channel.serverIconUrl(),
+        Image image = guildIcons.computeIfAbsent(channel.guildIconUrl(),
                 url -> new Image(url + "?size=64", SERVER_ICON_SIZE * 2, SERVER_ICON_SIZE * 2, true, true, true));
         ImageView view = new ImageView(image);
         view.setFitWidth(SERVER_ICON_SIZE);
@@ -160,8 +160,8 @@ final class InputBar {
     }
 
     private void updateCount(int length) {
-        countLabel.setText(length + "/" + QuickTtsApi.MAX_TEXT_LENGTH);
-        boolean tooLong = length > QuickTtsApi.MAX_TEXT_LENGTH;
+        countLabel.setText(length + "/" + QuickTtsApi.MAX_CONTENT_LENGTH);
+        boolean tooLong = length > QuickTtsApi.MAX_CONTENT_LENGTH;
         countLabel.setStyle("-fx-text-fill: " + (tooLong ? "#f23f43" : "#80848e") + "; -fx-font-size: 12px;" + FONT);
     }
 }

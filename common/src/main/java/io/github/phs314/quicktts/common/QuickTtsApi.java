@@ -27,7 +27,7 @@ public final class QuickTtsApi {
     public static final String BEARER_PREFIX = "Bearer ";
 
     /** 한 번에 읽어 줄 수 있는 최대 글자 수. */
-    public static final int MAX_TEXT_LENGTH = 200;
+    public static final int MAX_CONTENT_LENGTH = 200;
 
     private QuickTtsApi() {
     }

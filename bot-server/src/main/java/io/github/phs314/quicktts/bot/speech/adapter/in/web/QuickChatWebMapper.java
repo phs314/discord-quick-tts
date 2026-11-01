@@ -18,14 +18,13 @@ final class QuickChatWebMapper {
     }
 
     static SpeakQuickChatCommand toCommand(DiscordUserId author, QuickChatRequest request) {
-        return new SpeakQuickChatCommand(author, new QuickChatMessage(request.text()));
+        return new SpeakQuickChatCommand(author, new QuickChatMessage(request.content()));
     }
 
     static FindCurrentUserVoiceChannelQuery toQuery(DiscordUserId user) {
         return new FindCurrentUserVoiceChannelQuery(user);
     }
 
-    /** 웹 JSON 이름은 배포된 클라이언트가 읽으므로 {@code serverName} 그대로 둔다 (ADR 0027). */
     static VoiceChannelResponse toResponse(VoiceChannelDetails details) {
         return new VoiceChannelResponse(details.guildName(), details.guildIconUrl(), details.channelName());
     }

@@ -30,7 +30,7 @@ class QuickChatMessageTest {
 
     @Test
     void 클라이언트와_같은_최대_길이를_쓴다() {
-        assertThat(QuickChatMessage.MAX_LENGTH).isEqualTo(QuickTtsApi.MAX_TEXT_LENGTH);
+        assertThat(QuickChatMessage.MAX_LENGTH).isEqualTo(QuickTtsApi.MAX_CONTENT_LENGTH);
     }
 
     @Test
