@@ -3,8 +3,8 @@ package io.github.phs314.quicktts.bot;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.github.phs314.quicktts.bot.config.DiscordProperties;
-import io.github.phs314.quicktts.bot.guild.adapter.out.settings.GuildAllowlistProperties;
-import io.github.phs314.quicktts.bot.speech.adapter.out.tts.TtsProperties;
+import io.github.phs314.quicktts.bot.guild.adapter.out.config.GuildAllowlistProperties;
+import io.github.phs314.quicktts.bot.synthesis.adapter.out.tts.TtsProperties;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;

@@ -3,7 +3,7 @@ package io.github.phs314.quicktts.bot.guild.application.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.github.phs314.quicktts.bot.guild.application.port.out.FakeAllowedGuildPort;
-import io.github.phs314.quicktts.bot.guild.application.port.out.FakeGuildAllowlistSettingPort;
+import io.github.phs314.quicktts.bot.guild.application.port.out.FakeGuildAllowlistConfigPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.FakeJoinedGuildPort;
 import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
@@ -18,7 +18,7 @@ class LeaveAllNotAllowedGuildsServiceTest {
 
     private final FakeAllowedGuildPort allowedGuilds = new FakeAllowedGuildPort();
     private final FakeJoinedGuildPort joinedGuilds = new FakeJoinedGuildPort(MINE, STRANGER);
-    private final FakeGuildAllowlistSettingPort setting = new FakeGuildAllowlistSettingPort();
+    private final FakeGuildAllowlistConfigPort setting = new FakeGuildAllowlistConfigPort();
     private final LeaveAllNotAllowedGuildsService service =
             new LeaveAllNotAllowedGuildsService(allowedGuilds, joinedGuilds, setting);
 

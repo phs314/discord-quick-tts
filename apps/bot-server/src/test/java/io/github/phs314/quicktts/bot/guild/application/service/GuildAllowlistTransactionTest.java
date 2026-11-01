@@ -6,12 +6,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import io.github.phs314.quicktts.bot.guild.adapter.in.event.GuildRemovedFromAllowlistListener;
 import io.github.phs314.quicktts.bot.guild.adapter.out.event.GuildAllowlistEventAdapter;
 import io.github.phs314.quicktts.bot.guild.adapter.out.persistence.AllowedGuildPersistenceAdapter;
-import io.github.phs314.quicktts.bot.guild.application.port.in.RemoveFromAllowlistUseCase;
-import io.github.phs314.quicktts.bot.guild.application.port.in.SeedAllowlistUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.LeaveAllNotAllowedGuildsUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.LeaveNotAllowedGuildUseCase;
+import io.github.phs314.quicktts.bot.guild.application.port.in.RemoveFromAllowlistUseCase;
+import io.github.phs314.quicktts.bot.guild.application.port.in.SeedAllowlistUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.command.RemoveFromAllowlistCommand;
-import io.github.phs314.quicktts.bot.guild.application.port.out.FakeGuildAllowlistSettingPort;
+import io.github.phs314.quicktts.bot.guild.application.port.out.FakeGuildAllowlistConfigPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.FakeJoinedGuildPort;
 import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
@@ -171,19 +171,19 @@ class GuildAllowlistTransactionTest {
         SeedAllowlistService seedAllowlistService(
                 AllowedGuildPersistenceAdapter repository, TransactionRecordingJoinedGuildPort joinedGuildPort) {
             return new SeedAllowlistService(repository, joinedGuildPort,
-                    new FakeGuildAllowlistSettingPort(), Clock.fixed(NOW, ZoneOffset.UTC));
+                    new FakeGuildAllowlistConfigPort(), Clock.fixed(NOW, ZoneOffset.UTC));
         }
 
         @Bean
         LeaveAllNotAllowedGuildsService leaveAllNotAllowedGuildsService(
                 AllowedGuildPersistenceAdapter repository, TransactionRecordingJoinedGuildPort joinedGuildPort) {
-            return new LeaveAllNotAllowedGuildsService(repository, joinedGuildPort, new FakeGuildAllowlistSettingPort());
+            return new LeaveAllNotAllowedGuildsService(repository, joinedGuildPort, new FakeGuildAllowlistConfigPort());
         }
 
         @Bean
         LeaveNotAllowedGuildService leaveNotAllowedGuildService(
                 AllowedGuildPersistenceAdapter repository, TransactionRecordingJoinedGuildPort joinedGuildPort) {
-            return new LeaveNotAllowedGuildService(repository, joinedGuildPort, new FakeGuildAllowlistSettingPort());
+            return new LeaveNotAllowedGuildService(repository, joinedGuildPort, new FakeGuildAllowlistConfigPort());
         }
 
         @Bean

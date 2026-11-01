@@ -6,16 +6,16 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import io.github.phs314.quicktts.bot.shared.domain.InvalidDomainValueException;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
-import io.github.phs314.quicktts.bot.speech.application.exception.BotCannotJoinVoiceChannelException;
+import io.github.phs314.quicktts.bot.shared.domain.vo.VoiceId;
 import io.github.phs314.quicktts.bot.speech.application.exception.AuthorNotInVoiceChannelException;
+import io.github.phs314.quicktts.bot.speech.application.exception.BotCannotJoinVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.exception.VoiceChannelInUseException;
-import io.github.phs314.quicktts.bot.speech.application.port.in.command.ChangeVoiceCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeBotVoiceStatePort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechPlayerPort;
-import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechSynthesizerPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.FakeTextToSpeechPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.FakeUserVoicePort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeVoiceStatePort;
-import io.github.phs314.quicktts.bot.speech.application.port.out.FakeVoicePreferencePort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
@@ -36,15 +36,14 @@ class SpeakQuickChatServiceTest {
     private final FakeVoiceStatePort discord = new FakeVoiceStatePort();
     private final FakeSpeechPlayerPort player = new FakeSpeechPlayerPort();
     private final FakeBotVoiceStatePort states = new FakeBotVoiceStatePort();
-    private final FakeSpeechSynthesizerPort synthesizer = new FakeSpeechSynthesizerPort();
-    private final FakeVoicePreferencePort preferences = new FakeVoicePreferencePort();
-    private final ChangeVoiceService voices = new ChangeVoiceService(synthesizer, preferences);
+    private final FakeUserVoicePort voices = new FakeUserVoicePort();
+    private final FakeTextToSpeechPort tts = new FakeTextToSpeechPort();
     private final SpeakQuickChatService service =
-            new SpeakQuickChatService(discord, synthesizer, player, states, preferences);
+            new SpeakQuickChatService(discord, tts, player, states, voices);
 
     @Test
     void 보낸_사람이_있는_음성_채널에_들어가서_그_사람이_고른_목소리로_읽어_준다() {
-        voices.changeVoice(new ChangeVoiceCommand(AUTHOR, FakeSpeechSynthesizerPort.INJOON.id()));
+        voices.choose(AUTHOR, new VoiceId("fake:injoon"));
         discord.enter(AUTHOR, GENERAL);
 
         speak(AUTHOR, "안녕");
@@ -139,12 +138,12 @@ class SpeakQuickChatServiceTest {
     @Test
     void 채널에_들어가지_못하면_채널을_적지_않는다() {
         discord.enter(AUTHOR, GENERAL);
-        SpeakQuickChatService failingToJoin = new SpeakQuickChatService(discord, synthesizer, new FakeSpeechPlayerPort() {
+        SpeakQuickChatService failingToJoin = new SpeakQuickChatService(discord, tts, new FakeSpeechPlayerPort() {
             @Override
             public void join(VoiceChannel channel) {
                 throw new BotCannotJoinVoiceChannelException(channel, null);
             }
-        }, states, preferences);
+        }, states, voices);
 
         assertThatThrownBy(() -> failingToJoin.speak(command(AUTHOR, "안녕")))
                 .isInstanceOf(BotCannotJoinVoiceChannelException.class);

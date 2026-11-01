@@ -1,6 +1,7 @@
 # 설정 값은 그 값을 쓰는 어댑터 패키지에 둔다
 
-- 상태: 채택
+- 상태: 일부 대체됨
+  - 허용 목록 설정 어댑터 폴더 `settings` 를 `config` 로, TTS 설정은 synthesis 의 `tts` 로 → ADR 0047
 - 날짜: 2026-10-14
 
 설정 값은 `config/QuickTtsProperties` 레코드 하나(`quicktts.*`)에 `discord`, `tts`, `guildAllowlist` 가 함께 들어 있었습니다. 그래서 speech 의 TTS 어댑터와 guild 의 설정 어댑터가 같은 레코드를 import 했고, guild 어댑터는 TTS 설정이 든 타입에 기대고 있었습니다. `ArchitectureTest` 는 `config` 를 계층 규칙에서 빼 두었기 때문에 이 의존은 어떤 규칙에도 걸리지 않았습니다. "guild 와 다른 컨텍스트는 서로 모른다"(ADR 0015)가 설정 파일 하나를 통해 새는 모양이었습니다.

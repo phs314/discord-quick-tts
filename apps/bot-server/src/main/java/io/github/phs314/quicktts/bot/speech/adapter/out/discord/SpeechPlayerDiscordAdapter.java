@@ -11,9 +11,9 @@ import com.sedmelluq.discord.lavaplayer.track.AudioReference;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.application.exception.BotCannotJoinVoiceChannelException;
-import io.github.phs314.quicktts.bot.speech.application.exception.SpeechSynthesisException;
+import io.github.phs314.quicktts.bot.speech.application.exception.UnplayableAudioException;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
-import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
+import io.github.phs314.quicktts.bot.speech.domain.vo.Audio;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import jakarta.annotation.PreDestroy;
 import java.util.Map;
@@ -75,11 +75,11 @@ public class SpeechPlayerDiscordAdapter implements SpeechPlayerPort {
     }
 
     /**
-     * @throws SpeechSynthesisException 음성 바이트가 LavaPlayer 가 읽을 수 있는 형식이 아닐 때
+     * @throws UnplayableAudioException 음성 바이트가 LavaPlayer 가 읽을 수 있는 형식이 아닐 때
      */
     @Override
-    public void play(GuildId guildId, Speech speech) {
-        queueOf(guildId).enqueue(toTrack(speech));
+    public void play(GuildId guildId, Audio audio) {
+        queueOf(guildId).enqueue(toTrack(audio));
     }
 
     @Override
@@ -115,19 +115,19 @@ public class SpeechPlayerDiscordAdapter implements SpeechPlayerPort {
      * 음성 바이트의 형식(mp3 등)을 알아내 그 형식의 트랙을 만든다. LavaPlayer 의 파일 소스가 하는 일과 같고 스트림만 메모리다.
      * 형식을 알아낼 때 스트림을 앞에서부터 읽으므로 재생에는 새 스트림을 준다.
      */
-    static AudioTrack toTrack(Speech speech) {
+    static AudioTrack toTrack(Audio audio) {
         MediaContainerDetectionResult result;
         try {
             result = new MediaContainerDetection(MediaContainerRegistry.DEFAULT_REGISTRY, SPEECH,
-                    new ByteArraySeekableInputStream(speech.audio()),
-                    MediaContainerHints.from(null, speech.fileExtension())).detectContainer();
+                    new ByteArraySeekableInputStream(audio.content()),
+                    MediaContainerHints.from(null, audio.format())).detectContainer();
         } catch (FriendlyException e) {
-            throw new SpeechSynthesisException("음성 형식을 알아내지 못했습니다.", e);
+            throw new UnplayableAudioException("음성 형식을 알아내지 못했습니다.", e);
         }
         if (!result.isContainerDetected() || result.isReference() || !result.isSupportedFile()) {
-            throw new SpeechSynthesisException("재생할 수 없는 음성 형식입니다: " + speech.fileExtension());
+            throw new UnplayableAudioException("재생할 수 없는 음성 형식입니다: " + audio.format());
         }
         return result.getContainerDescriptor()
-                .createTrack(result.getTrackInfo(), new ByteArraySeekableInputStream(speech.audio()));
+                .createTrack(result.getTrackInfo(), new ByteArraySeekableInputStream(audio.content()));
     }
 }
