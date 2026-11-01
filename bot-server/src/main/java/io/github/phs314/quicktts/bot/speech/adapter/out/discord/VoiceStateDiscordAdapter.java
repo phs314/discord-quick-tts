@@ -2,7 +2,7 @@ package io.github.phs314.quicktts.bot.speech.adapter.out.discord;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
-import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocatorPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceStatePort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import java.util.Objects;
@@ -20,27 +20,27 @@ import org.springframework.stereotype.Component;
  */
 @Component
 @RequiredArgsConstructor
-public class VoiceChannelLocatorDiscordAdapter implements VoiceChannelLocatorPort {
+public class VoiceStateDiscordAdapter implements VoiceStatePort {
 
     private final JDA jda;
 
     @Override
-    public Optional<VoiceChannelDetails> findCurrentChannel(DiscordUserId user) {
+    public Optional<VoiceChannelDetails> findUserVoiceChannel(DiscordUserId user) {
         return jda.getGuilds().stream()
                 .map(guild -> guild.getMemberById(user.value()))
                 .filter(Objects::nonNull)
-                .map(VoiceChannelLocatorDiscordAdapter::currentChannel)
+                .map(VoiceStateDiscordAdapter::currentChannel)
                 .flatMap(Optional::stream)
                 .findFirst();
     }
 
     @Override
-    public Optional<VoiceChannelDetails> findDetails(VoiceChannel channel) {
+    public Optional<VoiceChannelDetails> findChannelDetails(VoiceChannel channel) {
         return findAudioChannel(channel).map(audioChannel -> toDetails(audioChannel.getGuild(), audioChannel));
     }
 
     @Override
-    public boolean hasPeople(VoiceChannel channel) {
+    public boolean hasHumanMembers(VoiceChannel channel) {
         return findAudioChannel(channel)
                 .map(audioChannel -> audioChannel.getMembers().stream().map(Member::getUser).anyMatch(user -> !user.isBot()))
                 .orElse(false);

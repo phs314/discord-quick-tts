@@ -36,7 +36,7 @@ import org.mockito.ArgumentCaptor;
 
 class UnlinkCommandListenerTest {
 
-    private static final DiscordUserId OWNER = new DiscordUserId(42L);
+    private static final DiscordUserId USER = new DiscordUserId(42L);
 
     private final GetDevicesUseCase getDevicesUseCase = mock(GetDevicesUseCase.class);
     private final UnlinkDeviceUseCase unlinkDeviceUseCase = mock(UnlinkDeviceUseCase.class);
@@ -48,7 +48,7 @@ class UnlinkCommandListenerTest {
     void 연결된_PC_가_없으면_없다고만_답한다() {
         ReplyCallbackAction reply = mock(ReplyCallbackAction.class, RETURNS_SELF);
         SlashCommandInteractionEvent event = slashCommand(reply);
-        when(getDevicesUseCase.getDevices(new GetDevicesQuery(OWNER))).thenReturn(List.of());
+        when(getDevicesUseCase.getDevices(new GetDevicesQuery(USER))).thenReturn(List.of());
 
         listener.onSlashCommandInteraction(event);
 
@@ -62,7 +62,7 @@ class UnlinkCommandListenerTest {
         ReplyCallbackAction reply = mock(ReplyCallbackAction.class, RETURNS_SELF);
         SlashCommandInteractionEvent event = slashCommand(reply);
         List<DeviceDto> devices = IntStream.rangeClosed(1, 30).mapToObj(UnlinkCommandListenerTest::device).toList();
-        when(getDevicesUseCase.getDevices(new GetDevicesQuery(OWNER))).thenReturn(devices);
+        when(getDevicesUseCase.getDevices(new GetDevicesQuery(USER))).thenReturn(devices);
 
         listener.onSlashCommandInteraction(event);
 
@@ -88,7 +88,7 @@ class UnlinkCommandListenerTest {
     @Test
     void 모두_해제를_고르면_끊은_PC_수를_알린다() {
         MessageEditCallbackAction edit = mock(MessageEditCallbackAction.class, RETURNS_SELF);
-        when(unlinkAllDevicesUseCase.unlinkAll(new UnlinkAllDevicesCommand(OWNER))).thenReturn(3);
+        when(unlinkAllDevicesUseCase.unlinkAll(new UnlinkAllDevicesCommand(USER))).thenReturn(3);
 
         StringSelectInteractionEvent event = selected("*", edit);
 
@@ -101,7 +101,7 @@ class UnlinkCommandListenerTest {
     @Test
     void 고른_PC_의_연결을_끊는다() {
         MessageEditCallbackAction edit = mock(MessageEditCallbackAction.class, RETURNS_SELF);
-        when(unlinkDeviceUseCase.unlink(new UnlinkDeviceCommand(OWNER, new DeviceId("device-1")))).thenReturn(true);
+        when(unlinkDeviceUseCase.unlink(new UnlinkDeviceCommand(USER, new DeviceId("device-1")))).thenReturn(true);
 
         StringSelectInteractionEvent event = selected("device-1", edit);
 
@@ -114,7 +114,7 @@ class UnlinkCommandListenerTest {
     @Test
     void 메뉴를_띄운_사이에_이미_끊긴_PC_면_그렇게_알린다() {
         MessageEditCallbackAction edit = mock(MessageEditCallbackAction.class, RETURNS_SELF);
-        when(unlinkDeviceUseCase.unlink(new UnlinkDeviceCommand(OWNER, new DeviceId("device-1")))).thenReturn(false);
+        when(unlinkDeviceUseCase.unlink(new UnlinkDeviceCommand(USER, new DeviceId("device-1")))).thenReturn(false);
 
         StringSelectInteractionEvent event = selected("device-1", edit);
 
@@ -127,7 +127,7 @@ class UnlinkCommandListenerTest {
     private static SlashCommandInteractionEvent slashCommand(ReplyCallbackAction reply) {
         SlashCommandInteractionEvent event = mock(SlashCommandInteractionEvent.class, RETURNS_DEEP_STUBS);
         when(event.getName()).thenReturn("unlink");
-        when(event.getUser().getIdLong()).thenReturn(OWNER.value());
+        when(event.getUser().getIdLong()).thenReturn(USER.value());
         when(event.reply(anyString())).thenReturn(reply);
         return event;
     }
@@ -135,7 +135,7 @@ class UnlinkCommandListenerTest {
     private static StringSelectInteractionEvent selected(String value, MessageEditCallbackAction edit) {
         StringSelectInteractionEvent event = mock(StringSelectInteractionEvent.class, RETURNS_DEEP_STUBS);
         when(event.getComponentId()).thenReturn("quicktts:unlink");
-        when(event.getUser().getIdLong()).thenReturn(OWNER.value());
+        when(event.getUser().getIdLong()).thenReturn(USER.value());
         when(event.getValues()).thenReturn(List.of(value));
         when(event.editMessage(anyString())).thenReturn(edit);
         return event;

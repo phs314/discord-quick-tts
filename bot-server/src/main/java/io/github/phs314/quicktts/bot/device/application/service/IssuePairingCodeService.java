@@ -18,7 +18,7 @@ public class IssuePairingCodeService implements IssuePairingCodeUseCase {
 
     @Override
     public IssuedPairingCodeDto issue(IssuePairingCodeCommand command) {
-        Pairing pairing = Pairing.issue(command.owner(), clock.instant());
+        Pairing pairing = Pairing.issue(command.userId(), clock.instant());
         pairingPort.save(pairing);
         return IssuedPairingCodeDto.from(pairing);
     }

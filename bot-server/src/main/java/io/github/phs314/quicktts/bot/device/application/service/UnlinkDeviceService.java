@@ -18,7 +18,7 @@ public class UnlinkDeviceService implements UnlinkDeviceUseCase {
     public boolean unlink(UnlinkDeviceCommand command) {
         // 다른 사람의 기기는 있는지도 알려 주지 않고 없는 기기처럼 다룬다.
         return devicePort.findById(command.deviceId())
-                .filter(device -> device.isOwnedBy(command.owner()))
+                .filter(device -> device.belongsTo(command.userId()))
                 .map(device -> devicePort.delete(device.id()))
                 .orElse(false);
     }

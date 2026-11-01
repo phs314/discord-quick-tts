@@ -34,7 +34,7 @@ class QuickTtsClientTest {
 
     @Test
     void 음성_채널에_없으면_먼저_들어가라고_안내한다() {
-        assertThat(client.sendFailure(409, problem(ApiErrorCode.SPEAKER_NOT_IN_VOICE_CHANNEL, "x")))
+        assertThat(client.sendFailure(409, problem(ApiErrorCode.AUTHOR_NOT_IN_VOICE_CHANNEL, "x")))
                 .hasMessage("봇이 있는 서버의 음성 채널에 먼저 들어가 주세요.");
     }
 

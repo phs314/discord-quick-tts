@@ -18,28 +18,28 @@ public class Device {
     /** 기기 토큰의 해시 ({@link DeviceToken#hash()}) */
     private final DeviceTokenHash tokenHash;
     /** 이 기기로 quick chat 을 보내는 사용자 */
-    private final DiscordUserId owner;
+    private final DiscordUserId userId;
     /** 사용자에게 보여 줄 PC 이름 */
     private final DeviceName name;
     /** 등록 시각 */
     private final Instant registeredAt;
 
     /** 저장소에서 읽어 온 기기를 되살릴 때 쓴다. 새로 등록할 때는 {@link #register} 를 쓴다. */
-    public Device(DeviceId id, DeviceTokenHash tokenHash, DiscordUserId owner, DeviceName name, Instant registeredAt) {
+    public Device(DeviceId id, DeviceTokenHash tokenHash, DiscordUserId userId, DeviceName name, Instant registeredAt) {
         this.id = Objects.requireNonNull(id);
         this.tokenHash = Objects.requireNonNull(tokenHash);
-        this.owner = Objects.requireNonNull(owner);
+        this.userId = Objects.requireNonNull(userId);
         this.name = Objects.requireNonNull(name);
         this.registeredAt = Objects.requireNonNull(registeredAt);
     }
 
-    public static Device register(DeviceToken token, DiscordUserId owner, DeviceName name, Instant now) {
-        return new Device(DeviceId.generate(), token.hash(), owner, name, now);
+    public static Device register(DeviceToken token, DiscordUserId userId, DeviceName name, Instant now) {
+        return new Device(DeviceId.generate(), token.hash(), userId, name, now);
     }
 
-    /** 그 사용자의 기기인지. 기기를 보거나 해제할 수 있는 사람은 주인뿐이다. */
-    public boolean isOwnedBy(DiscordUserId user) {
-        return owner.equals(user);
+    /** 그 사용자의 기기인지. 기기를 보거나 해제할 수 있는 사람은 그 사용자뿐이다. */
+    public boolean belongsTo(DiscordUserId user) {
+        return userId.equals(user);
     }
 
     public DeviceId id() {
@@ -50,8 +50,8 @@ public class Device {
         return tokenHash;
     }
 
-    public DiscordUserId owner() {
-        return owner;
+    public DiscordUserId userId() {
+        return userId;
     }
 
     public DeviceName name() {
@@ -74,6 +74,6 @@ public class Device {
 
     @Override
     public String toString() {
-        return "Device[id=" + id.value() + ", owner=" + owner + ", name=" + name.value() + "]";
+        return "Device[id=" + id.value() + ", userId=" + userId + ", name=" + name.value() + "]";
     }
 }

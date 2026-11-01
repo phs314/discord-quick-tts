@@ -98,7 +98,7 @@ class QuickTtsClient {
             case ApiErrorCode.DEVICE_UNAUTHORIZED -> new DeviceUnauthorizedException();
             case ApiErrorCode.INVALID_VALUE -> new QuickTtsClientException(error.detailOr(
                     "문장이 비어 있거나 너무 깁니다. (최대 " + QuickTtsApi.MAX_TEXT_LENGTH + "자)"));
-            case ApiErrorCode.SPEAKER_NOT_IN_VOICE_CHANNEL ->
+            case ApiErrorCode.AUTHOR_NOT_IN_VOICE_CHANNEL ->
                     new QuickTtsClientException("봇이 있는 서버의 음성 채널에 먼저 들어가 주세요.");
             case ApiErrorCode.VOICE_CHANNEL_IN_USE ->
                     new QuickTtsClientException("봇이 이 서버의 다른 음성 채널에서 쓰이고 있습니다. 그 채널이 비면 쓸 수 있습니다.");

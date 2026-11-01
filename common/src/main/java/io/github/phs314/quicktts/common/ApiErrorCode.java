@@ -20,7 +20,7 @@ public final class ApiErrorCode {
     public static final String DEVICE_UNAUTHORIZED = "device-unauthorized";
 
     /** 보낸 사람이 봇이 있는 디스코드 서버의 음성 채널에 없음. 409. */
-    public static final String SPEAKER_NOT_IN_VOICE_CHANNEL = "speaker-not-in-voice-channel";
+    public static final String AUTHOR_NOT_IN_VOICE_CHANNEL = "author-not-in-voice-channel";
 
     /** 봇이 같은 디스코드 서버의 다른 음성 채널에서 쓰이고 있음. 409 (옛 봇 서버는 423). */
     public static final String VOICE_CHANNEL_IN_USE = "voice-channel-in-use";

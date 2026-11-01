@@ -19,12 +19,12 @@ import io.github.phs314.quicktts.bot.device.application.port.in.query.Authentica
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.application.exception.BotCannotJoinVoiceChannelException;
-import io.github.phs314.quicktts.bot.speech.application.exception.SpeakerNotInVoiceChannelException;
+import io.github.phs314.quicktts.bot.speech.application.exception.AuthorNotInVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.exception.VoiceChannelInUseException;
-import io.github.phs314.quicktts.bot.speech.application.port.in.FindMyVoiceChannelUseCase;
+import io.github.phs314.quicktts.bot.speech.application.port.in.FindCurrentUserVoiceChannelUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
-import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindMyVoiceChannelQuery;
+import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindCurrentUserVoiceChannelQuery;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import io.github.phs314.quicktts.common.ApiErrorCode;
@@ -46,14 +46,14 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 /**
  * 클라이언트가 안내 문구를 고르는 오류 코드가 응답 본문 맨 위의 code 속성에 실리는지 확인한다.
  * 실제 MVC, JSON 설정과 기기 토큰 인증 필터(ADR 0031)를 올리고, 유스케이스만 Mockito 로 바꾼다.
- * 인증된 요청은 {@code Authorization: Bearer <기기 토큰>} 을 싣고, 그 토큰의 주인은 SPEAKER 다.
+ * 인증된 요청은 {@code Authorization: Bearer <기기 토큰>} 을 싣고, 그 토큰의 주인은 AUTHOR 다.
  */
 @WebMvcTest(QuickChatController.class)
 @Import(SecurityConfig.class)
 class QuickChatControllerTest {
 
-    private static final DiscordUserId SPEAKER = new DiscordUserId(42L);
-    private static final String TOKEN = "speaker-device-token";
+    private static final DiscordUserId AUTHOR = new DiscordUserId(42L);
+    private static final String TOKEN = "author-device-token";
 
     @Autowired
     MockMvc mockMvc;
@@ -62,14 +62,14 @@ class QuickChatControllerTest {
     SpeakQuickChatUseCase speak;
 
     @MockitoBean
-    FindMyVoiceChannelUseCase findMyVoiceChannel;
+    FindCurrentUserVoiceChannelUseCase findCurrentUserVoiceChannel;
 
     @MockitoBean
     AuthenticateDeviceUseCase authenticateDevice;
 
     @BeforeEach
     void speakerOwnsToken() {
-        given(authenticateDevice.authenticate(new AuthenticateDeviceQuery(TOKEN))).willReturn(Optional.of(SPEAKER));
+        given(authenticateDevice.authenticate(new AuthenticateDeviceQuery(TOKEN))).willReturn(Optional.of(AUTHOR));
     }
 
     @Test
@@ -78,7 +78,7 @@ class QuickChatControllerTest {
 
         ArgumentCaptor<SpeakQuickChatCommand> spoken = ArgumentCaptor.forClass(SpeakQuickChatCommand.class);
         verify(speak).speak(spoken.capture());
-        assertThat(spoken.getValue().speaker()).isEqualTo(SPEAKER);
+        assertThat(spoken.getValue().author()).isEqualTo(AUTHOR);
     }
 
     @Test
@@ -118,10 +118,10 @@ class QuickChatControllerTest {
 
     @Test
     void 보낸_사람이_음성_채널에_없으면_409_와_speaker_not_in_voice_channel() throws Exception {
-        willThrow(new SpeakerNotInVoiceChannelException(SPEAKER)).given(speak).speak(any());
+        willThrow(new AuthorNotInVoiceChannelException(AUTHOR)).given(speak).speak(any());
         sendQuickChat("안녕")
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.code").value(ApiErrorCode.SPEAKER_NOT_IN_VOICE_CHANNEL));
+                .andExpect(jsonPath("$.code").value(ApiErrorCode.AUTHOR_NOT_IN_VOICE_CHANNEL));
     }
 
     @Test
@@ -164,7 +164,7 @@ class QuickChatControllerTest {
 
     @Test
     void 내_음성_채널에_없으면_204() throws Exception {
-        given(findMyVoiceChannel.findMyVoiceChannel(new FindMyVoiceChannelQuery(SPEAKER))).willReturn(Optional.empty());
+        given(findCurrentUserVoiceChannel.findCurrentUserVoiceChannel(new FindCurrentUserVoiceChannelQuery(AUTHOR))).willReturn(Optional.empty());
 
         mockMvc.perform(get(QuickTtsApi.MY_VOICE_CHANNEL_PATH)
                         .header(HttpHeaders.AUTHORIZATION, QuickTtsApi.BEARER_PREFIX + TOKEN))
@@ -177,7 +177,7 @@ class QuickChatControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value(ApiErrorCode.DEVICE_UNAUTHORIZED));
 
-        verify(findMyVoiceChannel, never()).findMyVoiceChannel(any());
+        verify(findCurrentUserVoiceChannel, never()).findCurrentUserVoiceChannel(any());
     }
 
     private ResultActions sendQuickChat(String text) throws Exception {

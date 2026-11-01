@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 
 class UnlinkDeviceServiceTest {
 
-    private static final DiscordUserId OWNER = new DiscordUserId(42L);
+    private static final DiscordUserId USER = new DiscordUserId(42L);
     private static final DiscordUserId OTHER = new DiscordUserId(7L);
     private static final Instant NOW = Instant.parse("2026-10-05T00:00:00Z");
     private static final DeviceName PC = new DeviceName("현수-PC");
@@ -26,10 +26,10 @@ class UnlinkDeviceServiceTest {
 
     @Test
     void 해제한_PC_의_토큰은_더_이상_인증되지_않는다() {
-        DeviceToken token = devices.registered(OWNER, PC, NOW);
-        DeviceId id = getDevicesService.getDevices(new GetDevicesQuery(OWNER)).getFirst().id();
+        DeviceToken token = devices.registered(USER, PC, NOW);
+        DeviceId id = getDevicesService.getDevices(new GetDevicesQuery(USER)).getFirst().id();
 
-        assertThat(service.unlink(new UnlinkDeviceCommand(OWNER, id))).isTrue();
+        assertThat(service.unlink(new UnlinkDeviceCommand(USER, id))).isTrue();
         AuthenticateDeviceQuery query = new AuthenticateDeviceQuery(token.value());
         assertThat(new AuthenticateDeviceService(devices).authenticate(query)).isEmpty();
     }
@@ -39,7 +39,7 @@ class UnlinkDeviceServiceTest {
         devices.registered(OTHER, PC, NOW);
         DeviceId othersId = getDevicesService.getDevices(new GetDevicesQuery(OTHER)).getFirst().id();
 
-        assertThat(service.unlink(new UnlinkDeviceCommand(OWNER, othersId))).isFalse();
+        assertThat(service.unlink(new UnlinkDeviceCommand(USER, othersId))).isFalse();
         assertThat(getDevicesService.getDevices(new GetDevicesQuery(OTHER))).hasSize(1);
     }
 }

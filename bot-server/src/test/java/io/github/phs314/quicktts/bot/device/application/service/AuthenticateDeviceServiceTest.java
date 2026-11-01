@@ -12,17 +12,17 @@ import org.junit.jupiter.api.Test;
 
 class AuthenticateDeviceServiceTest {
 
-    private static final DiscordUserId OWNER = new DiscordUserId(42L);
+    private static final DiscordUserId USER = new DiscordUserId(42L);
     private static final Instant NOW = Instant.parse("2026-10-05T00:00:00Z");
 
     private final FakeDevicePort devices = new FakeDevicePort();
     private final AuthenticateDeviceService service = new AuthenticateDeviceService(devices);
 
     @Test
-    void 등록된_기기_토큰은_그_기기의_주인으로_인증된다() {
-        DeviceToken token = devices.registered(OWNER, new DeviceName("현수-PC"), NOW);
+    void 등록된_기기_토큰은_그_기기를_연결한_사용자로_인증된다() {
+        DeviceToken token = devices.registered(USER, new DeviceName("현수-PC"), NOW);
 
-        assertThat(service.authenticate(new AuthenticateDeviceQuery(token.value()))).contains(OWNER);
+        assertThat(service.authenticate(new AuthenticateDeviceQuery(token.value()))).contains(USER);
     }
 
     @Test

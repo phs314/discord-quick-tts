@@ -20,8 +20,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
- * {@code Authorization: Bearer <기기 토큰>} 으로 그 PC 의 주인을 알아내 스프링 시큐리티에 알린다 (ADR 0031).
- * 주인은 {@link DiscordUserId} 로 실어서, 컨트롤러는 {@code @AuthenticationPrincipal DiscordUserId} 로 받는다.
+ * {@code Authorization: Bearer <기기 토큰>} 으로 그 PC 를 연결한 디스코드 사용자를 알아내 스프링 시큐리티에 알린다 (ADR 0031).
+ * 사용자는 {@link DiscordUserId} 로 실어서, 컨트롤러는 {@code @AuthenticationPrincipal DiscordUserId} 로 받는다.
  * 토큰이 없거나 틀리면 아무것도 싣지 않고 넘긴다. 막는 일은 보안 설정의 경로 규칙이 한다.
  */
 @RequiredArgsConstructor
@@ -35,14 +35,14 @@ public class DeviceTokenAuthenticationFilter extends OncePerRequestFilter {
         Optional<String> token = bearerToken(request.getHeader(HttpHeaders.AUTHORIZATION));
         if (token.isPresent()) {
             AuthenticateDeviceQuery query = new AuthenticateDeviceQuery(token.get());
-            Optional<DiscordUserId> owner = authenticateDeviceUseCase.authenticate(query);
-            owner.ifPresent(DeviceTokenAuthenticationFilter::signIn);
+            Optional<DiscordUserId> userId = authenticateDeviceUseCase.authenticate(query);
+            userId.ifPresent(DeviceTokenAuthenticationFilter::signIn);
         }
         chain.doFilter(request, response);
     }
 
-    private static void signIn(DiscordUserId owner) {
-        Authentication authentication = UsernamePasswordAuthenticationToken.authenticated(owner, null, List.of());
+    private static void signIn(DiscordUserId userId) {
+        Authentication authentication = UsernamePasswordAuthenticationToken.authenticated(userId, null, List.of());
         SecurityContext context = SecurityContextHolder.createEmptyContext();
         context.setAuthentication(authentication);
         SecurityContextHolder.setContext(context);

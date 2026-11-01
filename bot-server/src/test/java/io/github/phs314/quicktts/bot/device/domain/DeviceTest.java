@@ -10,15 +10,15 @@ import org.junit.jupiter.api.Test;
 
 class DeviceTest {
 
-    private static final DiscordUserId OWNER = new DiscordUserId(42L);
+    private static final DiscordUserId USER = new DiscordUserId(42L);
     private static final DiscordUserId OTHER = new DiscordUserId(7L);
 
     @Test
-    void 기기의_주인은_등록한_사용자뿐이다() {
-        Device device = Device.register(DeviceToken.generate(), OWNER, new DeviceName("현수-PC"),
+    void 기기는_등록한_사용자의_것이다() {
+        Device device = Device.register(DeviceToken.generate(), USER, new DeviceName("현수-PC"),
                 Instant.parse("2026-10-16T00:00:00Z"));
 
-        assertThat(device.isOwnedBy(OWNER)).isTrue();
-        assertThat(device.isOwnedBy(OTHER)).isFalse();
+        assertThat(device.belongsTo(USER)).isTrue();
+        assertThat(device.belongsTo(OTHER)).isFalse();
     }
 }

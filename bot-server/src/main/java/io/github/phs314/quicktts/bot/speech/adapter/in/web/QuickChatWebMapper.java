@@ -2,7 +2,7 @@ package io.github.phs314.quicktts.bot.speech.adapter.in.web;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
-import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindMyVoiceChannelQuery;
+import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindCurrentUserVoiceChannelQuery;
 import io.github.phs314.quicktts.bot.speech.domain.vo.QuickChatMessage;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
 import io.github.phs314.quicktts.common.QuickChatRequest;
@@ -17,12 +17,12 @@ final class QuickChatWebMapper {
     private QuickChatWebMapper() {
     }
 
-    static SpeakQuickChatCommand toCommand(DiscordUserId speaker, QuickChatRequest request) {
-        return new SpeakQuickChatCommand(speaker, new QuickChatMessage(request.text()));
+    static SpeakQuickChatCommand toCommand(DiscordUserId author, QuickChatRequest request) {
+        return new SpeakQuickChatCommand(author, new QuickChatMessage(request.text()));
     }
 
-    static FindMyVoiceChannelQuery toQuery(DiscordUserId user) {
-        return new FindMyVoiceChannelQuery(user);
+    static FindCurrentUserVoiceChannelQuery toQuery(DiscordUserId user) {
+        return new FindCurrentUserVoiceChannelQuery(user);
     }
 
     /** 웹 JSON 이름은 배포된 클라이언트가 읽으므로 {@code serverName} 그대로 둔다 (ADR 0027). */

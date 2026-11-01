@@ -15,7 +15,7 @@ final class DevicePersistenceMapper {
     }
 
     static DeviceJpaEntity toEntity(Device device) {
-        return new DeviceJpaEntity(device.tokenHash().value(), device.id().value(), device.owner().value(),
+        return new DeviceJpaEntity(device.tokenHash().value(), device.id().value(), device.userId().value(),
                 device.name().value(), device.registeredAt());
     }
 
