@@ -7,7 +7,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import io.github.phs314.quicktts.bot.shared.adapter.in.discord.DiscordSlashCommand;
-import io.github.phs314.quicktts.bot.shared.adapter.in.discord.FailureReplyingListener;
+import io.github.phs314.quicktts.bot.shared.adapter.in.discord.InteractionErrorHandler;
 import java.util.List;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.events.GenericEvent;
@@ -42,6 +42,6 @@ class DiscordListenerRegistrarTest {
         ArgumentCaptor<Object> registered = ArgumentCaptor.forClass(Object.class);
         verify(jda, times(2)).addEventListener(registered.capture());
         assertThat(registered.getAllValues().getFirst()).isSameAs(listener);
-        assertThat(registered.getAllValues().get(1)).isInstanceOf(FailureReplyingListener.class);
+        assertThat(registered.getAllValues().get(1)).isInstanceOf(InteractionErrorHandler.class);
     }
 }

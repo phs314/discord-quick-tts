@@ -1,7 +1,7 @@
 package io.github.phs314.quicktts.bot.guild.application.service;
 
 import io.github.phs314.quicktts.bot.guild.application.port.in.LeaveNotAllowedGuildUseCase;
-import io.github.phs314.quicktts.bot.guild.application.port.in.command.LeaveIfNotAllowedCommand;
+import io.github.phs314.quicktts.bot.guild.application.port.in.command.LeaveNotAllowedGuildCommand;
 import io.github.phs314.quicktts.bot.guild.application.port.out.AllowedGuildPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.GuildAllowlistSettingPort;
 import io.github.phs314.quicktts.bot.guild.application.port.out.JoinedGuildPort;
@@ -20,7 +20,7 @@ public class LeaveNotAllowedGuildService implements LeaveNotAllowedGuildUseCase 
     private final GuildAllowlistSettingPort guildAllowlistSettingPort;
 
     @Override
-    public void leaveIfNotAllowed(LeaveIfNotAllowedCommand command) {
+    public void leaveIfNotAllowed(LeaveNotAllowedGuildCommand command) {
         if (!currentAllowlist().allows(command.guildId())) {
             joinedGuildPort.leaveWithNotice(command.guildId());
         }

@@ -1,7 +1,7 @@
 package io.github.phs314.quicktts.bot.guild.adapter.in.event;
 
 import io.github.phs314.quicktts.bot.guild.application.port.in.LeaveNotAllowedGuildUseCase;
-import io.github.phs314.quicktts.bot.guild.application.port.in.command.LeaveIfNotAllowedCommand;
+import io.github.phs314.quicktts.bot.guild.application.port.in.command.LeaveNotAllowedGuildCommand;
 import io.github.phs314.quicktts.bot.guild.domain.event.GuildRemovedFromAllowlist;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -19,6 +19,6 @@ public class GuildRemovedFromAllowlistListener {
 
     @TransactionalEventListener
     void leave(GuildRemovedFromAllowlist event) {
-        leaveNotAllowedGuildUseCase.leaveIfNotAllowed(new LeaveIfNotAllowedCommand(event.guildId()));
+        leaveNotAllowedGuildUseCase.leaveIfNotAllowed(new LeaveNotAllowedGuildCommand(event.guildId()));
     }
 }

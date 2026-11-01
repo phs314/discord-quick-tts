@@ -3,7 +3,7 @@ package io.github.phs314.quicktts.bot.guild.adapter.in.discord;
 import io.github.phs314.quicktts.bot.guild.application.port.in.SeedAllowlistUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.LeaveAllNotAllowedGuildsUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.LeaveNotAllowedGuildUseCase;
-import io.github.phs314.quicktts.bot.guild.application.port.in.command.LeaveIfNotAllowedCommand;
+import io.github.phs314.quicktts.bot.guild.application.port.in.command.LeaveNotAllowedGuildCommand;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import lombok.RequiredArgsConstructor;
 import net.dv8tion.jda.api.events.guild.GuildJoinEvent;
@@ -36,6 +36,6 @@ public class GuildJoinListener extends ListenerAdapter {
     @Override
     public void onGuildJoin(GuildJoinEvent event) {
         GuildId guildId = new GuildId(event.getGuild().getIdLong());
-        leaveNotAllowedGuildUseCase.leaveIfNotAllowed(new LeaveIfNotAllowedCommand(guildId));
+        leaveNotAllowedGuildUseCase.leaveIfNotAllowed(new LeaveNotAllowedGuildCommand(guildId));
     }
 }

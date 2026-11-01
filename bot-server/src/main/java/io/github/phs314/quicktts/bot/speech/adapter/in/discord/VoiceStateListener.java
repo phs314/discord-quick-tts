@@ -4,7 +4,7 @@ import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.application.port.in.SyncBotVoiceStateUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.LeaveEmptyVoiceChannelUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.SyncBotVoiceStateCommand;
-import io.github.phs314.quicktts.bot.speech.application.port.in.command.LeaveIfEmptyCommand;
+import io.github.phs314.quicktts.bot.speech.application.port.in.command.LeaveEmptyVoiceChannelCommand;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -35,7 +35,7 @@ public class VoiceStateListener extends ListenerAdapter {
             syncBotVoiceStateUseCase.sync(new SyncBotVoiceStateCommand(toVoiceChannel(guildId, left),
                     Optional.ofNullable(event.getChannelJoined()).map(joined -> toVoiceChannel(guildId, joined))));
         } else {
-            leaveEmptyVoiceChannelUseCase.leaveIfEmpty(new LeaveIfEmptyCommand(guildId));
+            leaveEmptyVoiceChannelUseCase.leaveIfEmpty(new LeaveEmptyVoiceChannelCommand(guildId));
         }
     }
 

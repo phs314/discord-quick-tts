@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
-import io.github.phs314.quicktts.bot.speech.application.port.in.command.LeaveIfEmptyCommand;
+import io.github.phs314.quicktts.bot.speech.application.port.in.command.LeaveEmptyVoiceChannelCommand;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeBotVoiceStatePort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeVoiceStatePort;
@@ -29,7 +29,7 @@ class LeaveEmptyVoiceChannelServiceTest {
         join(GENERAL);
         discord.empty(GENERAL.channel());
 
-        service.leaveIfEmpty(new LeaveIfEmptyCommand(GUILD));
+        service.leaveIfEmpty(new LeaveEmptyVoiceChannelCommand(GUILD));
 
         assertThat(player.actions()).containsExactly("leave:1");
         assertThat(states.channelOf(GUILD)).isEmpty();
@@ -39,7 +39,7 @@ class LeaveEmptyVoiceChannelServiceTest {
     void 봇이_있는_채널에_사람이_남아_있으면_그대로_있는다() {
         join(GENERAL);
 
-        service.leaveIfEmpty(new LeaveIfEmptyCommand(GUILD));
+        service.leaveIfEmpty(new LeaveEmptyVoiceChannelCommand(GUILD));
 
         assertThat(player.actions()).isEmpty();
         assertThat(states.channelOf(GUILD)).contains(GENERAL.channel());
@@ -47,7 +47,7 @@ class LeaveEmptyVoiceChannelServiceTest {
 
     @Test
     void 봇이_어느_채널에도_없으면_아무것도_하지_않는다() {
-        service.leaveIfEmpty(new LeaveIfEmptyCommand(GUILD));
+        service.leaveIfEmpty(new LeaveEmptyVoiceChannelCommand(GUILD));
 
         assertThat(player.actions()).isEmpty();
     }
