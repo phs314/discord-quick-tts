@@ -143,6 +143,7 @@
 | --- | --- | --- |
 | [0018](0018-windows-installer.md) | Windows 에는 jpackage 설치 마법사(.exe)로 설치한다 | 일부 대체됨 (ADR 0020, ADR 0021) |
 | [0021](0021-installer-look.md) | 설치 마법사는 앱 색의 그림과 한국어 문구로 꾸민다 | 채택 |
+| [0050](0050-desktop-input-ui-tests.md) | 데스크톱 입력창은 TestFX 로 화면 없이 띄워 테스트한다 | 채택 |
 
 ### 릴리스
 

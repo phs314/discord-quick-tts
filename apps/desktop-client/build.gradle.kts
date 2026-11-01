@@ -23,7 +23,17 @@ dependencies {
     testImplementation(platform(libs.junit.bom))
     testImplementation(libs.junit.jupiter)
     testImplementation(libs.assertj.core)
+    testImplementation(libs.testfx.junit5)
     testRuntimeOnly(libs.junit.platform.launcher)
+}
+
+tasks.test {
+    // 입력창 UI 테스트(TestFX)는 JavaFX 에 들어 있는 Headless 플랫폼에서 돈다.
+    // 화면이 없는 CI 에서도 돌고, 개발 PC 에서 돌려도 창이 뜨거나 키 입력을 빼앗지 않는다.
+    systemProperty("glass.platform", "Headless")
+    systemProperty("prism.order", "sw")
+    systemProperty("testfx.robot", "glass")
+    jvmArgs("--enable-native-access=ALL-UNNAMED")
 }
 
 application {
