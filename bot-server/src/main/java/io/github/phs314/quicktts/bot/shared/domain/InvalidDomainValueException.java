@@ -8,10 +8,10 @@ import io.github.phs314.quicktts.common.ApiErrorCode;
 public class InvalidDomainValueException extends BusinessException {
 
     public InvalidDomainValueException(String message) {
-        super(ErrorKind.INVALID_INPUT, ApiErrorCode.INVALID_VALUE, message);
+        super(ErrorKind.INVALID_ARGUMENT, ApiErrorCode.INVALID_VALUE, message);
     }
 
     public InvalidDomainValueException(String message, Throwable cause) {
-        super(ErrorKind.INVALID_INPUT, ApiErrorCode.INVALID_VALUE, message, cause);
+        super(ErrorKind.INVALID_ARGUMENT, ApiErrorCode.INVALID_VALUE, message, cause);
     }
 }

@@ -17,7 +17,7 @@ public final class ApiErrorCode {
     public static final String INVALID_PAIRING_CODE = "invalid-pairing-code";
 
     /** 기기 토큰이 없거나 해제된 기기. 401. 클라이언트는 연결 코드를 다시 받아야 한다. */
-    public static final String DEVICE_UNAUTHORIZED = "device-unauthorized";
+    public static final String INVALID_DEVICE_TOKEN = "invalid-device-token";
 
     /** 보낸 사람이 봇이 있는 디스코드 서버의 음성 채널에 없음. 409. */
     public static final String AUTHOR_NOT_IN_VOICE_CHANNEL = "author-not-in-voice-channel";

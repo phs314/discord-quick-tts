@@ -85,7 +85,7 @@ class QuickChatControllerTest {
     void 토큰이_없으면_401_과_device_unauthorized() throws Exception {
         mockMvc.perform(quickChat("안녕"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value(ApiErrorCode.DEVICE_UNAUTHORIZED));
+                .andExpect(jsonPath("$.code").value(ApiErrorCode.INVALID_DEVICE_TOKEN));
 
         verify(speak, never()).speak(any());
     }
@@ -94,7 +94,7 @@ class QuickChatControllerTest {
     void Bearer_가_아닌_인증_헤더면_401_과_device_unauthorized() throws Exception {
         mockMvc.perform(quickChat("안녕").header(HttpHeaders.AUTHORIZATION, "Basic " + TOKEN))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value(ApiErrorCode.DEVICE_UNAUTHORIZED));
+                .andExpect(jsonPath("$.code").value(ApiErrorCode.INVALID_DEVICE_TOKEN));
 
         verify(speak, never()).speak(any());
     }
@@ -103,7 +103,7 @@ class QuickChatControllerTest {
     void 해제됐거나_모르는_토큰이면_401_과_device_unauthorized() throws Exception {
         mockMvc.perform(quickChat("안녕").header(HttpHeaders.AUTHORIZATION, QuickTtsApi.BEARER_PREFIX + "unknown"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value(ApiErrorCode.DEVICE_UNAUTHORIZED));
+                .andExpect(jsonPath("$.code").value(ApiErrorCode.INVALID_DEVICE_TOKEN));
 
         verify(speak, never()).speak(any());
     }
@@ -175,7 +175,7 @@ class QuickChatControllerTest {
     void 토큰_없이_내_음성_채널을_물으면_401_과_device_unauthorized() throws Exception {
         mockMvc.perform(get(QuickTtsApi.MY_VOICE_CHANNEL_PATH))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.code").value(ApiErrorCode.DEVICE_UNAUTHORIZED));
+                .andExpect(jsonPath("$.code").value(ApiErrorCode.INVALID_DEVICE_TOKEN));
 
         verify(findCurrentUserVoiceChannel, never()).findCurrentUserVoiceChannel(any());
     }

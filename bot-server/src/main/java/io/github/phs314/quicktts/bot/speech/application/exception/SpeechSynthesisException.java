@@ -10,10 +10,10 @@ import io.github.phs314.quicktts.common.ApiErrorCode;
 public class SpeechSynthesisException extends BusinessException {
 
     public SpeechSynthesisException(String message) {
-        super(ErrorKind.EXTERNAL_FAILURE, ApiErrorCode.SPEECH_SYNTHESIS_FAILED, message);
+        super(ErrorKind.UNAVAILABLE, ApiErrorCode.SPEECH_SYNTHESIS_FAILED, message);
     }
 
     public SpeechSynthesisException(String message, Throwable cause) {
-        super(ErrorKind.EXTERNAL_FAILURE, ApiErrorCode.SPEECH_SYNTHESIS_FAILED, message, cause);
+        super(ErrorKind.UNAVAILABLE, ApiErrorCode.SPEECH_SYNTHESIS_FAILED, message, cause);
     }
 }

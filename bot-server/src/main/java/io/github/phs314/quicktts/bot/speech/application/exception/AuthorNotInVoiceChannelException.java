@@ -11,6 +11,6 @@ import io.github.phs314.quicktts.common.ApiErrorCode;
 public class AuthorNotInVoiceChannelException extends BusinessException {
 
     public AuthorNotInVoiceChannelException(DiscordUserId author) {
-        super(ErrorKind.CONFLICT, ApiErrorCode.AUTHOR_NOT_IN_VOICE_CHANNEL, "사용자 " + author.value() + " 가 음성 채널에 없습니다.");
+        super(ErrorKind.FAILED_PRECONDITION, ApiErrorCode.AUTHOR_NOT_IN_VOICE_CHANNEL, "사용자 " + author.value() + " 가 음성 채널에 없습니다.");
     }
 }

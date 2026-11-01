@@ -32,7 +32,7 @@ public class FailureReplyingListener implements EventListener {
         try {
             command.onEvent(event);
         } catch (BusinessException e) {
-            if (e.kind() == ErrorKind.EXTERNAL_FAILURE) {
+            if (e.kind() == ErrorKind.UNAVAILABLE) {
                 log.warn("바깥 서비스가 실패했습니다.", e);
             }
             replyIfNotAnswered(event, e.getMessage());

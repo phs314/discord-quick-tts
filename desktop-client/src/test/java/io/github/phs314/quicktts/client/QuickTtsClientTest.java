@@ -14,16 +14,16 @@ class QuickTtsClientTest {
 
     @Test
     void 해제된_기기면_다시_연결하라는_예외() {
-        assertThat(client.sendFailure(401, problem(ApiErrorCode.DEVICE_UNAUTHORIZED, "기기 토큰이 없습니다.")))
-                .isInstanceOf(QuickTtsClient.DeviceUnauthorizedException.class);
+        assertThat(client.sendFailure(401, problem(ApiErrorCode.INVALID_DEVICE_TOKEN, "기기 토큰이 없습니다.")))
+                .isInstanceOf(QuickTtsClient.InvalidDeviceTokenException.class);
     }
 
     @Test
     void 내_음성_채널을_물을_때도_해제된_기기면_다시_연결하라는_예외() {
-        assertThat(client.voiceChannelFailure(401, problem(ApiErrorCode.DEVICE_UNAUTHORIZED, "기기 토큰이 없습니다.")))
-                .isInstanceOf(QuickTtsClient.DeviceUnauthorizedException.class);
+        assertThat(client.voiceChannelFailure(401, problem(ApiErrorCode.INVALID_DEVICE_TOKEN, "기기 토큰이 없습니다.")))
+                .isInstanceOf(QuickTtsClient.InvalidDeviceTokenException.class);
         assertThat(client.voiceChannelFailure(500, problem(ApiErrorCode.UNEXPECTED_FAILURE, "x")))
-                .isNotInstanceOf(QuickTtsClient.DeviceUnauthorizedException.class);
+                .isNotInstanceOf(QuickTtsClient.InvalidDeviceTokenException.class);
     }
 
     @Test

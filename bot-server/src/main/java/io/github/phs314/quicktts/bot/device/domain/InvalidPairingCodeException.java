@@ -10,7 +10,7 @@ import io.github.phs314.quicktts.common.ApiErrorCode;
 public class InvalidPairingCodeException extends BusinessException {
 
     public InvalidPairingCodeException() {
-        super(ErrorKind.INVALID_INPUT, ApiErrorCode.INVALID_PAIRING_CODE,
+        super(ErrorKind.INVALID_ARGUMENT, ApiErrorCode.INVALID_PAIRING_CODE,
                 "연결 코드가 없거나 만료되었습니다. 디스코드에서 /연결 을 다시 입력해 주세요.");
     }
 }

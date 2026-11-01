@@ -175,7 +175,7 @@ class QuickTtsApiIntegrationTest {
                 .body(new QuickChatRequest("안녕"))
                 .exchange()
                 .expectStatus().isUnauthorized()
-                .expectBody().jsonPath("$.code").isEqualTo(ApiErrorCode.DEVICE_UNAUTHORIZED);
+                .expectBody().jsonPath("$.code").isEqualTo(ApiErrorCode.INVALID_DEVICE_TOKEN);
     }
 
     @Test
@@ -183,7 +183,7 @@ class QuickTtsApiIntegrationTest {
         client.get().uri(QuickTtsApi.MY_VOICE_CHANNEL_PATH)
                 .exchange()
                 .expectStatus().isUnauthorized()
-                .expectBody().jsonPath("$.code").isEqualTo(ApiErrorCode.DEVICE_UNAUTHORIZED);
+                .expectBody().jsonPath("$.code").isEqualTo(ApiErrorCode.INVALID_DEVICE_TOKEN);
     }
 
     @Test
@@ -195,7 +195,7 @@ class QuickTtsApiIntegrationTest {
 
         sendQuickChat(token, "안녕")
                 .expectStatus().isUnauthorized()
-                .expectBody().jsonPath("$.code").isEqualTo(ApiErrorCode.DEVICE_UNAUTHORIZED);
+                .expectBody().jsonPath("$.code").isEqualTo(ApiErrorCode.INVALID_DEVICE_TOKEN);
         assertThat(PLAYER.actions()).isEmpty();
     }
 

@@ -19,6 +19,6 @@ public class DeviceTokenAuthenticationEntryPoint implements AuthenticationEntryP
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
             AuthenticationException authException) {
-        handlerExceptionResolver.resolveException(request, response, null, new DeviceUnauthorizedException());
+        handlerExceptionResolver.resolveException(request, response, null, new InvalidDeviceTokenException());
     }
 }
