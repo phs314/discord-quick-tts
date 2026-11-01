@@ -1,11 +1,11 @@
 package io.github.phs314.quicktts.bot.guild.adapter.in.discord;
 
 import io.github.phs314.quicktts.bot.guild.application.exception.NotBotOwnerException;
-import io.github.phs314.quicktts.bot.guild.application.port.in.AllowGuildUseCase;
-import io.github.phs314.quicktts.bot.guild.application.port.in.DisallowGuildUseCase;
+import io.github.phs314.quicktts.bot.guild.application.port.in.AddToAllowlistUseCase;
+import io.github.phs314.quicktts.bot.guild.application.port.in.RemoveFromAllowlistUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.GetAllowlistUseCase;
-import io.github.phs314.quicktts.bot.guild.application.port.in.command.AllowGuildCommand;
-import io.github.phs314.quicktts.bot.guild.application.port.in.command.DisallowGuildCommand;
+import io.github.phs314.quicktts.bot.guild.application.port.in.command.AddToAllowlistCommand;
+import io.github.phs314.quicktts.bot.guild.application.port.in.command.RemoveFromAllowlistCommand;
 import io.github.phs314.quicktts.bot.guild.application.port.in.dto.AllowedGuildDto;
 import io.github.phs314.quicktts.bot.guild.application.port.in.dto.GuildAllowlistDto;
 import io.github.phs314.quicktts.bot.guild.application.port.in.query.GetAllowlistQuery;
@@ -50,8 +50,8 @@ public class AllowlistCommandListener extends ListenerAdapter implements Discord
 
     private final JDA jda;
     private final GetAllowlistUseCase getAllowlistUseCase;
-    private final AllowGuildUseCase allowGuildUseCase;
-    private final DisallowGuildUseCase disallowGuildUseCase;
+    private final AddToAllowlistUseCase addToAllowlistUseCase;
+    private final RemoveFromAllowlistUseCase removeFromAllowlistUseCase;
 
     @Override
     public SlashCommandData definition() {
@@ -103,7 +103,7 @@ public class AllowlistCommandListener extends ListenerAdapter implements Discord
     }
 
     private String add(DiscordUserId requester, GuildId guildId) {
-        String result = allowGuildUseCase.allow(new AllowGuildCommand(requester, guildId))
+        String result = addToAllowlistUseCase.add(new AddToAllowlistCommand(requester, guildId))
                 ? "허용 목록에 넣었어요: **" + guildName(guildId) + "**"
                 : "이미 허용 목록에 있어요: **" + guildName(guildId) + "**";
         if (jda.getGuildById(guildId.value()) != null) {
@@ -115,7 +115,7 @@ public class AllowlistCommandListener extends ListenerAdapter implements Discord
     /** 봇이 그 서버에서 나가는 일은 목록에서 빼는 트랜잭션이 커밋된 뒤에 이벤트로 일어난다 (ADR 0033). */
     private String remove(DiscordUserId requester, GuildId guildId) {
         String name = guildName(guildId);
-        return disallowGuildUseCase.disallow(new DisallowGuildCommand(requester, guildId))
+        return removeFromAllowlistUseCase.remove(new RemoveFromAllowlistCommand(requester, guildId))
                 ? "허용 목록에서 뺐어요: **" + name + "**\n봇이 그 서버에 있었다면 안내를 남기고 나가요."
                 : "허용 목록에 없는 서버예요: **" + name + "**";
     }

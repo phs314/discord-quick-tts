@@ -11,11 +11,11 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import io.github.phs314.quicktts.bot.guild.application.exception.NotBotOwnerException;
-import io.github.phs314.quicktts.bot.guild.application.port.in.AllowGuildUseCase;
-import io.github.phs314.quicktts.bot.guild.application.port.in.DisallowGuildUseCase;
+import io.github.phs314.quicktts.bot.guild.application.port.in.AddToAllowlistUseCase;
+import io.github.phs314.quicktts.bot.guild.application.port.in.RemoveFromAllowlistUseCase;
 import io.github.phs314.quicktts.bot.guild.application.port.in.GetAllowlistUseCase;
-import io.github.phs314.quicktts.bot.guild.application.port.in.command.AllowGuildCommand;
-import io.github.phs314.quicktts.bot.guild.application.port.in.command.DisallowGuildCommand;
+import io.github.phs314.quicktts.bot.guild.application.port.in.command.AddToAllowlistCommand;
+import io.github.phs314.quicktts.bot.guild.application.port.in.command.RemoveFromAllowlistCommand;
 import io.github.phs314.quicktts.bot.guild.application.port.in.dto.AllowedGuildDto;
 import io.github.phs314.quicktts.bot.guild.application.port.in.dto.GuildAllowlistDto;
 import io.github.phs314.quicktts.bot.guild.application.port.in.query.GetAllowlistQuery;
@@ -39,10 +39,10 @@ class AllowlistCommandListenerTest {
 
     private final JDA jda = mock(JDA.class, RETURNS_DEEP_STUBS);
     private final GetAllowlistUseCase getAllowlistUseCase = mock(GetAllowlistUseCase.class);
-    private final AllowGuildUseCase allowGuildUseCase = mock(AllowGuildUseCase.class);
-    private final DisallowGuildUseCase disallowGuildUseCase = mock(DisallowGuildUseCase.class);
+    private final AddToAllowlistUseCase addToAllowlistUseCase = mock(AddToAllowlistUseCase.class);
+    private final RemoveFromAllowlistUseCase removeFromAllowlistUseCase = mock(RemoveFromAllowlistUseCase.class);
     private final AllowlistCommandListener listener =
-            new AllowlistCommandListener(jda, getAllowlistUseCase, allowGuildUseCase, disallowGuildUseCase);
+            new AllowlistCommandListener(jda, getAllowlistUseCase, addToAllowlistUseCase, removeFromAllowlistUseCase);
     private final ReplyCallbackAction reply = mock(ReplyCallbackAction.class, RETURNS_SELF);
     /** 가장 최근에 만든 명령 이벤트. {@link #replied()} 가 여기에 간 답을 꺼낸다. */
     private SlashCommandInteractionEvent event;
@@ -58,7 +58,7 @@ class AllowlistCommandListenerTest {
 
     @Test
     void 봇이_있는_서버를_넣으면_이름만_알린다() {
-        when(allowGuildUseCase.allow(new AllowGuildCommand(OWNER, JOINED))).thenReturn(true);
+        when(addToAllowlistUseCase.add(new AddToAllowlistCommand(OWNER, JOINED))).thenReturn(true);
 
         listener.onSlashCommandInteraction(command("add", String.valueOf(JOINED.value())));
 
@@ -68,7 +68,7 @@ class AllowlistCommandListenerTest {
 
     @Test
     void 봇이_없는_서버를_넣으면_그_서버가_골라진_초대_링크를_준다() {
-        when(allowGuildUseCase.allow(new AllowGuildCommand(OWNER, NOT_JOINED))).thenReturn(false);
+        when(addToAllowlistUseCase.add(new AddToAllowlistCommand(OWNER, NOT_JOINED))).thenReturn(false);
 
         listener.onSlashCommandInteraction(command("add", " 200 "));
 
@@ -82,12 +82,12 @@ class AllowlistCommandListenerTest {
         listener.onSlashCommandInteraction(command("add", "우리 서버"));
 
         assertThat(replied()).startsWith("디스코드 서버 ID 는 숫자예요.");
-        verify(allowGuildUseCase, never()).allow(any());
+        verify(addToAllowlistUseCase, never()).add(any());
     }
 
     @Test
     void 봇_주인이_아니면_쓸_수_없다고_답한다() {
-        when(disallowGuildUseCase.disallow(new DisallowGuildCommand(OWNER, JOINED)))
+        when(removeFromAllowlistUseCase.remove(new RemoveFromAllowlistCommand(OWNER, JOINED)))
                 .thenThrow(new NotBotOwnerException(OWNER));
 
         listener.onSlashCommandInteraction(command("remove", String.valueOf(JOINED.value())));
@@ -97,7 +97,7 @@ class AllowlistCommandListenerTest {
 
     @Test
     void 목록에_없는_서버를_빼면_없다고_답한다() {
-        when(disallowGuildUseCase.disallow(new DisallowGuildCommand(OWNER, NOT_JOINED))).thenReturn(false);
+        when(removeFromAllowlistUseCase.remove(new RemoveFromAllowlistCommand(OWNER, NOT_JOINED))).thenReturn(false);
 
         listener.onSlashCommandInteraction(command("remove", String.valueOf(NOT_JOINED.value())));
 

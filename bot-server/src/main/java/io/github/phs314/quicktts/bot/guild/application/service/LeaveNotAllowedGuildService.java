@@ -21,7 +21,7 @@ public class LeaveNotAllowedGuildService implements LeaveNotAllowedGuildUseCase 
 
     @Override
     public void leaveIfNotAllowed(LeaveIfNotAllowedCommand command) {
-        if (!currentAllowlist().permits(command.guildId())) {
+        if (!currentAllowlist().allows(command.guildId())) {
             joinedGuildPort.leaveWithNotice(command.guildId());
         }
     }
