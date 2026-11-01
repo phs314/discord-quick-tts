@@ -12,14 +12,18 @@ import static org.mockito.Mockito.when;
 import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
+import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 
 class GuildSpeechQueueTest {
 
     private final AudioPlayer player = mock(AudioPlayer.class);
-    private final GuildSpeechQueue queue = new GuildSpeechQueue(player, Runnable::run);
+    private final Timer waitTimer = new SimpleMeterRegistry().timer("wait");
+    private final GuildSpeechQueue queue = new GuildSpeechQueue(player, waitTimer, Runnable::run);
 
     @Test
     void 재생_중이면_기다렸다가_앞_문장이_끝나면_다음_문장을_읽는다() {
@@ -72,7 +76,7 @@ class GuildSpeechQueueTest {
         // LavaPlayer 는 자기 잠금을 쥔 채로 onTrackEnd 를 부른다. 그때 다른 스레드가 큐의 잠금을 쥐고
         // LavaPlayer 잠금을 기다리고 있어도, onTrackEnd 가 큐의 잠금을 기다리지 않아야 둘 다 멈추지 않는다.
         List<Runnable> handedOff = new ArrayList<>();
-        GuildSpeechQueue queue = new GuildSpeechQueue(player, handedOff::add);
+        GuildSpeechQueue queue = new GuildSpeechQueue(player, waitTimer, handedOff::add);
         AudioTrack finished = mock(AudioTrack.class);
         AudioTrack next = mock(AudioTrack.class);
         when(player.startTrack(next, true)).thenReturn(false, true);
@@ -91,5 +95,26 @@ class GuildSpeechQueueTest {
         verify(player, times(2)).startTrack(next, true);
         verify(player, never()).startTrack(any(), eq(false));
         verify(player, never()).stopTrack();
+    }
+
+    @Test
+    void 순서에_들어와서_재생을_시작하기까지_기다린_시간을_잰다() {
+        AudioTrack track = mock(AudioTrack.class);
+        when(player.startTrack(track, true)).thenReturn(true);
+        queue.enqueue(track);
+        ArgumentCaptor<Object> enqueuedAt = ArgumentCaptor.forClass(Object.class);
+        verify(track).setUserData(enqueuedAt.capture());
+        when(track.getUserData(Long.class)).thenReturn((Long) enqueuedAt.getValue());
+
+        queue.onTrackStart(player, track);
+
+        assertThat(waitTimer.count()).isEqualTo(1);
+    }
+
+    @Test
+    void 이_큐에_들어오지_않은_트랙은_세지_않는다() {
+        queue.onTrackStart(player, mock(AudioTrack.class));
+
+        assertThat(waitTimer.count()).isZero();
     }
 }

@@ -4,10 +4,12 @@ import com.sedmelluq.discord.lavaplayer.player.AudioPlayer;
 import com.sedmelluq.discord.lavaplayer.player.event.AudioEventAdapter;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrack;
 import com.sedmelluq.discord.lavaplayer.track.AudioTrackEndReason;
+import io.micrometer.core.instrument.Timer;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 서버(길드) 하나의 음성 재생 순서. 앞 문장이 끝나야 다음 문장을 읽는다.
@@ -15,20 +17,24 @@ import java.util.concurrent.Executor;
  * <p>LavaPlayer 는 자기 잠금을 쥔 채로 {@link #onTrackEnd} 를 부르고, 이 큐는 자기 잠금을 쥔 채로 LavaPlayer 를 부른다.
  * {@link #onTrackEnd} 에서 이 큐의 잠금까지 잡으면 두 잠금을 반대 순서로 기다리다 둘 다 멈출 수 있으므로,
  * 다음 문장을 트는 일은 다른 스레드에 넘긴다.
+ *
+ * <p>문장이 순서에 들어와서 재생을 시작하기까지 기다린 시간을 {@code waitTimer} 로 잰다. 재생을 시작하지 못하고 버려진 문장은 세지 않는다.
  */
 class GuildSpeechQueue extends AudioEventAdapter {
 
     private final AudioPlayer player;
+    private final Timer waitTimer;
     private final Executor startNextExecutor;
     /** 이 큐의 잠금 안에서만 만진다. */
     private final Queue<AudioTrack> pending = new ArrayDeque<>();
 
-    GuildSpeechQueue(AudioPlayer player) {
-        this(player, CompletableFuture::runAsync);
+    GuildSpeechQueue(AudioPlayer player, Timer waitTimer) {
+        this(player, waitTimer, CompletableFuture::runAsync);
     }
 
-    GuildSpeechQueue(AudioPlayer player, Executor startNextExecutor) {
+    GuildSpeechQueue(AudioPlayer player, Timer waitTimer, Executor startNextExecutor) {
         this.player = player;
+        this.waitTimer = waitTimer;
         this.startNextExecutor = startNextExecutor;
         player.addListener(this);
     }
@@ -38,6 +44,7 @@ class GuildSpeechQueue extends AudioEventAdapter {
     }
 
     synchronized void enqueue(AudioTrack track) {
+        track.setUserData(System.nanoTime());
         pending.offer(track);
         startNextIfIdle();
     }
@@ -52,6 +59,14 @@ class GuildSpeechQueue extends AudioEventAdapter {
     synchronized void destroy() {
         pending.clear();
         player.destroy();
+    }
+
+    @Override
+    public void onTrackStart(AudioPlayer player, AudioTrack track) {
+        Long enqueuedAt = track.getUserData(Long.class);
+        if (enqueuedAt != null) {
+            waitTimer.record(System.nanoTime() - enqueuedAt, TimeUnit.NANOSECONDS);
+        }
     }
 
     @Override
