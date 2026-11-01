@@ -61,7 +61,7 @@ class QuickTtsClient {
 
     /**
      * 문장을 보낸다. 실패하면 사용자에게 보여 줄 메시지를 담은 예외로 끝난다.
-     * 기기 토큰이 더 이상 유효하지 않으면 {@link DeviceUnauthorizedException} 으로 끝난다.
+     * 기기 토큰이 더 이상 유효하지 않으면 {@link InvalidDeviceTokenException} 으로 끝난다.
      * <p>서버는 음성을 다 만든 문장부터 읽으므로, 앞 문장의 응답을 받은 뒤에 보내야 연달아 보내도 순서가 바뀌지 않는다.
      */
     synchronized CompletableFuture<Void> send(String deviceToken, String text) {
@@ -95,7 +95,7 @@ class QuickTtsClient {
     QuickTtsClientException sendFailure(int status, String body) {
         ServerError error = serverError(body);
         return switch (error.code()) {
-            case ApiErrorCode.DEVICE_UNAUTHORIZED -> new DeviceUnauthorizedException();
+            case ApiErrorCode.INVALID_DEVICE_TOKEN -> new InvalidDeviceTokenException();
             case ApiErrorCode.INVALID_VALUE -> new QuickTtsClientException(error.detailOr(
                     "문장이 비어 있거나 너무 깁니다. (최대 " + QuickTtsApi.MAX_TEXT_LENGTH + "자)"));
             case ApiErrorCode.AUTHOR_NOT_IN_VOICE_CHANNEL ->
@@ -112,8 +112,8 @@ class QuickTtsClient {
 
     /** 내 음성 채널 묻기가 실패한 응답을 예외로 바꾼다. 기기 연결이 끊겼으면 다시 연결하도록 따로 알린다. */
     QuickTtsClientException voiceChannelFailure(int status, String body) {
-        if (ApiErrorCode.DEVICE_UNAUTHORIZED.equals(serverError(body).code())) {
-            return new DeviceUnauthorizedException();
+        if (ApiErrorCode.INVALID_DEVICE_TOKEN.equals(serverError(body).code())) {
+            return new InvalidDeviceTokenException();
         }
         return new QuickTtsClientException("음성 채널을 확인하지 못했습니다. (HTTP " + status + ")");
     }
@@ -187,9 +187,9 @@ class QuickTtsClient {
         }
     }
 
-    static class DeviceUnauthorizedException extends QuickTtsClientException {
+    static class InvalidDeviceTokenException extends QuickTtsClientException {
 
-        DeviceUnauthorizedException() {
+        InvalidDeviceTokenException() {
             super("이 PC 의 연결이 해제되었습니다. 디스코드에서 /연결 로 다시 연결해 주세요.");
         }
     }

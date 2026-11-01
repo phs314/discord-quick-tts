@@ -11,6 +11,6 @@ import io.github.phs314.quicktts.common.ApiErrorCode;
 public class NotBotOwnerException extends BusinessException {
 
     public NotBotOwnerException(DiscordUserId requester) {
-        super(ErrorKind.FORBIDDEN, ApiErrorCode.NOT_BOT_OWNER, "봇 주인만 허용 목록을 다룰 수 있습니다: " + requester.value());
+        super(ErrorKind.PERMISSION_DENIED, ApiErrorCode.NOT_BOT_OWNER, "봇 주인만 허용 목록을 다룰 수 있습니다: " + requester.value());
     }
 }

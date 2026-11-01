@@ -28,7 +28,7 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ProblemDetail businessFailure(BusinessException e) {
-        if (e.kind() == ErrorKind.EXTERNAL_FAILURE) {
+        if (e.kind() == ErrorKind.UNAVAILABLE) {
             log.warn("바깥 서비스가 실패했습니다.", e);
         }
         return ApiProblem.of(statusOf(e.kind()), e.code(), e.getMessage());
@@ -56,11 +56,11 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
 
     static HttpStatus statusOf(ErrorKind kind) {
         return switch (kind) {
-            case INVALID_INPUT -> HttpStatus.BAD_REQUEST;
+            case INVALID_ARGUMENT -> HttpStatus.BAD_REQUEST;
             case UNAUTHENTICATED -> HttpStatus.UNAUTHORIZED;
-            case FORBIDDEN -> HttpStatus.FORBIDDEN;
-            case CONFLICT -> HttpStatus.CONFLICT;
-            case EXTERNAL_FAILURE -> HttpStatus.BAD_GATEWAY;
+            case PERMISSION_DENIED -> HttpStatus.FORBIDDEN;
+            case FAILED_PRECONDITION -> HttpStatus.CONFLICT;
+            case UNAVAILABLE -> HttpStatus.BAD_GATEWAY;
         };
     }
 }

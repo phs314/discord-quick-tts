@@ -12,6 +12,6 @@ import io.github.phs314.quicktts.common.ApiErrorCode;
 public class BotCannotJoinVoiceChannelException extends BusinessException {
 
     public BotCannotJoinVoiceChannelException(VoiceChannel channel, Throwable cause) {
-        super(ErrorKind.FORBIDDEN, ApiErrorCode.BOT_CANNOT_JOIN_VOICE_CHANNEL, "봇이 이 음성 채널에 들어갈 수 없습니다. 채널 인원이 꽉 찼거나 봇에게 연결 권한이 없습니다: " + channel, cause);
+        super(ErrorKind.PERMISSION_DENIED, ApiErrorCode.BOT_CANNOT_JOIN_VOICE_CHANNEL, "봇이 이 음성 채널에 들어갈 수 없습니다. 채널 인원이 꽉 찼거나 봇에게 연결 권한이 없습니다: " + channel, cause);
     }
 }

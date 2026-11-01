@@ -11,6 +11,6 @@ import io.github.phs314.quicktts.common.ApiErrorCode;
 public class UnknownVoiceException extends BusinessException {
 
     public UnknownVoiceException(VoiceId voiceId) {
-        super(ErrorKind.INVALID_INPUT, ApiErrorCode.UNKNOWN_VOICE, "없는 목소리입니다: " + voiceId.value());
+        super(ErrorKind.INVALID_ARGUMENT, ApiErrorCode.UNKNOWN_VOICE, "없는 목소리입니다: " + voiceId.value());
     }
 }

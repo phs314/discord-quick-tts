@@ -158,7 +158,7 @@ public class QuickTtsApp extends Application {
             Throwable cause = failure instanceof CompletionException ? failure.getCause() : failure;
             if (failure == null) {
                 inputBar.showChannel(channel);
-            } else if (cause instanceof QuickTtsClient.DeviceUnauthorizedException) {
+            } else if (cause instanceof QuickTtsClient.InvalidDeviceTokenException) {
                 hide();
                 trayMenu.showError(cause.getMessage());
                 forgetDeviceAndPairAgain();
@@ -190,7 +190,7 @@ public class QuickTtsApp extends Application {
                     ? cause.getMessage()
                     : "봇 서버에 연결하지 못했습니다.";
             trayMenu.showError(message);
-            if (cause instanceof QuickTtsClient.DeviceUnauthorizedException) {
+            if (cause instanceof QuickTtsClient.InvalidDeviceTokenException) {
                 Platform.runLater(this::forgetDeviceAndPairAgain);
             }
             return null;

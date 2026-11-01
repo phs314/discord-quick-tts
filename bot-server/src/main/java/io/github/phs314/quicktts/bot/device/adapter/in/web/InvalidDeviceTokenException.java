@@ -7,9 +7,9 @@ import io.github.phs314.quicktts.common.ApiErrorCode;
 /**
  * 기기 토큰이 필요한 요청에 토큰이 없거나 해제된 기기의 토큰일 때 쓴다. 웹 공통 예외 처리가 401 로 바꾼다.
  */
-class DeviceUnauthorizedException extends BusinessException {
+class InvalidDeviceTokenException extends BusinessException {
 
-    DeviceUnauthorizedException() {
-        super(ErrorKind.UNAUTHENTICATED, ApiErrorCode.DEVICE_UNAUTHORIZED, "기기 토큰이 없거나 연결이 해제된 기기입니다.");
+    InvalidDeviceTokenException() {
+        super(ErrorKind.UNAUTHENTICATED, ApiErrorCode.INVALID_DEVICE_TOKEN, "기기 토큰이 없거나 연결이 해제된 기기입니다.");
     }
 }
