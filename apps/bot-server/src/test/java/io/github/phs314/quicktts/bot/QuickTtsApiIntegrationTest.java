@@ -1,6 +1,8 @@
 package io.github.phs314.quicktts.bot;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 
@@ -29,8 +31,10 @@ import io.github.phs314.quicktts.api.DeviceRegistrationResponse;
 import io.github.phs314.quicktts.api.QuickChatRequest;
 import io.github.phs314.quicktts.api.QuickTtsApi;
 import io.github.phs314.quicktts.api.VoiceChannelResponse;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.sharding.ShardManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,8 +59,8 @@ import org.springframework.test.web.servlet.client.RestTestClient;
         "spring.datasource.username=sa",
         "spring.datasource.password="
 })
-// 진짜 JDA 를 만들면 디스코드에 로그인하므로 빈 껍데기로 바꾸고, 켜질 때 디스코드를 부르는 빈도 함께 바꾼다.
-@MockitoBean(types = {JDA.class, DiscordListenerRegistrar.class, BotOwnerPort.class, JoinedGuildPort.class})
+// 진짜 ShardManager 를 만들면 디스코드에 로그인하므로 빈 껍데기로 바꾸고, 켜질 때 디스코드를 부르는 빈도 함께 바꾼다.
+@MockitoBean(types = {ShardManager.class, DiscordListenerRegistrar.class, BotOwnerPort.class, JoinedGuildPort.class})
 class QuickTtsApiIntegrationTest {
 
     private static final FakeVoiceStatePort VOICE_CHANNELS = new FakeVoiceStatePort();
@@ -88,7 +92,7 @@ class QuickTtsApiIntegrationTest {
     ChangeVoiceUseCase changeVoiceUseCase;
 
     @Autowired
-    JDA jda;
+    ShardManager shardManager;
 
     RestTestClient client;
 
@@ -259,7 +263,7 @@ class QuickTtsApiIntegrationTest {
 
     @Test
     void 상태_확인은_토큰_없이_열려_있고_디스코드에_붙어_있으면_UP() {
-        when(jda.getStatus()).thenReturn(JDA.Status.CONNECTED);
+        connectShard(JDA.Status.CONNECTED);
 
         client.get().uri(QuickTtsApi.HEALTH_PATH)
                 .exchange()
@@ -269,7 +273,7 @@ class QuickTtsApiIntegrationTest {
 
     @Test
     void 디스코드에서_끊겨_있으면_상태_확인이_503_과_DOWN() {
-        when(jda.getStatus()).thenReturn(JDA.Status.ATTEMPTING_TO_RECONNECT);
+        connectShard(JDA.Status.ATTEMPTING_TO_RECONNECT);
 
         client.get().uri(QuickTtsApi.HEALTH_PATH)
                 .exchange()
@@ -289,6 +293,13 @@ class QuickTtsApiIntegrationTest {
     }
 
     /** 디스코드 /연결 로 코드를 받아 클라이언트 첫 실행처럼 등록하고 기기 토큰을 돌려준다. */
+    /** 샤드 하나가 이 상태로 디스코드에 붙어 있는 것처럼 만든다. */
+    private void connectShard(JDA.Status status) {
+        JDA shard = mock(JDA.class, RETURNS_DEEP_STUBS);
+        when(shard.getStatus()).thenReturn(status);
+        when(shardManager.getShards()).thenReturn(List.of(shard));
+    }
+
     private String registerDevice(DiscordUserId userId) {
         String code = issuePairingCodeUseCase.issue(new IssuePairingCodeCommand(userId)).code().display();
         DeviceRegistrationResponse response = postDevice(code)

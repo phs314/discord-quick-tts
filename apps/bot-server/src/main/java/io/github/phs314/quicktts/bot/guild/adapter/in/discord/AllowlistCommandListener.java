@@ -28,6 +28,7 @@ import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.interactions.commands.build.OptionData;
 import net.dv8tion.jda.api.interactions.commands.build.SlashCommandData;
 import net.dv8tion.jda.api.interactions.commands.build.SubcommandData;
+import net.dv8tion.jda.api.sharding.ShardManager;
 import org.springframework.stereotype.Component;
 
 /**
@@ -48,7 +49,7 @@ public class AllowlistCommandListener extends ListenerAdapter implements Discord
     private static final long INVITE_PERMISSIONS =
             Permission.getRaw(Permission.VIEW_CHANNEL, Permission.VOICE_CONNECT, Permission.VOICE_SPEAK);
 
-    private final JDA jda;
+    private final ShardManager shardManager;
     private final GetAllowlistUseCase getAllowlistUseCase;
     private final AddToAllowlistUseCase addToAllowlistUseCase;
     private final RemoveFromAllowlistUseCase removeFromAllowlistUseCase;
@@ -90,7 +91,7 @@ public class AllowlistCommandListener extends ListenerAdapter implements Discord
         String reply;
         try {
             reply = switch (String.valueOf(event.getSubcommandName())) {
-                case ADD -> add(requester, GuildId.parse(event.getOption(SERVER_OPTION).getAsString()));
+                case ADD -> add(event.getJDA(), requester, GuildId.parse(event.getOption(SERVER_OPTION).getAsString()));
                 case REMOVE -> remove(requester, GuildId.parse(event.getOption(SERVER_OPTION).getAsString()));
                 default -> list(requester);
             };
@@ -102,14 +103,14 @@ public class AllowlistCommandListener extends ListenerAdapter implements Discord
         event.reply(reply).setEphemeral(true).queue();
     }
 
-    private String add(DiscordUserId requester, GuildId guildId) {
+    private String add(JDA shard, DiscordUserId requester, GuildId guildId) {
         String result = addToAllowlistUseCase.add(new AddToAllowlistCommand(requester, guildId))
                 ? "허용 목록에 넣었어요: **" + guildName(guildId) + "**"
                 : "이미 허용 목록에 있어요: **" + guildName(guildId) + "**";
-        if (jda.getGuildById(guildId.value()) != null) {
+        if (shardManager.getGuildById(guildId.value()) != null) {
             return result;
         }
-        return result + "\n이 링크로 초대하면 돼요: " + inviteUrl(guildId);
+        return result + "\n이 링크로 초대하면 돼요: " + inviteUrl(shard, guildId);
     }
 
     /** 봇이 그 서버에서 나가는 일은 목록에서 빼는 트랜잭션이 커밋된 뒤에 이벤트로 일어난다 (ADR 0033). */
@@ -136,13 +137,13 @@ public class AllowlistCommandListener extends ListenerAdapter implements Discord
     }
 
     private String guildName(GuildId guildId) {
-        Guild guild = jda.getGuildById(guildId.value());
+        Guild guild = shardManager.getGuildById(guildId.value());
         return guild != null ? guild.getName() : "봇이 아직 없는 서버 " + guildId.value();
     }
 
-    /** 그 디스코드 서버가 미리 골라진 봇 초대 링크 */
-    private String inviteUrl(GuildId guildId) {
-        return "https://discord.com/oauth2/authorize?client_id=" + jda.getSelfUser().getApplicationId()
+    /** 그 디스코드 서버가 미리 골라진 봇 초대 링크. 앱 ID 는 어느 샤드에서 봐도 같다. */
+    private static String inviteUrl(JDA shard, GuildId guildId) {
+        return "https://discord.com/oauth2/authorize?client_id=" + shard.getSelfUser().getApplicationId()
                 + "&scope=bot+applications.commands&permissions=" + INVITE_PERMISSIONS
                 + "&guild_id=" + guildId.value() + "&disable_guild_select=true";
     }

@@ -12,13 +12,13 @@ import static org.mockito.Mockito.withSettings;
 
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import java.util.function.Consumer;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Message;
 import net.dv8tion.jda.api.entities.channel.concrete.TextChannel;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
 import net.dv8tion.jda.api.entities.channel.unions.DefaultGuildChannelUnion;
 import net.dv8tion.jda.api.requests.restaction.MessageCreateAction;
+import net.dv8tion.jda.api.sharding.ShardManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -27,13 +27,13 @@ class JoinedGuildDiscordAdapterTest {
 
     private static final GuildId GUILD_ID = new GuildId(100L);
 
-    private final JDA jda = mock(JDA.class);
+    private final ShardManager shardManager = mock(ShardManager.class);
     private final Guild guild = mock(Guild.class, RETURNS_DEEP_STUBS);
-    private final JoinedGuildDiscordAdapter joinedGuild = new JoinedGuildDiscordAdapter(jda);
+    private final JoinedGuildDiscordAdapter joinedGuild = new JoinedGuildDiscordAdapter(shardManager);
 
     @BeforeEach
     void setUp() {
-        when(jda.getGuildById(GUILD_ID.value())).thenReturn(guild);
+        when(shardManager.getGuildById(GUILD_ID.value())).thenReturn(guild);
         when(guild.getId()).thenReturn("100");
     }
 
@@ -93,7 +93,7 @@ class JoinedGuildDiscordAdapterTest {
 
     @Test
     void 이미_나간_서버면_아무것도_하지_않는다() {
-        when(jda.getGuildById(GUILD_ID.value())).thenReturn(null);
+        when(shardManager.getGuildById(GUILD_ID.value())).thenReturn(null);
 
         joinedGuild.leaveWithNotice(GUILD_ID);
 

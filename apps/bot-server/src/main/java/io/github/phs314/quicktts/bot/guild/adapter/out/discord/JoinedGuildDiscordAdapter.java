@@ -4,9 +4,9 @@ import io.github.phs314.quicktts.bot.guild.application.port.out.JoinedGuildPort;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.channel.middleman.GuildMessageChannel;
+import net.dv8tion.jda.api.sharding.ShardManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -20,16 +20,16 @@ public class JoinedGuildDiscordAdapter implements JoinedGuildPort {
 
     private static final Logger log = LoggerFactory.getLogger(JoinedGuildDiscordAdapter.class);
 
-    private final JDA jda;
+    private final ShardManager shardManager;
 
     @Override
     public List<GuildId> joinedGuilds() {
-        return jda.getGuilds().stream().map(guild -> new GuildId(guild.getIdLong())).toList();
+        return shardManager.getGuilds().stream().map(guild -> new GuildId(guild.getIdLong())).toList();
     }
 
     @Override
     public void leaveWithNotice(GuildId guildId) {
-        Guild guild = jda.getGuildById(guildId.value());
+        Guild guild = shardManager.getGuildById(guildId.value());
         if (guild == null) {
             return;
         }

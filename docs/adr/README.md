@@ -110,7 +110,7 @@
 | --- | --- | --- |
 | [0005](0005-device-token-pairing.md) | PC 는 /연결 코드로 받은 기기 토큰으로 인증한다 | 일부 대체됨 (ADR 0031) |
 | [0013](0013-api-versioning-and-error-codes.md) | API 경로에 버전을 붙이고, 오류는 코드로 구분한다 | 일부 대체됨 (ADR 0025) |
-| [0017](0017-api-integration-test.md) | API 통합 테스트는 디스코드와 TTS 엔진만 출력 포트 대역으로 바꾼다 | 채택 |
+| [0017](0017-api-integration-test.md) | API 통합 테스트는 디스코드와 TTS 엔진만 출력 포트 대역으로 바꾼다 | 일부 대체됨 (ADR 0046) |
 | [0030](0030-web-mappers.md) | 웹 요청·응답 변환은 컨트롤러 옆 웹 매퍼가 맡는다 | 일부 대체됨 (ADR 0031, ADR 0032, ADR 0038) |
 | [0031](0031-device-token-authentication-with-spring-security.md) | 기기 토큰 인증은 스프링 시큐리티 필터가 맡는다 | 일부 대체됨 (ADR 0036) |
 
@@ -124,12 +124,13 @@
 | [0015](0015-guild-allowlist.md) | 봇이 머물 디스코드 서버를 허용 목록으로 정한다 (guild 컨텍스트) | 채택 |
 | [0019](0019-spoken-text-cleanup.md) | 문장은 speech 도메인에서 읽기 좋게 다듬은 뒤 엔진에 보낸다 | 채택 |
 | [0043](0043-play-speech-from-memory.md) | 음성은 임시 파일 없이 메모리에서 바로 재생한다 | 채택 |
+| [0046](0046-discord-shard-manager.md) | 디스코드 연결은 처음부터 ShardManager 로 만든다 | 채택 |
 
 ### 운영
 
 | ADR | 제목 | 상태 |
 | --- | --- | --- |
-| [0036](0036-health-and-metrics-with-actuator.md) | 상태 확인과 지표는 Actuator 로 보고, 디스코드 연결과 TTS 를 거기에 더한다 | 채택 |
+| [0036](0036-health-and-metrics-with-actuator.md) | 상태 확인과 지표는 Actuator 로 보고, 디스코드 연결과 TTS 를 거기에 더한다 | 일부 대체됨 (ADR 0046) |
 | [0037](0037-cache-tts-results.md) | 엔진이 만든 음성은 스프링 캐시(Caffeine)로 기억한다 | 채택 |
 
 ### 데스크톱 클라이언트와 배포
