@@ -2,9 +2,9 @@ package io.github.phs314.quicktts.bot;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.github.phs314.quicktts.bot.device.adapter.out.persistence.DevicePersistenceAdapter;
 import io.github.phs314.quicktts.bot.guild.adapter.out.persistence.AllowedGuildPersistenceAdapter;
 import io.github.phs314.quicktts.bot.guild.domain.AllowedGuild;
+import io.github.phs314.quicktts.bot.identity.adapter.out.persistence.DevicePersistenceAdapter;
 import io.github.phs314.quicktts.bot.settings.adapter.out.persistence.UserSettingsPersistenceAdapter;
 import io.github.phs314.quicktts.bot.settings.domain.UserSettings;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;

@@ -13,13 +13,15 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import io.github.phs314.quicktts.api.ApiErrorCode;
+import io.github.phs314.quicktts.api.QuickTtsApi;
 import io.github.phs314.quicktts.bot.config.SecurityConfig;
-import io.github.phs314.quicktts.bot.device.application.port.in.AuthenticateDeviceUseCase;
-import io.github.phs314.quicktts.bot.device.application.port.in.query.AuthenticateDeviceQuery;
+import io.github.phs314.quicktts.bot.identity.application.port.in.AuthenticateDeviceUseCase;
+import io.github.phs314.quicktts.bot.identity.application.port.in.query.AuthenticateDeviceQuery;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
-import io.github.phs314.quicktts.bot.speech.application.exception.BotCannotJoinVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.exception.AuthorNotInVoiceChannelException;
+import io.github.phs314.quicktts.bot.speech.application.exception.BotCannotJoinVoiceChannelException;
 import io.github.phs314.quicktts.bot.speech.application.exception.VoiceChannelInUseException;
 import io.github.phs314.quicktts.bot.speech.application.port.in.FindCurrentUserVoiceChannelUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatUseCase;
@@ -27,8 +29,6 @@ import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQui
 import io.github.phs314.quicktts.bot.speech.application.port.in.query.FindCurrentUserVoiceChannelQuery;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannelDetails;
-import io.github.phs314.quicktts.api.ApiErrorCode;
-import io.github.phs314.quicktts.api.QuickTtsApi;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
