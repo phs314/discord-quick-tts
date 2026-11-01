@@ -3,6 +3,7 @@
 - 상태: 일부 대체됨
   - 4번(필드 이름)·6번(테스트 대역) 규칙은 리뷰로 지킴 → ADR 0032
   - 4번(출력 어댑터 이름)과 5번의 "어댑터는 기술 접두사" 는 `<대상><폴더>Adapter` 로 → ADR 0039
+  - 2번의 역할 이름 `owner`·`speaker` 는 `userId`·`author` 로, 3번의 `permits`·`findMyVoiceChannel`·`withLockedSeat` 는 새 이름으로, 1번의 웹 JSON 예외(`serverName`)는 없앰 → ADR 0044
 - 날짜: 2026-10-17
 
 접미사 규칙(`...UseCase`, `...Service`, `...Port`, `...Command`, `...Dto`, 포트 필드 이름)은 ADR 0004, 0008, 0010, 0012 에 나뉘어 있습니다. 이름을 전부 훑어보니 어긋난 곳은 규칙이 없는 자리에 몰려 있었습니다.

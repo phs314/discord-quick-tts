@@ -56,22 +56,22 @@ ADR 목록과 상태(채택, 일부 대체됨), 새 ADR 을 쓰는 법은 [docs/
 ```
 bot-server/src/main/java/io/github/phs314/quicktts/bot/
 ├── speech/
-│   ├── domain/                 BotSeat (디스코드 서버별 봇 자리, 애그리거트), UnknownVoiceException
+│   ├── domain/                 BotVoiceState (디스코드 서버별 봇 음성 상태, 애그리거트), UnknownVoiceException
 │   │   └── vo/                 QuickChatMessage, VoiceChannel, Speech, Voice, VoiceCatalog (값 객체)
 │   ├── application/
-│   │   ├── exception/          SpeakerNotInVoiceChannel, VoiceChannelInUse, BotCannotJoinVoiceChannel, SpeechSynthesis 예외
-│   │   ├── port/in/            SpeakQuickChat, FindMyVoiceChannel, GetVoices, GetCurrentVoice, ChangeVoice, LeaveEmptyVoiceChannel, FollowBotMove (...UseCase, 메서드 하나씩)
-│   │   ├── port/in/command/    SpeakQuickChat, ChangeVoice, LeaveIfEmpty, FollowBotMove (...Command)
-│   │   ├── port/in/query/      FindMyVoiceChannel, GetCurrentVoice (...Query)
-│   │   ├── port/out/           SpeechSynthesizerPort, VoiceChannelLocatorPort, SpeechPlayerPort, VoicePreferencePort, BotSeatPort
+│   │   ├── exception/          AuthorNotInVoiceChannel, VoiceChannelInUse, BotCannotJoinVoiceChannel, SpeechSynthesis 예외
+│   │   ├── port/in/            SpeakQuickChat, FindCurrentUserVoiceChannel, GetVoices, GetCurrentVoice, ChangeVoice, LeaveEmptyVoiceChannel, SyncBotVoiceState, ClearBotVoiceState (...UseCase, 메서드 하나씩)
+│   │   ├── port/in/command/    SpeakQuickChat, ChangeVoice, LeaveEmptyVoiceChannel, SyncBotVoiceState, ClearBotVoiceState (...Command)
+│   │   ├── port/in/query/      FindCurrentUserVoiceChannel, GetCurrentVoice (...Query)
+│   │   ├── port/out/           SpeechSynthesizerPort, VoiceStatePort, SpeechPlayerPort, VoicePreferencePort, BotVoiceStatePort
 │   │   └── service/            입력 포트마다 하나 (SpeakQuickChatService 등)
 │   └── adapter/
 │       ├── in/web/             quick chat REST 컨트롤러와 웹 매퍼
-│       ├── in/discord/         /목소리 슬래시 명령, 음성 채널 입·퇴장 소식
+│       ├── in/discord/         /목소리 슬래시 명령, 음성 채널 입·퇴장 소식, 봇이 디스코드 서버에서 나간 소식
 │       ├── out/tts/            TTS 엔진 (Edge, Google 번역), 엔진 고르기, 결과 캐시와 지표
 │       ├── out/discord/        JDA + LavaPlayer 로 채널 찾기, 들어가기·재생·나가기
 │       ├── out/persistence/    사용자별 목소리 저장소 (JPA 엔티티 + 매퍼)
-│       └── out/memory/         봇 자리 저장소 (메모리)
+│       └── out/memory/         봇 음성 상태 저장소 (메모리)
 ├── device/
 │   ├── domain/                 Pairing, Device (엔티티), InvalidPairingCodeException
 │   │   └── vo/                 PairingCode, DeviceToken, DeviceId, DeviceName (값 객체)
@@ -90,11 +90,11 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 ├── guild/
 │   ├── domain/                 AllowedGuild (허용한 디스코드 서버)
 │   │   ├── vo/                 GuildAllowlist (허용 목록으로 머물 곳 정하기)
-│   │   └── event/              GuildDisallowed (허용 목록에서 뺐다)
+│   │   └── event/              GuildRemovedFromAllowlist (허용 목록에서 뺐다)
 │   ├── application/
 │   │   ├── exception/          NotBotOwnerException
-│   │   ├── port/in/            GetAllowlist, AllowGuild, DisallowGuild, LeaveNotAllowedGuild, FillEmptyAllowlist, LeaveAllNotAllowedGuilds (...UseCase)
-│   │   ├── port/in/command/    AllowGuild, DisallowGuild, LeaveIfNotAllowed (...Command)
+│   │   ├── port/in/            GetAllowlist, AddToAllowlist, RemoveFromAllowlist, LeaveNotAllowedGuild, SeedAllowlist, LeaveAllNotAllowedGuilds (...UseCase)
+│   │   ├── port/in/command/    AddToAllowlist, RemoveFromAllowlist, LeaveNotAllowedGuild (...Command)
 │   │   ├── port/in/query/      GetAllowlist (...Query)
 │   │   ├── port/in/dto/        AllowedGuildDto, GuildAllowlistDto
 │   │   ├── port/out/           AllowedGuildPort, JoinedGuildPort, BotOwnerPort, GuildAllowlistSettingPort, GuildAllowlistEventPort
@@ -114,7 +114,7 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 
 - 각 컨텍스트의 `domain` 은 자바 표준 라이브러리와 도메인, `common` 의 오류 코드만 쓰고, `application` 은 스프링 중 `@Service`, `@Transactional` 만 씁니다 ([ADR 0009](docs/adr/0009-spring-annotations-on-services.md), [ADR 0035](docs/adr/0035-archunit-patterns-and-domain-allowlist.md)). `domain` 과 `application` 은 어떤 어댑터 폴더도 모르고, 어댑터끼리도 서로 모릅니다.
 - 컨텍스트끼리는 컨텍스트 지도(`ArchitectureTest.CONTEXT_MAP`)에 적힌 대로만, 상대의 공개 입구(`application.port.in`)로만 부릅니다. 부르는 자리는 서비스의 출력 포트를 구현한 `adapter/out/<상대>` 하나이고, 인바운드 어댑터와 서비스, 도메인은 다른 컨텍스트를 모릅니다. 다른 컨텍스트에 알리기만 하면 될 때는 보내는 쪽이 `...EventPort` 로 공개 이벤트(`application/port/in/event`)를 내고, 받는 쪽 `adapter/in/event` 리스너가 받아 자기 유스케이스를 부릅니다. 지금은 서로 부르는 컨텍스트가 없고(`guild` 는 다른 컨텍스트와 서로 모름), `shared` 는 어느 컨텍스트도 모릅니다 ([ADR 0026](docs/adr/0026-calls-between-contexts.md), [ADR 0040](docs/adr/0040-inbound-adapters-do-not-call-other-contexts.md)).
-- 인바운드 어댑터는 입력 포트로만 애플리케이션을 부르고, 애그리거트(`Device`, `Pairing`, `BotSeat`)를 직접 쓰지 않고 입력 포트가 돌려주는 `...Dto` 로만 봅니다 ([ADR 0010](docs/adr/0010-use-cases-return-dtos.md)).
+- 인바운드 어댑터는 입력 포트로만 애플리케이션을 부르고, 애그리거트(`Device`, `Pairing`, `BotVoiceState`)를 직접 쓰지 않고 입력 포트가 돌려주는 `...Dto` 로만 봅니다 ([ADR 0010](docs/adr/0010-use-cases-return-dtos.md)).
 - 서비스는 다른 서비스의 입력 포트(`...UseCase`)를 쓰지 않고 출력 포트와 도메인만 씁니다 ([ADR 0008](docs/adr/0008-one-service-per-use-case.md)).
 - 설정 값은 그 값을 쓰는 어댑터 패키지에 두고(`TtsProperties`, `GuildAllowlistProperties`), 어댑터는 `config` 를 쓰지 않습니다. 기본값은 `application.yml` 에, 꼭 있어야 하는 값은 `@Validated` 와 제약으로 적습니다 ([ADR 0023](docs/adr/0023-properties-per-adapter.md)).
 
@@ -126,17 +126,18 @@ bot-server/src/main/java/io/github/phs314/quicktts/bot/
 - 유스케이스 메서드는 상태를 바꾸면 `...Command`, 조회면 `...Query` 하나를 받고, 받을 값이 없으면 인자 없이 둡니다 ([ADR 0029](docs/adr/0029-commands-and-queries.md)).
 - 컨트롤러는 웹 요청·응답을 직접 바꾸지 않고, 같은 패키지의 웹 매퍼(`DeviceWebMapper`)에 맡깁니다 ([ADR 0030](docs/adr/0030-web-mappers.md)).
 - 저장소 어댑터는 Spring Data JPA 를 쓰고, JPA 엔티티(`DeviceJpaEntity`)를 도메인과 따로 둡니다. 엔티티와 애그리거트는 같은 패키지의 퍼시스턴스 매퍼(`DevicePersistenceMapper`)가 옮기고, 도메인 클래스에는 JPA 애너테이션을 붙이지 않습니다 ([ADR 0038](docs/adr/0038-jpa-entities-with-persistence-mappers.md)).
-- 기기 토큰 인증은 스프링 시큐리티가 맡습니다. 기기 등록과 상태 확인(`/actuator/health`)만 토큰 없이 열려 있고, device 의 필터가 `Bearer` 토큰의 주인을 알아내면 컨트롤러는 `@AuthenticationPrincipal DiscordUserId` 로 받습니다 ([ADR 0031](docs/adr/0031-device-token-authentication-with-spring-security.md), [ADR 0036](docs/adr/0036-health-and-metrics-with-actuator.md)).
+- 기기 토큰 인증은 스프링 시큐리티가 맡습니다. 기기 등록과 상태 확인(`/actuator/health`)만 토큰 없이 열려 있고, device 의 필터가 `Bearer` 토큰으로 연결한 디스코드 사용자를 알아내면 컨트롤러는 `@AuthenticationPrincipal DiscordUserId` 로 받습니다 ([ADR 0031](docs/adr/0031-device-token-authentication-with-spring-security.md), [ADR 0036](docs/adr/0036-health-and-metrics-with-actuator.md)).
 - 도메인 규칙을 어겼을 때 던지는 예외는 각 컨텍스트의 `domain` 바로 아래에 둡니다. 데이터 상태로 정하는 규칙은 애그리거트와 값 객체에, 누가 부르는지로 정하는 권한은 서비스에 둡니다 ([ADR 0024](docs/adr/0024-rules-live-in-the-domain.md)).
 - 우리가 만든 예외는 모두 `BusinessException` 을 상속하고 종류(`ErrorKind`)를 가집니다. 웹은 `ApiExceptionHandler` 한 곳이 종류로 HTTP 상태를 정하고 예상하지 못한 실패까지 같은 오류 응답 모양으로 돌려주며, 디스코드 명령은 명령이 잡지 않은 실패에도 답이 가도록 감싸서 등록합니다 ([ADR 0025](docs/adr/0025-business-exceptions-by-kind.md)).
 - 출력 포트를 구현한 어댑터 이름은 `<포트 이름에서 Port 를 뺀 것><폴더 이름>Adapter` 입니다(`DevicePersistenceAdapter`, `BotOwnerDiscordAdapter`, `PairingMemoryAdapter`). 폴더 뜻이 이미 이름에 있으면 한 번만 씁니다(`GuildAllowlistEventAdapter`, `SpeechSynthesizerAdapter`). 포트를 구현하지 않는 도우미(`EdgeReadAloudEngine`, `GuildSpeechQueue`)와 Spring Data 인터페이스(`DeviceSpringDataRepository`)는 `Adapter` 를 붙이지 않고, 같은 폴더의 파일은 모두 대상 이름으로 시작합니다 ([ADR 0039](docs/adr/0039-outbound-adapters-end-with-adapter.md)).
 - 디스코드 서버는 코드에서 언제나 `guild` 이고 `server` 는 봇 서버만 뜻합니다 ([ADR 0027](docs/adr/0027-naming-rules.md)).
+- 이름은 디스코드 개발자 문서와 화면에 있는 말을 먼저 쓰고(Voice State, `author`, Keybind), 없으면 TTS 업계·스프링·Google API 지침 같은 실무 표준을 씁니다. 디스코드에 있는 말(speaker, owner, session)을 다른 뜻으로 쓰지 않고, 비유로 이름을 짓지 않습니다 ([ADR 0044](docs/adr/0044-discord-vocabulary-first-names.md)).
 - 출력 포트 테스트 대역은 포트마다 하나(`Fake<포트 이름>`)이고 테스트 폴더에서 포트와 같은 패키지에 있어서, 서비스 테스트와 통합 테스트가 같은 대역을 씁니다 ([ADR 0027](docs/adr/0027-naming-rules.md)).
 
 그 밖에:
 
-- 같은 디스코드 서버에서는 먼저 쓰고 있는 음성 채널이 우선이고, 사람이 다 나가면 봇도 나갑니다. 이 판단은 디스코드 서버마다 하나인 봇 자리(`BotSeat`)가 하고, 잠금도 디스코드 서버마다 따로입니다 ([ADR 0007](docs/adr/0007-first-come-voice-channel.md), [ADR 0014](docs/adr/0014-bot-seat-aggregate.md)).
-- 한 번에 함께 저장하는 것은 애그리거트 하나입니다. 같은 종류를 한꺼번에 넣거나 지울 때만 포트 메서드 하나(`saveAll`, `deleteAllByOwner`)로 묶고, 다른 애그리거트는 순서대로 따로 저장합니다 ([ADR 0028](docs/adr/0028-one-aggregate-per-write.md)).
+- 같은 디스코드 서버에서는 먼저 쓰고 있는 음성 채널이 우선이고, 사람이 다 나가면 봇도 나갑니다. 이 판단은 디스코드 서버마다 하나인 봇 음성 상태(`BotVoiceState`)가 하고, 잠금도 디스코드 서버마다 따로입니다 ([ADR 0007](docs/adr/0007-first-come-voice-channel.md), [ADR 0014](docs/adr/0014-bot-seat-aggregate.md)).
+- 한 번에 함께 저장하는 것은 애그리거트 하나입니다. 같은 종류를 한꺼번에 넣거나 지울 때만 포트 메서드 하나(`saveAll`, `deleteAllByUserId`)로 묶고, 다른 애그리거트는 순서대로 따로 저장합니다 ([ADR 0028](docs/adr/0028-one-aggregate-per-write.md)).
 - DB 에 쓰는 유스케이스 메서드에는 `@Transactional` 을 붙이고, 저장소는 그 트랜잭션 안에서 한 줄씩 씁니다. 읽기만 하는 유스케이스에는 붙이지 않습니다. 트랜잭션 안에서는 디스코드 서버 나가기 같은 되돌릴 수 없는 호출을 하지 않고, 쓴 결과로 나가야 하면 도메인 이벤트를 내서 커밋 뒤에 받는 쪽이 나갑니다(`@TransactionalEventListener`) ([ADR 0033](docs/adr/0033-transactional-on-writing-use-cases.md)).
 - TTS 엔진은 `SpeechSynthesizerPort` 뒤에 있습니다. 지금은 무료인 Microsoft Edge "소리 내어 읽기" 목소리(선희, 인준, 현수)와 Google 번역 목소리를 쓰고, Edge 가 실패하면 Google 번역 목소리로 대신 읽습니다. 엔진을 추가하려면 `speech/adapter/out/tts` 에 `TtsEngine` 구현을 하나 더 만들면 됩니다. 둘 다 공식 API 가 아니라서 언제든 막힐 수 있습니다. 엔진이 만든 음성은 문장과 목소리를 키로 메모리에 500개까지 기억해서, 같은 문장은 엔진을 다시 부르지 않습니다 ([ADR 0037](docs/adr/0037-cache-tts-results.md)).
 - 서버 상태는 `GET /actuator/health` 로 봅니다. 디스코드 게이트웨이에 붙어 있지 않거나 DB 가 안 되면 503 과 `DOWN` 입니다. 지표는 기기 토큰을 실어 `/actuator/metrics` 로 보고, TTS 는 목소리별 걸린 시간과 성공·실패(`quicktts.tts.synthesis`), Google 번역 목소리로 대신 읽은 횟수(`quicktts.tts.fallback`)를 셉니다 ([ADR 0036](docs/adr/0036-health-and-metrics-with-actuator.md)).
