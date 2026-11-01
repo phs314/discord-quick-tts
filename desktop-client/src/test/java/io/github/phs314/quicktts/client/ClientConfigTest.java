@@ -20,11 +20,11 @@ class ClientConfigTest {
     @Test
     void 저장한_단축키를_다시_읽는다() {
         Path file = dir.resolve("client.properties");
-        Hotkey hotkey = Hotkey.parse("Ctrl+Alt+T").orElseThrow();
+        Keybind keybind = Keybind.parse("Ctrl+Alt+T").orElseThrow();
 
-        new ClientConfig("http://localhost:8080", "token", hotkey).save(file);
+        new ClientConfig("http://localhost:8080", "token", keybind).save(file);
 
-        assertThat(ClientConfig.load(file)).isEqualTo(new ClientConfig("http://localhost:8080", "token", hotkey));
+        assertThat(ClientConfig.load(file)).isEqualTo(new ClientConfig("http://localhost:8080", "token", keybind));
     }
 
     @Test
@@ -32,19 +32,39 @@ class ClientConfigTest {
         Path file = dir.resolve("client.properties");
         Files.writeString(file, "server-url=http://localhost:8080\ndevice-token=token\n", StandardCharsets.UTF_8);
 
-        assertThat(ClientConfig.load(file).hotkey()).isEqualTo(Hotkey.DEFAULT);
+        assertThat(ClientConfig.load(file).keybind()).isEqualTo(Keybind.DEFAULT);
     }
 
     @Test
     void 단축키를_잘못_적었으면_기본_단축키를_쓴다() throws IOException {
         Path file = dir.resolve("client.properties");
-        Files.writeString(file, "device-token=token\nhotkey=Shift+A\n", StandardCharsets.UTF_8);
+        Files.writeString(file, "device-token=token\nkeybind=Shift+A\n", StandardCharsets.UTF_8);
 
-        assertThat(ClientConfig.load(file).hotkey()).isEqualTo(Hotkey.DEFAULT);
+        assertThat(ClientConfig.load(file).keybind()).isEqualTo(Keybind.DEFAULT);
     }
 
     @Test
     void 설정_파일이_없으면_기본_단축키를_쓴다() {
-        assertThat(ClientConfig.load(dir.resolve("missing.properties")).hotkey()).isEqualTo(Hotkey.DEFAULT);
+        assertThat(ClientConfig.load(dir.resolve("missing.properties")).keybind()).isEqualTo(Keybind.DEFAULT);
+    }
+
+    @Test
+    void 예전_hotkey_키로_적힌_단축키를_읽고_keybind_키로_옮겨_적는다() throws IOException {
+        Path file = dir.resolve("client.properties");
+        Files.writeString(file, "server-url=http://localhost:8080\ndevice-token=token\nhotkey=Ctrl+Alt+T\n",
+                StandardCharsets.UTF_8);
+
+        assertThat(ClientConfig.load(file).keybind()).isEqualTo(Keybind.parse("Ctrl+Alt+T").orElseThrow());
+        assertThat(Files.readString(file, StandardCharsets.UTF_8))
+                .contains("keybind=Ctrl+Alt+T")
+                .doesNotContain("hotkey=");
+    }
+
+    @Test
+    void keybind_키가_있으면_예전_hotkey_키는_보지_않는다() throws IOException {
+        Path file = dir.resolve("client.properties");
+        Files.writeString(file, "device-token=token\nkeybind=F9\nhotkey=Ctrl+Alt+T\n", StandardCharsets.UTF_8);
+
+        assertThat(ClientConfig.load(file).keybind()).isEqualTo(Keybind.parse("F9").orElseThrow());
     }
 }

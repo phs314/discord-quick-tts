@@ -11,15 +11,15 @@ import java.util.logging.Logger;
 /**
  * 다른 프로그램을 쓰는 중에도 동작하는 전역 단축키. 단축키는 설정 파일에서 읽고 트레이 메뉴에서 바꾼다.
  */
-class GlobalHotkey implements NativeKeyListener {
+class GlobalKeybind implements NativeKeyListener {
 
     private final Runnable onPressed;
-    private volatile Hotkey hotkey;
+    private volatile Keybind keybind;
     /** 새 단축키를 받는 중이면 키 입력을 여기로 넘기고 입력창은 띄우지 않는다. */
-    private volatile Consumer<Hotkey> recorder;
+    private volatile Consumer<Keybind> recorder;
 
-    GlobalHotkey(Hotkey hotkey, Runnable onPressed) {
-        this.hotkey = hotkey;
+    GlobalKeybind(Keybind keybind, Runnable onPressed) {
+        this.keybind = keybind;
         this.onPressed = onPressed;
     }
 
@@ -42,15 +42,15 @@ class GlobalHotkey implements NativeKeyListener {
         }
     }
 
-    void change(Hotkey newHotkey) {
-        hotkey = newHotkey;
+    void change(Keybind newKeybind) {
+        keybind = newKeybind;
     }
 
     /**
      * 단축키 바꾸기 창이 떠 있는 동안 누른 키를 받는다. 입력창을 여는 키와 같은 경로로 받아서
      * 저장한 단축키가 나중에 그대로 눌린다. 콜백은 JNativeHook 스레드에서 불린다.
      */
-    void startRecording(Consumer<Hotkey> onKeyPressed) {
+    void startRecording(Consumer<Keybind> onKeyPressed) {
         recorder = onKeyPressed;
     }
 
@@ -60,12 +60,12 @@ class GlobalHotkey implements NativeKeyListener {
 
     @Override
     public void nativeKeyPressed(NativeKeyEvent event) {
-        Consumer<Hotkey> currentRecorder = recorder;
+        Consumer<Keybind> currentRecorder = recorder;
         if (currentRecorder != null) {
-            Hotkey.fromEvent(event.getModifiers(), event.getKeyCode()).ifPresent(currentRecorder);
+            Keybind.fromEvent(event.getModifiers(), event.getKeyCode()).ifPresent(currentRecorder);
             return;
         }
-        if (hotkey.matches(event.getModifiers(), event.getKeyCode())) {
+        if (keybind.matches(event.getModifiers(), event.getKeyCode())) {
             onPressed.run();
         }
     }

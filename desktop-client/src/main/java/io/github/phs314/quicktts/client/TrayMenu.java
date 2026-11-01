@@ -21,21 +21,21 @@ class TrayMenu {
 
     private TrayIcon trayIcon;
 
-    void install(Hotkey hotkey, Runnable onChangeHotkey, Runnable onExit, Optional<WindowsStartup> startup) {
+    void install(Keybind keybind, Runnable onChangeKeybind, Runnable onExit, Optional<WindowsStartup> startup) {
         if (!SystemTray.isSupported()) {
             return;
         }
         EventQueue.invokeLater(() -> {
             PopupMenu menu = new PopupMenu();
-            MenuItem changeHotkey = new MenuItem("Change Shortcut...");
-            changeHotkey.addActionListener(e -> onChangeHotkey.run());
-            menu.add(changeHotkey);
+            MenuItem changeKeybind = new MenuItem("Change Keybind...");
+            changeKeybind.addActionListener(e -> onChangeKeybind.run());
+            menu.add(changeKeybind);
             startup.ifPresent(windowsStartup -> menu.add(startWithWindowsItem(windowsStartup)));
             MenuItem exit = new MenuItem("Exit");
             exit.addActionListener(e -> onExit.run());
             menu.add(exit);
 
-            trayIcon = new TrayIcon(createIcon(), tooltip(hotkey), menu);
+            trayIcon = new TrayIcon(createIcon(), tooltip(keybind), menu);
             trayIcon.setImageAutoSize(true);
             try {
                 SystemTray.getSystemTray().add(trayIcon);
@@ -46,10 +46,10 @@ class TrayMenu {
     }
 
     /** 트레이 아이콘에 마우스를 올리면 보이는 단축키 안내를 바꾼다. */
-    void showHotkey(Hotkey hotkey) {
+    void showKeybind(Keybind keybind) {
         EventQueue.invokeLater(() -> {
             if (trayIcon != null) {
-                trayIcon.setToolTip(tooltip(hotkey));
+                trayIcon.setToolTip(tooltip(keybind));
             }
         });
     }
@@ -111,8 +111,8 @@ class TrayMenu {
         }
     }
 
-    private static String tooltip(Hotkey hotkey) {
-        return "Discord Quick TTS (" + hotkey + ")";
+    private static String tooltip(Keybind keybind) {
+        return "Discord Quick TTS (" + keybind + ")";
     }
 
     private static Image createIcon() {

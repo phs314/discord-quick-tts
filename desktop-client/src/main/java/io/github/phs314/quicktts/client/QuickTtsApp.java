@@ -37,12 +37,12 @@ public class QuickTtsApp extends Application {
     private ClientConfig config;
     private QuickTtsClient client;
     private LocalBotServer localBotServer;
-    private GlobalHotkey hotkey;
+    private GlobalKeybind keybind;
     private Stage stage;
     private InputBar inputBar;
     private TextField input;
     /** 단축키 바꾸기 창이 이미 떠 있으면 트레이 메뉴를 또 눌러도 하나만 띄운다. */
-    private boolean changingHotkey;
+    private boolean changingKeybind;
 
     @Override
     public void start(Stage primaryStage) {
@@ -69,15 +69,15 @@ public class QuickTtsApp extends Application {
             }
         });
 
-        hotkey = new GlobalHotkey(config.hotkey(), () -> Platform.runLater(this::toggle));
+        keybind = new GlobalKeybind(config.keybind(), () -> Platform.runLater(this::toggle));
         try {
-            hotkey.register();
+            keybind.register();
         } catch (NativeHookException e) {
             showFatal("전역 단축키를 등록하지 못했습니다: " + e.getMessage());
             return;
         }
 
-        trayMenu.install(config.hotkey(), () -> Platform.runLater(this::changeHotkey),
+        trayMenu.install(config.keybind(), () -> Platform.runLater(this::changeKeybind),
                 () -> Platform.runLater(Platform::exit), WindowsStartup.forThisApp());
         // 이미 떠 있는데 exe 를 또 실행하면 새로 뜨는 대신 입력창을 연다.
         if (singleInstance != null) {
@@ -96,8 +96,8 @@ public class QuickTtsApp extends Application {
         if (singleInstance != null) {
             singleInstance.close();
         }
-        if (hotkey != null) {
-            hotkey.unregister();
+        if (keybind != null) {
+            keybind.unregister();
         }
         trayMenu.remove();
     }
@@ -198,23 +198,23 @@ public class QuickTtsApp extends Application {
     }
 
     /** 새 단축키를 눌러서 정하는 창을 띄우고, 저장하면 설정 파일에 쓰고 바로 바꾼다. */
-    private void changeHotkey() {
-        if (changingHotkey) {
+    private void changeKeybind() {
+        if (changingKeybind) {
             return;
         }
-        changingHotkey = true;
-        HotkeyDialog dialog = new HotkeyDialog(config.hotkey());
-        hotkey.startRecording(dialog::onPressed);
+        changingKeybind = true;
+        KeybindDialog dialog = new KeybindDialog(config.keybind());
+        keybind.startRecording(dialog::onPressed);
         try {
-            dialog.showAndWait().ifPresent(newHotkey -> {
-                config = config.withHotkey(newHotkey);
+            dialog.showAndWait().ifPresent(newKeybind -> {
+                config = config.withKeybind(newKeybind);
                 config.save();
-                hotkey.change(newHotkey);
-                trayMenu.showHotkey(newHotkey);
+                keybind.change(newKeybind);
+                trayMenu.showKeybind(newKeybind);
             });
         } finally {
-            hotkey.stopRecording();
-            changingHotkey = false;
+            keybind.stopRecording();
+            changingKeybind = false;
         }
     }
 
