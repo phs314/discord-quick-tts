@@ -4,12 +4,12 @@ import io.github.phs314.quicktts.bot.speech.application.exception.SpeakerNotInVo
 import io.github.phs314.quicktts.bot.speech.application.exception.VoiceChannelInUseException;
 import io.github.phs314.quicktts.bot.speech.application.port.in.SpeakQuickChatUseCase;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.SpeakQuickChatCommand;
-import io.github.phs314.quicktts.bot.speech.application.port.out.BotSeatPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.BotVoiceStatePort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.SpeechSynthesizerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceChannelLocatorPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoicePreferencePort;
-import io.github.phs314.quicktts.bot.speech.domain.BotSeat;
+import io.github.phs314.quicktts.bot.speech.domain.BotVoiceState;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Speech;
 import io.github.phs314.quicktts.bot.speech.domain.vo.SpokenText;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceCatalog;
@@ -26,7 +26,7 @@ public class SpeakQuickChatService implements SpeakQuickChatUseCase {
     private final VoiceChannelLocatorPort voiceChannelLocatorPort;
     private final SpeechSynthesizerPort speechSynthesizerPort;
     private final SpeechPlayerPort speechPlayerPort;
-    private final BotSeatPort botSeatPort;
+    private final BotVoiceStatePort botVoiceStatePort;
     private final VoicePreferencePort voicePreferencePort;
 
     @Override
@@ -40,20 +40,20 @@ public class SpeakQuickChatService implements SpeakQuickChatUseCase {
         VoiceId voiceId = catalog.chosenOrDefault(voicePreferencePort.findVoice(command.speaker())).id();
         Speech speech = speechSynthesizerPort.synthesize(text, voiceId);
 
-        // 같은 디스코드 서버에서는 자리 잡기와 재생 순서 넣기가 한 번에 하나씩 일어나서 다른 채널의 요청이 끼어들지 못한다.
-        botSeatPort.withLockedSeat(channel.guildId(), seat -> {
-            if (!seat.isFreeFor(channel, voiceChannelLocatorPort::hasPeople)) {
-                throw inUseException(seat);
+        // 같은 디스코드 서버에서는 채널 정하기와 재생 순서 넣기가 한 번에 하나씩 일어나서 다른 채널의 요청이 끼어들지 못한다.
+        botVoiceStatePort.withLockedState(channel.guildId(), state -> {
+            if (!state.canJoin(channel, voiceChannelLocatorPort::hasPeople)) {
+                throw inUseException(state);
             }
-            // 들어가지 못하면(권한 없음 등) 예외가 나서 자리는 그대로 남는다.
+            // 들어가지 못하면(권한 없음 등) 예외가 나서 상태는 그대로 남는다.
             speechPlayerPort.join(channel);
-            seat.sitIn(channel, voiceChannelLocatorPort::hasPeople);
+            state.join(channel, voiceChannelLocatorPort::hasPeople);
             speechPlayerPort.play(channel.guildId(), speech);
         });
     }
 
-    private VoiceChannelInUseException inUseException(BotSeat seat) {
-        VoiceChannel inUse = seat.channel().orElseThrow();
+    private VoiceChannelInUseException inUseException(BotVoiceState state) {
+        VoiceChannel inUse = state.channel().orElseThrow();
         return new VoiceChannelInUseException(voiceChannelLocatorPort.findDetails(inUse)
                 .orElseGet(() -> new VoiceChannelDetails(inUse, "", null, "알 수 없음")));
     }

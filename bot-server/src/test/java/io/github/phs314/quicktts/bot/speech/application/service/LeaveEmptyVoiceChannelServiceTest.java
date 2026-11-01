@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.github.phs314.quicktts.bot.shared.domain.vo.DiscordUserId;
 import io.github.phs314.quicktts.bot.shared.domain.vo.GuildId;
 import io.github.phs314.quicktts.bot.speech.application.port.in.command.LeaveIfEmptyCommand;
-import io.github.phs314.quicktts.bot.speech.application.port.out.FakeBotSeatPort;
+import io.github.phs314.quicktts.bot.speech.application.port.out.FakeBotVoiceStatePort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeSpeechPlayerPort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.FakeVoiceChannelLocatorPort;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
@@ -21,28 +21,28 @@ class LeaveEmptyVoiceChannelServiceTest {
 
     private final FakeVoiceChannelLocatorPort discord = new FakeVoiceChannelLocatorPort();
     private final FakeSpeechPlayerPort player = new FakeSpeechPlayerPort();
-    private final FakeBotSeatPort seats = new FakeBotSeatPort();
-    private final LeaveEmptyVoiceChannelService service = new LeaveEmptyVoiceChannelService(seats, discord, player);
+    private final FakeBotVoiceStatePort states = new FakeBotVoiceStatePort();
+    private final LeaveEmptyVoiceChannelService service = new LeaveEmptyVoiceChannelService(states, discord, player);
 
     @Test
     void 봇이_있는_채널에_사람이_아무도_없으면_나간다() {
-        sitIn(GENERAL);
+        join(GENERAL);
         discord.empty(GENERAL.channel());
 
         service.leaveIfEmpty(new LeaveIfEmptyCommand(GUILD));
 
         assertThat(player.actions()).containsExactly("leave:1");
-        assertThat(seats.channelOf(GUILD)).isEmpty();
+        assertThat(states.channelOf(GUILD)).isEmpty();
     }
 
     @Test
     void 봇이_있는_채널에_사람이_남아_있으면_그대로_있는다() {
-        sitIn(GENERAL);
+        join(GENERAL);
 
         service.leaveIfEmpty(new LeaveIfEmptyCommand(GUILD));
 
         assertThat(player.actions()).isEmpty();
-        assertThat(seats.channelOf(GUILD)).contains(GENERAL.channel());
+        assertThat(states.channelOf(GUILD)).contains(GENERAL.channel());
     }
 
     @Test
@@ -52,8 +52,8 @@ class LeaveEmptyVoiceChannelServiceTest {
         assertThat(player.actions()).isEmpty();
     }
 
-    private void sitIn(VoiceChannelDetails details) {
+    private void join(VoiceChannelDetails details) {
         discord.enter(SPEAKER, details);
-        seats.withLockedSeat(GUILD, seat -> seat.sitIn(details.channel(), discord::hasPeople));
+        states.withLockedState(GUILD, state -> state.join(details.channel(), discord::hasPeople));
     }
 }
