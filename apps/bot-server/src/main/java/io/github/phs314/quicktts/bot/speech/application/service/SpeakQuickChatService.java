@@ -11,6 +11,7 @@ import io.github.phs314.quicktts.bot.speech.application.port.out.TextToSpeechPor
 import io.github.phs314.quicktts.bot.speech.application.port.out.UserVoicePort;
 import io.github.phs314.quicktts.bot.speech.application.port.out.VoiceStatePort;
 import io.github.phs314.quicktts.bot.speech.domain.BotVoiceState;
+import io.github.phs314.quicktts.bot.speech.domain.normalization.TextNormalizer;
 import io.github.phs314.quicktts.bot.speech.domain.vo.Audio;
 import io.github.phs314.quicktts.bot.speech.domain.vo.SpokenText;
 import io.github.phs314.quicktts.bot.speech.domain.vo.VoiceChannel;
@@ -30,7 +31,7 @@ public class SpeakQuickChatService implements SpeakQuickChatUseCase {
 
     @Override
     public void speak(SpeakQuickChatCommand command) {
-        SpokenText text = command.message().toSpokenText();
+        SpokenText text = TextNormalizer.normalize(command.message());
         VoiceChannel channel = voiceStatePort.findUserVoiceChannel(command.author())
                 .map(VoiceChannelDetails::channel)
                 .orElseThrow(() -> new AuthorNotInVoiceChannelException(command.author()));
